@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Narrative Alpha — Forensic Intel Console</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --font-mono: 'Courier New', Courier, monospace;
+    --bg-page:        #0e0e10;
+    --bg-primary:     #141416;
+    --bg-secondary:   #1c1c1f;
+    --bg-tertiary:    #222226;
+    --border-faint:   rgba(255,255,255,0.08);
+    --border-med:     rgba(255,255,255,0.14);
+    --border-strong:  rgba(255,255,255,0.22);
+    --text-primary:   #e8e8ea;
+    --text-secondary: #8b8b95;
+    --text-tertiary:  #55555f;
+    --radius-md: 6px;
+    --radius-lg: 10px;
+    --green-bg:   #0d2b1a; --green-border: #1a5c34; --green-text: #4ade80;
+    --amber-bg:   #2b1f08; --amber-border: #7a5010; --amber-text: #fbbf24;
+    --red-bg:     #2b0d0d; --red-border:   #7a1f1f; --red-text:   #f87171;
+    --blue-bg:    #0d1f2b; --blue-border:  #1a4a6e; --blue-text:  #60a5fa;
+    --warn-bg:    #2b1a08; --warn-border:  #7a4a10; --warn-text:  #fb923c;
+  }
+
+  body {
+    font-family: var(--font-mono);
+    background: var(--bg-page);
+    color: var(--text-primary);
+    font-size: 13px;
+    padding: 24px;
+    min-height: 100vh;
+  }
+
+  .console { max-width: 960px; margin: 0 auto; }
+
+  .header {
+    background: var(--bg-secondary);
+    border: 0.5px solid var(--border-med);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .header-title { font-size: 13px; font-weight: bold; color: var(--text-primary); letter-spacing: 0.06em; }
+  .header-meta { font-size: 11px; color: var(--text-secondary); margin-top: 3px; }
+  .cluster-id {
+    font-size: 11px; color: var(--blue-text);
+    background: var(--blue-bg); border: 0.5px solid var(--blue-border);
+    padding: 3px 10px; border-radius: var(--radius-md);
+  }
+  .header-right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .corpus-note { font-size: 10px; color: var(--text-tertiary); }
+
+  .nav { display: flex; gap: 6px; margin-bottom: 14px; }
+  .nav-btn {
+    font-size: 11px; padding: 5px 14px;
+    border-radius: var(--radius-md);
+    border: 0.5px solid var(--border-med);
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: var(--font-mono);
+    transition: background 0.15s, color 0.15s;
+  }
+  .nav-btn:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+  .nav-btn.active { background: var(--bg-secondary); color: var(--text-primary); border-color: var(--border-strong); }
+
+  .zone {
+    border: 0.5px solid var(--border-faint);
+    border-radius: var(--radius-lg);
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .zone-header {
+    padding: 8px 16px;
+    border-bottom: 0.5px solid var(--border-faint);
+    background: var(--bg-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .zone-label { font-size: 10px; letter-spacing: 0.09em; color: var(--text-tertiary); text-transform: uppercase; }
+  .zone-body { padding: 14px 16px; background: var(--bg-primary); }
+
+  .consensus-summary { font-size: 12px; color: var(--text-primary); line-height: 1.7; margin-bottom: 10px; }
+  .verified-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--green-bg); border: 0.5px solid var(--green-border);
+    color: var(--green-text); font-size: 10px;
+    padding: 3px 10px; border-radius: var(--radius-md); margin-bottom: 10px;
+  }
+  .anchor-nodes { display: flex; flex-wrap: wrap; gap: 6px; }
+  .node-pill {
+    font-size: 10px;
+    background: var(--bg-tertiary); border: 0.5px solid var(--border-med);
+    color: var(--text-secondary); padding: 2px 9px; border-radius: 99px;
+  }
+
+  .sub-header {
+    font-size: 10px; letter-spacing: 0.08em; color: var(--text-tertiary);
+    text-transform: uppercase;
+    margin: 14px 0 9px;
+    padding-bottom: 5px;
+    border-bottom: 0.5px solid var(--border-faint);
+  }
+
+  .distortion-table { width: 100%; border-collapse: collapse; font-size: 11px; table-layout: fixed; }
+  .distortion-table th {
+    text-align: left; padding: 6px 10px;
+    color: var(--text-tertiary); font-weight: normal;
+    border-bottom: 0.5px solid var(--border-faint);
+    font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase;
+  }
+  .distortion-table td {
+    padding: 9px 10px; border-bottom: 0.5px solid var(--border-faint);
+    vertical-align: top; color: var(--text-primary); font-size: 11px;
+  }
+  .distortion-table tr:last-child td { border-bottom: none; }
+  .outlet-name { font-weight: bold; font-size: 11px; }
+  .outlet-domain { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
+
+  .badge { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: var(--radius-md); font-weight: bold; }
+  .badge-high { background: var(--red-bg); color: var(--red-text); border: 0.5px solid var(--red-border); }
+  .badge-med  { background: var(--amber-bg); color: var(--amber-text); border: 0.5px solid var(--amber-border); }
+  .badge-low  { background: var(--green-bg); color: var(--green-text); border: 0.5px solid var(--green-border); }
+
+  .camouflage { font-size: 10px; line-height: 1.6; }
+  .cam-raw   { color: var(--red-text); }
+  .cam-arrow { color: var(--text-tertiary); margin: 0 4px; }
+  .cam-clean { color: var(--green-text); }
+
+  .regime-card {
+    background: var(--bg-secondary); border: 0.5px solid var(--border-faint);
+    border-radius: var(--radius-md); padding: 9px 12px; margin-bottom: 8px;
+  }
+  .regime-shift { font-size: 11px; display: flex; align-items: center; gap: 7px; margin-bottom: 5px; flex-wrap: wrap; }
+  .term-old  { color: var(--text-secondary); text-decoration: line-through; }
+  .term-arrow { color: var(--text-tertiary); }
+  .term-new  { color: var(--warn-text); font-weight: bold; }
+  .regime-meta { display: flex; gap: 10px; align-items: center; font-size: 10px; color: var(--text-secondary); flex-wrap: wrap; }
+  .regime-note { font-size: 10px; color: var(--text-tertiary); margin-top: 5px; font-style: italic; line-height: 1.6; }
+
+  .rep-warning {
+    border: 0.5px solid var(--red-border); background: var(--red-bg);
+    border-radius: var(--radius-md); padding: 10px 13px; margin-bottom: 12px;
+  }
+  .rep-warning-title { font-size: 11px; font-weight: bold; color: var(--red-text); margin-bottom: 5px; display: flex; align-items: center; gap: 7px; }
+  .rep-warning-body { font-size: 10px; color: var(--red-text); opacity: 0.85; line-height: 1.7; }
+
+  .outlier-card {
+    border: 0.5px solid var(--amber-border);
+    border-radius: var(--radius-md); padding: 11px 13px; margin-bottom: 10px;
+  }
+  .outlier-claim {
+    font-size: 11px; color: var(--text-primary); line-height: 1.7; margin-bottom: 9px;
+    border-left: 2px solid var(--amber-border); padding-left: 9px;
+  }
+  .outlier-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+  .meta-row { font-size: 10px; }
+  .meta-label { color: var(--text-secondary); }
+  .meta-val { color: var(--text-primary); }
+  .pending-badge {
+    display: inline-block;
+    background: var(--warn-bg); border: 0.5px solid var(--warn-border);
+    color: var(--warn-text); font-size: 10px; padding: 2px 9px; border-radius: var(--radius-md);
+  }
+
+  .divergence-block {
+    border: 0.5px solid var(--red-border);
+    border-radius: var(--radius-md); padding: 11px 13px; margin-bottom: 10px;
+  }
+  .div-topic { font-size: 11px; font-weight: bold; color: var(--text-primary); margin-bottom: 7px; }
+  .div-status-row { display: flex; gap: 7px; margin-bottom: 9px; flex-wrap: wrap; }
+  .status-pill { font-size: 10px; padding: 2px 9px; border-radius: 99px; }
+  .status-unresolved { background: var(--red-bg); color: var(--red-text); border: 0.5px solid var(--red-border); }
+  .status-low        { background: var(--amber-bg); color: var(--amber-text); border: 0.5px solid var(--amber-border); }
+
+  .narrative-list { font-size: 10px; }
+  .narrative-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 5px 0; border-bottom: 0.5px solid var(--border-faint);
+    flex-wrap: wrap; gap: 5px;
+  }
+  .narrative-item:last-child { border-bottom: none; }
+  .narrative-name { color: var(--text-secondary); }
+  .narrative-outlets { display: flex; gap: 4px; flex-wrap: wrap; }
+  .outlet-tag {
+    background: var(--bg-tertiary); color: var(--text-tertiary);
+    font-size: 9px; padding: 1px 6px; border-radius: var(--radius-md);
+    border: 0.5px solid var(--border-faint);
+  }
+
+  .fracture-card {
+    border: 0.5px solid var(--red-border);
+    border-radius: var(--radius-md); overflow: hidden; margin-bottom: 10px;
+  }
+  .fracture-header {
+    background: var(--red-bg); padding: 7px 13px;
+    font-size: 10px; color: var(--red-text);
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px;
+  }
+  .fracture-body { display: grid; grid-template-columns: 1fr 1fr; }
+  .claim-block { padding: 11px 13px; background: var(--bg-primary); }
+  .claim-block:first-child { border-right: 0.5px solid var(--border-faint); }
+  .claim-label { font-size: 10px; color: var(--text-tertiary); margin-bottom: 5px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .claim-text { font-size: 11px; color: var(--text-primary); line-height: 1.6; margin-bottom: 7px; }
+  .claim-outlets { display: flex; flex-wrap: wrap; gap: 4px; }
+  .fracture-footer {
+    border-top: 0.5px solid var(--border-faint);
+    padding: 5px 13px; font-size: 9px; color: var(--text-tertiary);
+    background: var(--bg-secondary);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px;
+  }
+
+  .settings-page { display: none; }
+  .settings-grid { display: grid; gap: 10px; }
+  .settings-col-header {
+    display: grid; grid-template-columns: 170px 1fr 1fr 90px;
+    gap: 10px; padding: 4px 13px;
+    font-size: 10px; color: var(--text-tertiary); letter-spacing: 0.07em; text-transform: uppercase;
+  }
+  .settings-row {
+    display: grid; grid-template-columns: 170px 1fr 1fr 90px;
+    gap: 10px; align-items: center;
+    padding: 11px 13px;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border: 0.5px solid var(--border-faint);
+  }
+  .settings-slot { font-size: 11px; font-weight: bold; color: var(--text-primary); }
+  .settings-slot-sub { font-size: 10px; color: var(--text-secondary); font-weight: normal; margin-top: 2px; }
+  select, input[type="text"] {
+    background: var(--bg-tertiary); color: var(--text-primary);
+    border: 0.5px solid var(--border-med); border-radius: var(--radius-md);
+    padding: 5px 9px; font-size: 11px; font-family: var(--font-mono);
+    width: 100%;
+  }
+  select:focus, input[type="text"]:focus { outline: none; border-color: var(--blue-border); }
+  .thinking-toggle { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--text-secondary); }
+  input[type="checkbox"] { width: 14px; height: 14px; accent-color: var(--blue-text); cursor: pointer; }
+  .save-btn {
+    font-size: 11px; padding: 7px 18px; margin-top: 12px;
+    border-radius: var(--radius-md);
+    border: 0.5px solid var(--blue-border);
+    background: var(--blue-bg); color: var(--blue-text);
+    cursor: pointer; font-family: var(--font-mono);
+    transition: background 0.15s;
+  }
+  .save-btn:hover { background: #132840; }
+
+  .icon { display: inline-block; width: 14px; height: 14px; vertical-align: middle; margin-right: 5px; opacity: 0.7; }
+
+  @media (max-width: 640px) {
+    body { padding: 12px; }
+    .fracture-body { grid-template-columns: 1fr; }
+    .claim-block:first-child { border-right: none; border-bottom: 0.5px solid var(--border-faint); }
+    .settings-col-header, .settings-row { grid-template-columns: 1fr 1fr; }
+    .settings-col-header span:nth-child(3), .settings-col-header span:nth-child(4),
+    .settings-row > *:nth-child(3), .settings-row > *:nth-child(4) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="console">
+
+  <div class="header">
+    <div>
+      <div class="header-title">[ NARRATIVE ALPHA ] &nbsp;&nbsp; Forensic Intel Console</div>
+      <div class="header-meta">Target inquiry: "Fab 7 manufacturing halt" &nbsp;·&nbsp; Vertical: TECHNOLOGY</div>
+    </div>
+    <div class="header-right">
+      <span class="cluster-id">EVT-20260528-TECH-SEMI</span>
+      <span class="corpus-note">7 sources · 4 LLM calls</span>
+    </div>
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn active" onclick="showPage('dashboard', this)">Dashboard</button>
+    <button class="nav-btn" onclick="showPage('settings', this)">LLM Settings</button>
+  </div>
+
+  <!-- ═══════════════════════════════ DASHBOARD ═══════════════════════════════ -->
+  <div id="dashboard-page">
+
+    <!-- ZONE 1 -->
+    <div class="zone">
+      <div class="zone-header">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span class="zone-label">Zone 1 — Consensus truth baseline</span>
+        <span style="margin-left:auto;font-size:10px;color:var(--text-tertiary);">&gt;75% source agreement</span>
+      </div>
+      <div class="zone-body">
+        <div class="consensus-summary">Fab 7 microchip production operations completely halted on May 28 at 02:00 UTC due to an unspecified localized grid anomaly. Normal operations estimated to resume within 48 hours.</div>
+        <div class="verified-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><polyline points="20 6 9 17 4 12"/></svg>
+          Municipal Energy Regulatory Filing (Ref: REG-POWER-9042) — confirmed substation drop
+        </div>
+        <div class="anchor-nodes" style="margin-top:10px;">
+          <span class="node-pill">Fab 7</span>
+          <span class="node-pill">Operations halted</span>
+          <span class="node-pill">May 28 02:00 UTC</span>
+          <span class="node-pill">48-hr resumption estimate</span>
+          <span class="node-pill">Localized grid anomaly</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ZONE 2 -->
+    <div class="zone">
+      <div class="zone-header">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg>
+        <span class="zone-label">Zone 2 — Media distortion matrix</span>
+      </div>
+      <div class="zone-body">
+        <table class="distortion-table">
+          <thead>
+            <tr>
+              <th style="width:26%;">Outlet vector</th>
+              <th style="width:13%;">Omission (Oᵢ)</th>
+              <th style="width:13%;">Volatility (Vf)</th>
+              <th style="width:48%;">Detected text camouflage</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="outlet-name">Global Corporate News Wire</div><div class="outlet-domain">globalwire.com</div></td>
+              <td><span class="badge badge-high">0.65 HIGH</span></td>
+              <td><span class="badge badge-low">0.12 LOW</span></td>
+              <td class="camouflage">
+                <span class="cam-raw">"minor power interruption"</span>
+                <span class="cam-arrow">→</span>
+                <span class="cam-clean">complete grid line severance</span>
+              </td>
+            </tr>
+            <tr>
+              <td><div class="outlet-name">State Economic Chronicle</div><div class="outlet-domain">statechronicle.gov</div></td>
+              <td><span class="badge badge-low">0.10 LOW</span></td>
+              <td><span class="badge badge-high">0.84 HIGH</span></td>
+              <td class="camouflage">
+                <span class="cam-raw">"unauthorized destabilizing factors"</span>
+                <span class="cam-arrow">→</span>
+                <span class="cam-clean">localized transformer hardware fire</span>
+              </td>
+            </tr>
+            <tr>
+              <td><div class="outlet-name">Tech Market Pulse</div><div class="outlet-domain">techpulse.io</div></td>
+              <td><span class="badge badge-med">0.30 MED</span></td>
+              <td><span class="badge badge-med">0.45 MED</span></td>
+              <td class="camouflage">
+                <span class="cam-raw">"preventative infrastructure lifecycle reset"</span>
+                <span class="cam-arrow">→</span>
+                <span class="cam-clean">forced emergency equipment shutdown</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="sub-header">Narrative regime shifts</div>
+        <div class="regime-card">
+          <div class="regime-shift">
+            <span class="term-old">power outage</span>
+            <span class="term-arrow">→</span>
+            <span class="term-new">service interruption</span>
+          </div>
+          <div class="regime-meta">
+            <span class="badge badge-high">HIGH sync</span>
+            <span>6 of 8 sources</span>
+            <span>synchronization score: 0.75</span>
+          </div>
+          <div class="regime-note">Institutional language converged toward softened operational terminology across the majority of sources.</div>
+        </div>
+        <div class="regime-card">
+          <div class="regime-shift">
+            <span class="term-old">shutdown</span>
+            <span class="term-arrow">→</span>
+            <span class="term-new">operational pause</span>
+          </div>
+          <div class="regime-meta">
+            <span class="badge badge-med">MED sync</span>
+            <span>4 of 8 sources</span>
+            <span>synchronization score: 0.50</span>
+          </div>
+          <div class="regime-note">Partial adoption of duration-minimizing framing across mid-tier financial outlets.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ZONE 3 -->
+    <div class="zone">
+      <div class="zone-header">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+        <span class="zone-label">Zone 3 — Forensic analysis of outlier signals</span>
+      </div>
+      <div class="zone-body">
+
+        <div class="rep-warning">
+          <div class="rep-warning-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Reputation alert: high scatter-shot ratio — The Tainan Industrial Insider
+          </div>
+          <div class="rep-warning-body">Historical back-testing indicates 84% baseline accuracy in TECHNOLOGY, but 72% Scatter-Shot Anomaly Factor (HIGH). They routinely front-run accurate details inside high volumes of hyper-volatile narrative noise. Filter outputs carefully.</div>
+        </div>
+
+        <div class="sub-header">Predictive narrative watch — outlier signals</div>
+        <div class="outlier-card">
+          <div class="outlier-claim">"The backup grid system did not fail due to a transformer surge; internal industrial control systems were manually overridden via a compromised service account originating outside the region."</div>
+          <div class="outlier-meta">
+            <div class="meta-row"><span class="meta-label">Origin: </span><span class="meta-val">The Tainan Industrial Insider</span></div>
+            <div class="meta-row"><span class="meta-label">Validation rate: </span><span class="meta-val">84% (TECHNOLOGY)</span></div>
+            <div class="meta-row" style="grid-column:1/-1;margin-top:5px;"><span class="meta-label">Status: </span><span class="pending-badge">UNVERIFIED · 30-day convergence window active</span></div>
+          </div>
+        </div>
+
+        <div class="sub-header">Reality divergence zones</div>
+        <div class="divergence-block">
+          <div class="div-topic">Cause of Fab 7 shutdown</div>
+          <div class="div-status-row">
+            <span class="status-pill status-low">Consensus stability: LOW (0.21)</span>
+            <span class="status-pill status-unresolved">Institutional convergence: UNRESOLVED</span>
+          </div>
+          <div class="narrative-list">
+            <div class="narrative-item">
+              <span class="narrative-name">Localized grid instability</span>
+              <div class="narrative-outlets"><span class="outlet-tag">globalwire.com</span><span class="outlet-tag">marketindustrial.net</span></div>
+            </div>
+            <div class="narrative-item">
+              <span class="narrative-name">Cybersecurity breach</span>
+              <div class="narrative-outlets"><span class="outlet-tag">tainanindustrial.com</span></div>
+            </div>
+            <div class="narrative-item">
+              <span class="narrative-name">Internal systems failure</span>
+              <div class="narrative-outlets"><span class="outlet-tag">techpulse.io</span></div>
+            </div>
+            <div class="narrative-item">
+              <span class="narrative-name">Planned maintenance anomaly</span>
+              <div class="narrative-outlets"><span class="outlet-tag">statechronicle.gov</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sub-header">Reality fractures</div>
+        <div class="fracture-card">
+          <div class="fracture-header">
+            <span>RF-1004 · Root cause of outage</span>
+            <span>STRUCTURALLY CONTRADICTORY · UNRESOLVED</span>
+          </div>
+          <div class="fracture-body">
+            <div class="claim-block">
+              <div class="claim-label">Claim A</div>
+              <div class="claim-text">"The outage resulted from transformer overload."</div>
+              <div class="claim-outlets">
+                <span class="outlet-tag">globalwire.com</span>
+                <span class="outlet-tag">industrialobserver.net</span>
+              </div>
+            </div>
+            <div class="claim-block">
+              <div class="claim-label">Claim B</div>
+              <div class="claim-text">"The outage resulted from unauthorized remote override activity."</div>
+              <div class="claim-outlets">
+                <span class="outlet-tag">tainanindustrial.com</span>
+              </div>
+            </div>
+          </div>
+          <div class="fracture-footer">
+            <span>No winner declared — incompatibility surfaced only</span>
+            <span>Classification method: LLM_ASSISTED</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- end dashboard-page -->
+
+  <!-- ═══════════════════════════════ SETTINGS ═══════════════════════════════ -->
+  <div id="settings-page" class="settings-page">
+    <div class="zone">
+      <div class="zone-header">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+        <span class="zone-label">LLM provider settings — per call slot</span>
+      </div>
+      <div class="zone-body">
+        <div class="settings-grid">
+          <div class="settings-col-header">
+            <span>Call slot</span><span>Provider</span><span>Model</span><span>Thinking</span>
+          </div>
+          <div class="settings-row">
+            <div class="settings-slot">Call 1 <div class="settings-slot-sub">Entity normalization</div></div>
+            <select><option>deepseek</option><option>openai</option><option>groq</option><option>google</option></select>
+            <input type="text" value="deepseek-v4-flash" />
+            <div class="thinking-toggle"><input type="checkbox" disabled /><span style="color:var(--text-tertiary);font-size:10px;">N/A</span></div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-slot">Call 2 <div class="settings-slot-sub">Linguistic neutralization</div></div>
+            <select><option>deepseek</option><option>openai</option><option>groq</option><option>google</option></select>
+            <input type="text" value="deepseek-v4-flash" />
+            <div class="thinking-toggle"><input type="checkbox" disabled /><span style="color:var(--text-tertiary);font-size:10px;">N/A</span></div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-slot">Call 3 <div class="settings-slot-sub">Graph extraction</div></div>
+            <select><option>deepseek</option><option>openai</option><option>groq</option><option>google</option></select>
+            <input type="text" value="deepseek-v4-pro" />
+            <div class="thinking-toggle"><input type="checkbox" checked /><span>On</span></div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-slot">Call 4 <div class="settings-slot-sub">Forensic synthesis</div></div>
+            <select><option>deepseek</option><option>openai</option><option>groq</option><option>google</option></select>
+            <input type="text" value="deepseek-v4-pro" />
+            <div class="thinking-toggle"><input type="checkbox" checked /><span>On</span></div>
+          </div>
+        </div>
+        <button class="save-btn">Save configuration</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end console -->
+
+<script>
+function showPage(page, btn) {
+  document.getElementById('dashboard-page').style.display = page === 'dashboard' ? 'block' : 'none';
+  document.getElementById('settings-page').style.display = page === 'settings' ? 'block' : 'none';
+  document.querySelectorAll('.nav-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>
