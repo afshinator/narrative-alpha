@@ -17,7 +17,7 @@
 | `contracts.py` | Shared | Pydantic models for all data contracts (Contract A, Contract B, LLM config) |
 | `llm_client.py` | Shared | Runtime LLM config loader, provider client factory, `call_llm()` |
 | `ingestion.py` | Layer 1 | SERP discovery, Web Unlocker extraction, `validate_ingestion_payload()`, manifest assembly, corpus floor gate |
-| `processing.py` | Layer 2 | `build_search_context_table()`, entity normalization (Call 1), linguistic neutralization (Call 2), embedding generation, Vf computation |
+| `processing.py` | Layer 2 | `build_search_context_table()`, entity normalization (Call 1), linguistic neutralization (Call 2) |
 | `analysis.py` | Layer 3 | Graph extraction (Call 3), Python set-math (Gc, Oi, Sa), `compute_pre_synthesis_context()`, forensic synthesis (Call 4), label injection |
 | `reputation.py` | Persistence | SQLite schema, `get_hardened_db_connection()`, `handle_outlet_registration()`, read/write reputation, ingestion log |
 | `backtest.py` | Persistence | Background `.spawn()` worker for historical reputation back-test |
@@ -80,6 +80,7 @@ class EventMeta(BaseModel):
     industry_vertical: str
     timestamp_utc: str
     corpus_count: int
+    corpus_capped: bool = False
 
 
 class PrimaryVerification(BaseModel):
@@ -236,7 +237,7 @@ git add contracts.py
 git commit -m "feat: add Pydantic data contracts for all pipeline layers"
 ```
 
-**Sanity check:** Do all Contract B fields from Section 4 have a matching Pydantic model? Count fields in JSON example vs. models. Does `LlamaSlotConfig` match the `llm_config.json` structure from Section 9.2?
+**Sanity check:** Do all Contract B fields from Section 4 have a matching Pydantic model? Count fields in JSON example vs. models. Does `LLMSlotConfig` match the `llm_config.json` structure from Section 9.2?
 
 ---
 
@@ -360,7 +361,12 @@ def call_llm(slot_config: dict, messages: list[dict],
         retries: number of retry attempts on failure
 
     Returns:
-        response.choices[0].message.content
+        response.choices[0].message.content as a string.
+
+    Note: All current calls are single-turn. If multi-turn history is ever needed,
+    use extract_assistant_message() to append the assistant turn — do NOT reconstruct
+    the dict manually. DeepSeek returns reasoning_content on thinking-mode responses
+    and will reject the next request with a 400 if it is missing from the history.
     """
     provider = slot_config["provider"]
     client = get_llm_client(provider)
@@ -382,6 +388,30 @@ def call_llm(slot_config: dict, messages: list[dict],
             raise
 
     raise last_error  # type: ignore[misc]
+
+
+# ── DeepSeek multi-turn helper ──
+
+def extract_assistant_message(response_message) -> dict:
+    """
+    Build a correctly-shaped assistant message dict from a DeepSeek response object
+    for appending to messages history in multi-turn calls.
+
+    DeepSeek's API rejects multi-turn requests with a 400 error if reasoning_content
+    is present in the previous assistant turn but not echoed back in the messages list.
+    Using the SDK object (not a manually reconstructed dict) is the safe approach.
+
+    Usage:
+        response = client.chat.completions.create(...)
+        messages.append(extract_assistant_message(response.choices[0].message))
+        # then add next user turn and call again
+    """
+    msg: dict = {"role": "assistant", "content": response_message.content}
+    # reasoning_content is only present on thinking-mode responses
+    reasoning = getattr(response_message, "reasoning_content", None)
+    if reasoning is not None:
+        msg["reasoning_content"] = reasoning
+    return msg
 
 
 # ── Standalone embedding call (not slot-configured — fixed to OpenAI) ──
@@ -489,6 +519,9 @@ def fetch_article_body(url: str, zone: str, api_key: str) -> str:
     return response.text
 
 
+MIN_BODY_CHARS = 200  # trafilatura extraction floor — JS-heavy / paywalled sites return ""
+
+
 def extract_text(html: str) -> str:
     """Strip HTML boilerplate via trafilatura. Returns clean text or ''."""
     text = trafilatura.extract(html)
@@ -558,6 +591,7 @@ def validate_ingestion_payload(doc: dict) -> Optional[dict]:
         "scrape_timestamp": doc.get("scrape_timestamp"),
         "author": doc.get("author", "Staff"),
         "raw_text_content": raw_text,
+        "passed_validation": 1,
     }
 
 
@@ -568,19 +602,28 @@ def build_ingestion_manifest(
     serp_data: dict,
     zone: str,
     api_key: str,
+    db_conn=None,
 ) -> dict:
     """
     Full Layer 1 pipeline: SERP results → Web Unlocker fetch → validate → manifest.
+
+    Args:
+        db_conn: optional SQLite connection — if provided, logs ALL scrape attempts
+                 (pass and fail) to ingestion_manifest_log (Section 14.3, Issue #3 fix).
 
     Returns one of:
         - A valid IngestionManifest dict (corpus_count >= 5)
         - A FloorGateResponse dict (corpus_count < 5)
     """
+    from reputation import write_ingestion_log
+    from urllib.parse import urlparse
+
     now_utc = datetime.now(timezone.utc).isoformat()
     cluster_id = f"EVT-{datetime.now(timezone.utc).strftime('%Y%m%d')}-{keyword[:20].upper().replace(' ', '-')}"
 
     organic = serp_data.get("organic", [])
     validated_docs: list[dict] = []
+    all_attempted: list[dict] = []   # every fetch attempt — for ingestion log
 
     for idx, result in enumerate(organic):
         url = result.get("link", "")
@@ -590,11 +633,51 @@ def build_ingestion_manifest(
         if not url:
             continue
 
+        fetch_status = None
+        raw_text = ""
         try:
             html = fetch_article_body(url, zone, api_key)
+            fetch_status = 200
             raw_text = extract_text(html)
-        except Exception:
-            continue   # fetch/extract failure — skip silently
+        except Exception as e:
+            fetch_status = getattr(getattr(e, "response", None), "status_code", 0) or -1
+            all_attempted.append({
+                "doc_id": f"DOC-{idx:03d}",
+                "source_name": source_name,
+                "source_url": url,
+                "source_domain": "",
+                "title": title,
+                "scrape_timestamp": now_utc,
+                "raw_text_content": "",
+                "fetch_status": fetch_status,
+                "passed_validation": 0,
+            })
+            continue
+
+        # Explicit extraction failure check: HTTP succeeded but trafilatura returned
+        # nothing (JS-rendered layout, anti-scrape gate, or paywalled iframe).
+        # Log immediately as failed rather than letting validate_ingestion_payload
+        # reject it silently with no distinguishable reason in the ingestion log.
+        if len(raw_text) < MIN_BODY_CHARS:
+            try:
+                domain = urlparse(url).netloc.lower()
+                if domain.startswith("www."):
+                    domain = domain[4:]
+            except Exception:
+                domain = ""
+            all_attempted.append({
+                "doc_id": f"DOC-{idx:03d}",
+                "source_name": source_name,
+                "source_url": url,
+                "source_domain": domain,
+                "title": title,
+                "scrape_timestamp": now_utc,
+                "raw_text_content": raw_text,
+                "fetch_status": fetch_status,
+                "body_length": len(raw_text),
+                "passed_validation": 0,
+            })
+            continue
 
         doc = {
             "doc_id": f"DOC-{idx:03d}",
@@ -603,11 +686,32 @@ def build_ingestion_manifest(
             "title": title,
             "scrape_timestamp": now_utc,
             "raw_text_content": raw_text,
+            "fetch_status": fetch_status,
         }
 
         validated = validate_ingestion_payload(doc)
         if validated:
+            validated["fetch_status"] = fetch_status
             validated_docs.append(validated)
+            all_attempted.append(validated)
+        else:
+            try:
+                domain = urlparse(url).netloc.lower()
+                if domain.startswith("www."):
+                    domain = domain[4:]
+            except Exception:
+                domain = ""
+            all_attempted.append({
+                "doc_id": f"DOC-{idx:03d}",
+                "source_name": source_name,
+                "source_url": url,
+                "source_domain": domain,
+                "title": title,
+                "scrape_timestamp": now_utc,
+                "raw_text_content": raw_text,
+                "fetch_status": fetch_status,
+                "passed_validation": 0,
+            })
 
     # Deduplicate by unique source_domain
     seen_domains: set[str] = set()
@@ -617,6 +721,16 @@ def build_ingestion_manifest(
         if domain not in seen_domains:
             seen_domains.add(domain)
             unique_docs.append(doc)
+
+    # Hard cap at 20 documents — prevents context saturation + Modal timeout (Section 10)
+    corpus_capped = False
+    if len(unique_docs) > 20:
+        unique_docs = unique_docs[:20]
+        corpus_capped = True
+
+    # Log all attempted docs (pass and fail) if db_conn provided (Section 14.3)
+    if db_conn is not None:
+        write_ingestion_log(cluster_id, keyword, now_utc, all_attempted, db_conn)
 
     corpus_count = len(unique_docs)
 
@@ -629,7 +743,7 @@ def build_ingestion_manifest(
             }
         }
 
-    return {
+    manifest = {
         "cluster_id": cluster_id,
         "trigger_type": "KEYWORD",
         "search_query": keyword,
@@ -637,6 +751,9 @@ def build_ingestion_manifest(
         "corpus_count": corpus_count,
         "documents": unique_docs,
     }
+    if corpus_capped:
+        manifest["corpus_capped"] = True
+    return manifest
 ```
 
 - [ ] **Step 2: Verify imports + basic structure**
@@ -651,7 +768,7 @@ git add ingestion.py
 git commit -m "feat: add Layer 1 ingestion — SERP discovery, Web Unlocker extraction, validation gates"
 ```
 
-**Sanity check:** Does `build_ingestion_manifest` return `FloorGateResponse` shape when corpus < 5? Does it return `IngestionManifest` shape when corpus >= 5? Are extracted domains normalized (no www prefix, lowercased)?
+**Sanity check:** Does `build_ingestion_manifest` return `FloorGateResponse` shape when corpus < 5? Does it return `IngestionManifest` shape when corpus >= 5? Are extracted domains normalized (no www prefix, lowercased)? Does `passed_validation: 1` appear in the return dict of `validate_ingestion_payload`? Does the 20-doc hard cap apply before the floor gate check? Does `corpus_capped: True` appear in the manifest when cap fires? Does `write_ingestion_log` get called when `db_conn` is provided?
 
 ---
 
@@ -693,6 +810,31 @@ def get_hardened_db_connection(db_path: Optional[str] = None) -> sqlite3.Connect
     conn.execute("PRAGMA synchronous=NORMAL;")
     conn.execute("PRAGMA busy_timeout=30000;")
     return conn
+
+
+def _write_with_retry(
+    conn: sqlite3.Connection,
+    sql: str,
+    params: tuple,
+    max_retries: int = 3,
+) -> None:
+    """
+    Execute a write with exponential backoff on OperationalError (database locked).
+    Needed because Modal Volumes are network-attached; WAL mode locking can fail
+    when the backtest worker and main pipeline write concurrently.
+    """
+    import time
+    delay = 0.1
+    for attempt in range(max_retries):
+        try:
+            conn.execute(sql, params)
+            conn.commit()
+            return
+        except sqlite3.OperationalError as exc:
+            if "locked" not in str(exc).lower() or attempt == max_retries - 1:
+                raise
+            time.sleep(delay)
+            delay *= 2
 
 
 def init_db(conn: sqlite3.Connection) -> None:
@@ -746,12 +888,14 @@ def handle_outlet_registration(
     domain: str,
     vertical: str,
     conn: sqlite3.Connection,
+    outlet_name: str = "",
 ) -> str:
     """
     Check if outlet is known. If new: insert UNRATED row immediately.
     Returns the outlet's current rating_status.
 
     Does NOT spawn the back-test — that's the orchestrator's job.
+    outlet_name is stored on first registration (Issue #15 fix).
     """
     cursor = conn.cursor()
     cursor.execute(
@@ -761,12 +905,12 @@ def handle_outlet_registration(
     row = cursor.fetchone()
 
     if not row:
-        cursor.execute(
-            "INSERT INTO outlet_reputation (domain, industry_vertical, rating_status, last_updated) "
-            "VALUES (?, ?, 'UNRATED', datetime('now'))",
-            (domain, vertical),
+        _write_with_retry(
+            conn,
+            "INSERT INTO outlet_reputation (domain, industry_vertical, outlet_name, rating_status, last_updated) "
+            "VALUES (?, ?, ?, 'UNRATED', datetime('now'))",
+            (domain, vertical, outlet_name),
         )
-        conn.commit()
         return "UNRATED"
 
     return row[0]
@@ -799,13 +943,13 @@ def write_outlier_signal(
     conn: sqlite3.Connection,
 ) -> None:
     """Log a new outlier signal to the tracking table."""
-    conn.execute(
+    _write_with_retry(
+        conn,
         "INSERT OR IGNORE INTO outlier_tracking "
         "(signal_id, cluster_id, origin_domain, extracted_claim, timestamp_first_seen) "
         "VALUES (?, ?, ?, ?, ?)",
         (signal_id, cluster_id, origin_domain, extracted_claim, timestamp),
     )
-    conn.commit()
 
 
 def write_ingestion_log(
@@ -820,8 +964,10 @@ def write_ingestion_log(
     Section 14.3 schema.
     """
     for doc in docs:
+        # INSERT OR REPLACE so both fetch attempts for the same URL across cluster runs
+        # are visible in the debug log (composite uniqueness: canonical_url + query_id)
         conn.execute(
-            "INSERT OR IGNORE INTO ingestion_manifest_log "
+            "INSERT OR REPLACE INTO ingestion_manifest_log "
             "(query_id, topic, discovery_timestamp, source_domain, canonical_url, "
             "title, fetch_status, body_text, body_length, passed_validation) "
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -868,7 +1014,7 @@ git add reputation.py
 git commit -m "feat: add SQLite reputation ledger — outlet registration, outlier tracking, ingestion log"
 ```
 
-**Sanity check:** Does `init_db` create 3 tables with correct PKs? Does `handle_outlet_registration` use composite PK (domain, vertical)? Does WAL mode actually activate (PRAGMA journal_mode)?
+**Sanity check:** Does `init_db` create 3 tables with correct PKs? Does `handle_outlet_registration` use composite PK (domain, vertical)? Does WAL mode actually activate (PRAGMA journal_mode)? Does `handle_outlet_registration` write `outlet_name` to the INSERT statement?
 
 ---
 
@@ -876,15 +1022,17 @@ git commit -m "feat: add SQLite reputation ledger — outlet registration, outli
 
 **File:** Create `processing.py`
 
-**What:** Sections 6 (Call 1, Call 2), 5.2 (Vf), and 14.2C (search context). Three functions run sequentially: entity normalization, linguistic neutralization, framing volatility.
+**What:** Sections 6 (Call 1, Call 2) and 14.2C (search context). Two LLM calls: entity normalization and linguistic neutralization. Vf (framing volatility) computation lives in Layer 3 (`analysis.py`) per spec Section 2 decoupling rule: "Layer 2 contains zero analysis logic."
 
 - [ ] **Step 1: Write `processing.py` — search context helper**
 
 ```python
-"""Layer 2: Processing — entity normalization, linguistic neutralization, embeddings."""
+"""Layer 2: Processing — entity normalization and linguistic neutralization only.
 
-from llm_client import call_llm, load_llm_config, get_embedding
-import numpy as np
+Vf (framing volatility) computation is Layer 3 concern — see analysis.py.
+"""
+
+from llm_client import call_llm, load_llm_config
 
 
 # ── Search Context Reference Table (Section 14.2C) ──
@@ -1009,59 +1157,21 @@ def run_linguistic_neutralization(
         results.append(neutralized.strip())
 
     return results
-
-
-# ── Framing Volatility Score (Section 5.2) ──
-
-def compute_framing_volatility(
-    raw_texts: list[str],
-    neutralized_texts: list[str],
-) -> tuple[list[float], list[str]]:
-    """
-    Compute Vf = 1 - cos(raw_embedding, neutralized_embedding) per document.
-
-    Args:
-        raw_texts: original article texts
-        neutralized_texts: Call 2 output texts (same indexing)
-
-    Returns:
-        (vf_scores, vf_labels) — one per doc
-    """
-    scores = []
-    labels = []
-
-    for raw, neut in zip(raw_texts, neutralized_texts):
-        e_raw = np.array(get_embedding(raw))
-        e_neut = np.array(get_embedding(neut))
-        cos_sim = np.dot(e_raw, e_neut) / (
-            np.linalg.norm(e_raw) * np.linalg.norm(e_neut)
-        )
-        vf = 1.0 - float(cos_sim)
-        scores.append(round(vf, 4))
-
-        if vf < 0.25:
-            labels.append("LOW")
-        elif vf < 0.55:
-            labels.append("MED")
-        else:
-            labels.append("HIGH")
-
-    return scores, labels
 ```
 
 - [ ] **Step 3: Verify imports**
 
-Run: `python -c "from processing import build_search_context_table, run_entity_normalization, run_linguistic_neutralization, compute_framing_volatility; print('processing OK')"`
+Run: `python -c "from processing import build_search_context_table, run_entity_normalization, run_linguistic_neutralization; print('processing OK')"`
 Expected: `processing OK`
 
 - [ ] **Step 4: Commit**
 
 ```bash
 git add processing.py
-git commit -m "feat: add Layer 2 processing — entity normalization, linguistic neutralization, framing volatility"
+git commit -m "feat: add Layer 2 processing — entity normalization and linguistic neutralization"
 ```
 
-**Sanity check:** Does `build_search_context_table` handle missing `people_also_ask` key? Does `run_entity_normalization` lowercase all map keys? Does `compute_framing_volatility` use correct label thresholds from Section 5.2?
+**Sanity check:** Does `build_search_context_table` handle missing `people_also_ask` key (PAA loop just skips — graceful degrade, no code change needed for `merge_and_resolve`)? Does `run_entity_normalization` lowercase all map keys? Is `compute_framing_volatility` absent from `processing.py` (it belongs in `analysis.py`)?
 
 ---
 
@@ -1069,25 +1179,34 @@ git commit -m "feat: add Layer 2 processing — entity normalization, linguistic
 
 **File:** Create `analysis.py`
 
-**What:** Sections 5, 6 (Call 3, Call 4), and pre-synthesis pass. This is the largest and most complex file. Five sub-systems:
+**What:** Sections 5, 6 (Call 3, Call 4), 5.2 (Vf), and pre-synthesis pass. This is the largest and most complex file. Seven sub-systems:
 1. Graph extraction (Call 3 — DeepSeek V4-Pro thinking)
 2. Resolve-to-canonical + omission index (Python)
 3. Consensus baseline Gc (Python)
 4. Scatter-Shot Anomaly Sa (Python + SQLite)
-5. Pre-synthesis context aggregation (Python)
-6. Forensic synthesis (Call 4 — DeepSeek V4-Pro thinking)
-7. Label injection (Python threshold rules)
+5. **Framing Volatility Vf** (Python + OpenAI embeddings) — moved here from processing.py per layer decoupling
+6. Pre-synthesis context aggregation (Python)
+7. Forensic synthesis (Call 4 — DeepSeek V4-Pro thinking)
+8. Label injection (Python threshold rules)
+
+**Call 3 timeout note:** Serial thinking-mode calls take ~10–30s each. 15 articles × 20s = 300s, leaving minimal headroom in Modal's 600s timeout. Consider `asyncio.gather` for parallel Call 3 invocations — articles are independent, no ordering dependency. The 20-doc hard cap (Task 3) bounds worst-case to 20 × 20s = 400s absolute ceiling.
 
 - [ ] **Step 1: Write `analysis.py` — Call 3 + Python metrics**
 
 ```python
-"""Layer 3: Analysis — graph extraction, forensic synthesis, metric computation."""
+"""Layer 3: Analysis — graph extraction, forensic synthesis, metric computation.
+
+Vf (framing volatility) lives here — not in processing.py — per spec Section 2
+decoupling rule: Layer 2 contains zero analysis logic.
+"""
 
 import json
 import uuid
 from typing import Optional
 
-from llm_client import call_llm
+import numpy as np
+
+from llm_client import call_llm, get_embedding
 
 
 # ── Call 3: Graph Extraction (DeepSeek V4-Pro, thinking enabled) ──
@@ -1208,11 +1327,11 @@ def compute_consensus_baseline(
     Determine consensus node set Gc: nodes appearing in >75% of source graphs.
     Uses canonical-resolved node names.
     """
-    n = len(all_graphs)
+    n = sum(1 for g in all_graphs if not g.get("_parse_error"))
     if n < 5:
         return set()
 
-    threshold = int(0.75 * n) + 1  # ceiling
+    threshold = int(0.75 * n) + 1  # ceiling against valid sources only
 
     node_source_counts: dict[str, set[str]] = {}
     for graph in all_graphs:
@@ -1254,7 +1373,7 @@ def compute_sa_for_outlet(
     return round(sa, 4), scatter_shot_label(sa)
 
 
-# ── Framing Volatility label (Section 5.2) ──
+# ── Framing Volatility Score + label (Section 5.2) — Layer 3, not Layer 2 ──
 
 def framing_volatility_label(vf: float) -> str:
     if vf < 0.25:
@@ -1263,6 +1382,37 @@ def framing_volatility_label(vf: float) -> str:
         return "MED"
     else:
         return "HIGH"
+
+
+def compute_framing_volatility(
+    raw_texts: list[str],
+    neutralized_texts: list[str],
+) -> tuple[list[float], list[str]]:
+    """
+    Compute Vf = 1 - cos(raw_embedding, neutralized_embedding) per document.
+    Called inside run_analysis_layer after Call 2 outputs are available.
+
+    Args:
+        raw_texts: original article texts
+        neutralized_texts: Call 2 output texts (same indexing)
+
+    Returns:
+        (vf_scores, vf_labels) — one per doc
+    """
+    scores = []
+    labels = []
+
+    for raw, neut in zip(raw_texts, neutralized_texts):
+        e_raw = np.array(get_embedding(raw))
+        e_neut = np.array(get_embedding(neut))
+        cos_sim = np.dot(e_raw, e_neut) / (
+            np.linalg.norm(e_raw) * np.linalg.norm(e_neut)
+        )
+        vf = 1.0 - float(cos_sim)
+        scores.append(round(vf, 4))
+        labels.append(framing_volatility_label(vf))
+
+    return scores, labels
 
 
 # ── Consensus Stability Score (Section 5.5) ──
@@ -1321,8 +1471,8 @@ def compute_pre_synthesis_context(
 
     Pure Python — no LLM.
     """
-    # TBD: full implementation.
-    # Overview:
+    # STUB: Task 11 must implement this before the pipeline can run.
+    # Overview of what Task 11 must build:
     # - narrative_clusters: for each consensus node, group edges from different
     #   sources. If sources disagree on target/relationship → divergence zone candidate.
     #   {topic: {claim_text: [domain, ...]}}
@@ -1336,13 +1486,12 @@ def compute_pre_synthesis_context(
     #   un-neutralized texts for usage rates. Where adoption of a term across sources
     #   exceeds threshold → regime shift candidate.
     #   [{previous_term, replacement_term, observed_across, total_sources}, ...]
-    #
-    # Placeholder returns empty structures for now:
-    return {
-        "narrative_clusters": {},
-        "fracture_candidates": [],
-        "term_shifts": [],
-    }
+    raise NotImplementedError(
+        "Task 11: compute_pre_synthesis_context not yet implemented. "
+        "Running the pipeline without this produces empty reality_divergence_zones, "
+        "reality_fractures, and narrative_regime_shifts — the entire v1.4 forensic layer. "
+        "Implement Task 11 before executing the pipeline."
+    )
 ```
 
 - [ ] **Step 3: Write `analysis.py` — Call 4 forensic synthesis**
@@ -1357,8 +1506,18 @@ FORENSIC_SYNTHESIS_SYSTEM_PROMPT = (
     "agree on, who omitted which facts, who used linguistic camouflage, and which "
     "single-source outlier claims exist. "
     "Your output must reflect narrative structure, not truth arbitration. "
-    "Output only valid JSON matching the schema provided. "
-    "The word 'json' must appear in your response."
+    "Output only valid JSON. The word 'json' must appear in your response.\n\n"
+    "Required output schema (Contract B):\n"
+    "{\n"
+    "  \"event_meta\": {\"cluster_id\": str, \"search_query\": str, \"industry_vertical\": str, \"timestamp_utc\": str, \"corpus_count\": int},\n"
+    "  \"consensus_reality_graph\": {\"consensus_summary\": str, \"verified_anchor_nodes\": [str], \"primary_verifications\": [{\"authority\": str, \"reference_id\": str, \"status\": str}]},\n"
+    "  \"distortion_matrix\": [{\"outlet_name\": str, \"source_domain\": str, \"omission_index\": float, \"framing_volatility_score\": float, \"identifiable_omissions\": [str], \"linguistic_camouflage\": [{\"raw_expression\": str, \"clinical_translation\": str}]}],\n"
+    "  \"outlier_signals\": [{\"signal_id\": str, \"origin_outlet\": str, \"origin_domain\": str, \"extracted_claim\": str, \"timestamp_first_seen\": str, \"outlier_origin_provenance\": {\"classification\": str, \"historical_origin_validation_rate\": float, \"scatter_shot_anomaly_factor\": float, \"reputation_warning_triggered\": bool, \"echo_chamber_mimics\": [str]}, \"validation_tracking\": {\"current_state\": str, \"last_checked_timestamp\": str, \"consensus_absorption_status\": str, \"evaluation_window_days\": int}}],\n"
+    "  \"reputation_warnings\": [{\"outlet_name\": str, \"source_domain\": str, \"warning_triggered\": bool, \"historical_origin_validation_rate\": float, \"scatter_shot_anomaly_factor\": float, \"scatter_shot_label\": str, \"warning_message\": str}],\n"
+    "  \"reality_divergence_zones\": [{\"topic\": str, \"consensus_stability_score\": float, \"institutional_convergence\": str, \"observed_narrative_structures\": [str], \"supporting_outlets\": {\"<narrative>\": [\"<domain>\"]}}],\n"
+    "  \"reality_fractures\": [{\"fracture_id\": str, \"topic\": str, \"claim_a\": {\"statement\": str, \"supporting_outlets\": [str]}, \"claim_b\": {\"statement\": str, \"supporting_outlets\": [str]}, \"relationship\": str, \"resolution_status\": str}],\n"
+    "  \"narrative_regime_shifts\": [{\"shift_id\": str, \"topic\": str, \"detected_shift\": {\"previous_term\": str, \"replacement_term\": str}, \"observed_across\": int, \"total_sources\": int, \"synchronization_score\": float, \"interpretive_note\": str}]\n"
+    "}"
 )
 
 
@@ -1424,12 +1583,17 @@ def inject_labels(report: dict) -> dict:
             shift.get("synchronization_score", 0)
         )
 
+    for fracture in report.get("reality_fractures", []):
+        # Constant default — not a threshold label, but missing from raw dict
+        # since Pydantic defaults only apply on model instantiation.
+        fracture.setdefault("classification_method", "LLM_ASSISTED")
+
     return report
 ```
 
 - [ ] **Step 4: Verify imports**
 
-Run: `python -c "from analysis import extract_graph, compute_omission_index, compute_consensus_baseline, synthesize_forensic_report, inject_labels; print('analysis OK')"`
+Run: `python -c "from analysis import extract_graph, compute_omission_index, compute_consensus_baseline, compute_framing_volatility, synthesize_forensic_report, inject_labels; print('analysis OK')"`
 Expected: `analysis OK`
 
 - [ ] **Step 5: Commit**
@@ -1439,7 +1603,7 @@ git add analysis.py
 git commit -m "feat: add Layer 3 analysis — graph extraction, forensic synthesis, all metrics"
 ```
 
-**Sanity check:** Does `resolve_to_canonical` handle lowercase mapping correctly? Does `compute_consensus_baseline` use ceiling threshold (>75%, not >=)? Does `compute_omission_index` handle division by zero? Does `inject_labels` cover all 4 metric fields?
+**Sanity check:** Does `resolve_to_canonical` handle lowercase mapping correctly? Does `compute_consensus_baseline` use ceiling threshold (>75%, not >=)? Does `compute_omission_index` handle division by zero? Does `inject_labels` cover all 4 metric fields plus `classification_method` on `reality_fractures`? Is `compute_framing_volatility` in `analysis.py` (not `processing.py`)? Does `compute_framing_volatility` import `get_embedding` from `llm_client`?
 
 ---
 
@@ -1526,18 +1690,19 @@ from reputation import (
     get_hardened_db_connection,
     init_db,
     handle_outlet_registration,
+    read_outlet_reputation,
     write_outlier_signal,
 )
 from ingestion import discover_articles, build_ingestion_manifest
 from processing import (
     run_entity_normalization,
     run_linguistic_neutralization,
-    compute_framing_volatility,
 )
 from analysis import (
     extract_all_graphs,
     compute_consensus_baseline,
     compute_omission_index,
+    compute_framing_volatility,
     omission_label,
     framing_volatility_label,
     compute_sa_for_outlet,
@@ -1567,16 +1732,15 @@ image_recipe = (
 app = modal.App(name="narrative-alpha-core")
 
 
-# ── Firewall hook: init DB + write default llm_config on cold start ──
+# ── Cold-start init: runs on every container start (all ops are idempotent) ──
 
-DB_INITIALIZED = False
-
-
-def _ensure_initialized():
-    """Idempotent: create SQLite tables and default llm_config on first run."""
-    global DB_INITIALIZED
-    if DB_INITIALIZED:
-        return
+def _run_startup_init():
+    """
+    Run DB init and config load on every cold start.
+    Safe to call repeatedly — init_db uses CREATE TABLE IF NOT EXISTS,
+    load_llm_config skips write if config already exists.
+    No module-level flag needed; the underlying ops are idempotent.
+    """
     db_path = os.path.join(
         os.environ.get("NARRATIVE_ALPHA_ROOT", "/root/.narrative_alpha"),
         "outlet_reputation.db",
@@ -1585,7 +1749,6 @@ def _ensure_initialized():
     init_db(conn)
     conn.close()
     load_llm_config()  # writes default if missing
-    DB_INITIALIZED = True
 
 
 # ── Main endpoint ──
@@ -1604,56 +1767,61 @@ async def execute_forensic_pipeline(payload: dict) -> dict:
     Input:  {"keyword": "Fab 7 manufacturing halt", "vertical": "TECHNOLOGY"}
     Output: Complete Forensic Report JSON (Contract B)
 
-    Execution order (13 steps, see Section 8):
-    1. SERP API → discover articles
-    2. Web Unlocker → fetch article bodies
-    3. Corpus floor gate (min 5 unique source domains)
-    4. Outlet reputation check (UNRATED + spawn back-test if new)
-    5. Call 1: entity normalization → canonical_map
-    6. Call 2: linguistic neutralization per article
-    7. Embed raw + neutralized texts → Vf cosine distances
-    8. Call 3: graph extraction per source
-    9. Python: resolve nodes → Gc → Oi per source
+    Execution order (14 steps, see Section 8):
+    1.  SERP API → discover articles
+    2.  Web Unlocker → fetch article bodies + log all attempts to ingestion_manifest_log
+    3.  Corpus floor gate (min 5 unique source domains)
+    4.  Outlet reputation check (UNRATED + spawn back-test if new); read reputation records
+    5.  Call 1: entity normalization → canonical_map
+    6.  Call 2: linguistic neutralization per article
+    7.  Call 3: graph extraction per source
+    8.  Python: resolve nodes → Gc → Oi per source
+    9.  Vf: embed raw + neutralized texts → cosine distances (Layer 3)
     10. Pre-synthesis: narrative clusters, fractures, term shifts
     11. Call 4: forensic synthesis → Contract B JSON
     12. Python: inject labels via threshold rules
-    13. Write reputation + outlier signals → vol.commit()
+    13. Write outlier signals to SQLite
+    14. vol.commit()
     """
-    _ensure_initialized()
+    _run_startup_init()
 
     keyword = payload.get("keyword", "")
     vertical = payload.get("vertical", "TECHNOLOGY")
     api_key = os.environ.get("BRIGHTDATA_API_KEY", "")
-    serp_zone = os.environ.get("BRIGHTDATA_SERP_ZONE", "")
     unlocker_zone = os.environ.get("BRIGHTDATA_UNLOCKER_ZONE", "")
 
     llm_config = load_llm_config()
 
-    # ── Step 1-2: Ingestion ──
+    db_path = os.path.join(
+        os.environ.get("NARRATIVE_ALPHA_ROOT", "/root/.narrative_alpha"),
+        "outlet_reputation.db",
+    )
+
+    # ── Step 1-2: Ingestion + ingestion log ──
+    # Pass db_conn so build_ingestion_manifest logs all fetch attempts (pass+fail)
+    db_conn = get_hardened_db_connection(db_path)
     serp_data = discover_articles(keyword, api_key)
-    manifest = build_ingestion_manifest(keyword, serp_data, unlocker_zone, api_key)
+    manifest = build_ingestion_manifest(keyword, serp_data, unlocker_zone, api_key, db_conn=db_conn)
 
     # ── Step 3: Corpus floor gate ──
     if "validation_tracking" in manifest:
+        db_conn.close()
         return manifest
 
     documents = manifest["documents"]
     corp_count = manifest["corpus_count"]
 
-    # ── Step 4: Reputation check ──
-    db_path = os.path.join(
-        os.environ.get("NARRATIVE_ALPHA_ROOT", "/root/.narrative_alpha"),
-        "outlet_reputation.db",
-    )
-    db_conn = get_hardened_db_connection(db_path)
+    # ── Step 4: Reputation check + read records for Call 4 bundle ──
+    reputation_records: dict[str, dict] = {}
     for doc in documents:
         status = handle_outlet_registration(
-            doc["source_domain"], vertical, db_conn
+            doc["source_domain"], vertical, db_conn,
+            outlet_name=doc.get("source_name", ""),
         )
+        rep = read_outlet_reputation(doc["source_domain"], vertical, db_conn)
+        reputation_records[doc["source_domain"]] = rep or {"rating_status": "UNRATED"}
         if status == "UNRATED":
-            # TBD: spawn background back-test via modal.Function.spawn()
-            # Requires backtest.py to be a Modal function
-            pass
+            run_historical_backtest.spawn(doc["source_domain"], vertical)
     db_conn.close()
 
     # ── Step 5: Call 1 — Entity normalization ──
@@ -1662,14 +1830,11 @@ async def execute_forensic_pipeline(payload: dict) -> dict:
     # ── Step 6: Call 2 — Linguistic neutralization ──
     neutralized = run_linguistic_neutralization(documents, llm_config)
 
-    # ── Step 7: Framing volatility ──
+    # ── Step 7: Call 3 — Graph extraction ──
     raw_texts = [d["raw_text_content"] for d in documents]
-    vf_scores, vf_labels = compute_framing_volatility(raw_texts, neutralized)
-
-    # ── Step 8: Call 3 — Graph extraction ──
     all_graphs = extract_all_graphs(documents, neutralized, canonical_map, llm_config)
 
-    # ── Step 9: Consensus baseline + Omission index ──
+    # ── Step 8: Consensus baseline + Omission index ──
     consensus_nodes = compute_consensus_baseline(all_graphs, canonical_map)
 
     omission_results = []
@@ -1681,16 +1846,19 @@ async def execute_forensic_pipeline(payload: dict) -> dict:
         oi, missing = compute_omission_index(consensus_nodes, source_nodes, canonical_map)
         omission_results.append((oi, missing, omission_label(oi)))
 
+    # ── Step 9: Vf — Framing volatility (Layer 3, not Layer 2) ──
+    vf_scores, vf_labels = compute_framing_volatility(raw_texts, neutralized)
+
     # ── Step 10: Pre-synthesis context ──
     pre_context = compute_pre_synthesis_context(
         all_graphs, neutralized, raw_texts, canonical_map, consensus_nodes
     )
 
-    # ── Build the Call 4 input bundle ──
-    # TBD: assemble full context_bundle from all computed data
+    # ── Build the Call 4 input bundle (Section 6) ──
     context_bundle = {
         "consensus_nodes": list(consensus_nodes),
         "corpus_count": corp_count,
+        "search_query": keyword,
         "per_source": [
             {
                 "domain": g.get("_source_domain", ""),
@@ -1701,22 +1869,41 @@ async def execute_forensic_pipeline(payload: dict) -> dict:
                 "missing_nodes": omission_results[i][1],
                 "framing_volatility": vf_scores[i] if i < len(vf_scores) else 0.0,
                 "framing_volatility_label": vf_labels[i] if i < len(vf_labels) else "MED",
+                # Neutralized text pairs for linguistic camouflage detection
+                "raw_text": raw_texts[i] if i < len(raw_texts) else "",
+                "neutralized_text": neutralized[i] if i < len(neutralized) else "",
             }
             for i, g in enumerate(all_graphs)
         ],
+        # Reputation records from SQLite — required for reputation_warnings in Call 4
+        "reputation_records": reputation_records,
         "narrative_clusters": pre_context["narrative_clusters"],
         "fracture_candidates": pre_context["fracture_candidates"],
         "term_shifts": pre_context["term_shifts"],
+        "corpus_capped": manifest.get("corpus_capped", False),
     }
 
     # ── Step 11: Call 4 — Forensic synthesis ──
     report = synthesize_forensic_report(context_bundle, llm_config)
 
-    # ── Step 12: Label injection ──
+    # ── Step 12: Label injection + corpus_capped flag ──
     report = inject_labels(report)
+    report.setdefault("event_meta", {})["corpus_capped"] = manifest.get("corpus_capped", False)
 
-    # ── Step 13: Persist + commit ──
-    # TBD: write outlier signals to SQLite, update reputation ledger
+    # ── Step 13: Write outlier signals to SQLite ──
+    db_conn = get_hardened_db_connection(db_path)
+    for signal in report.get("outlier_signals", []):
+        write_outlier_signal(
+            signal_id=signal.get("signal_id", ""),
+            cluster_id=manifest["cluster_id"],
+            origin_domain=signal.get("origin_domain", ""),
+            extracted_claim=signal.get("extracted_claim", ""),
+            timestamp=signal.get("timestamp_first_seen", ""),
+            conn=db_conn,
+        )
+    db_conn.close()
+
+    # ── Step 14: Commit volume ──
     vol.commit()
 
     return report
@@ -1741,7 +1928,7 @@ async def update_llm_config(payload: dict) -> dict:
         call_3_graph_extraction
         call_4_forensic_synthesis
     """
-    _ensure_initialized()
+    _run_startup_init()
 
     required_slots = [
         "call_1_entity_normalization",
@@ -1762,6 +1949,27 @@ async def update_llm_config(payload: dict) -> dict:
     vol.commit()
 
     return {"status": "ok", "config": payload}
+
+
+# ── Background back-test Modal function (Section 7) ──
+# Decorated here in app.py so .spawn() works — implementation is in backtest.py.
+# Task 12 implements execute_historical_backtest in backtest.py.
+
+@app.function(
+    image=image_recipe,
+    volumes={"/root/.narrative_alpha": vol},
+    secrets=[modal.Secret.from_dotenv(".env.production")],
+    timeout=600,
+)
+def run_historical_backtest(domain: str, vertical: str) -> None:
+    """
+    Non-blocking background task. Runs after main pipeline returns.
+    Imports execute_historical_backtest from backtest.py.
+    On completion: writes reputation metrics to SQLite and commits volume.
+    """
+    from backtest import execute_historical_backtest
+    execute_historical_backtest(domain, vertical)
+    vol.commit()
 ```
 
 - [ ] **Step 2: Verify imports**
@@ -1773,10 +1981,10 @@ Expected: structural OK (Modal decorators only load inside Modal container)
 
 ```bash
 git add app.py
-git commit -m "feat: add Modal orchestration — pipeline endpoint + LLM config settings endpoint"
+git commit -m "feat: add Modal orchestration — pipeline endpoint + LLM config settings endpoint + backtest spawn"
 ```
 
-**Sanity check:** Does `execute_forensic_pipeline` follow the 13-step sequence from Section 8? Does the corpus floor gate return before any LLM calls? Does `update_llm_config` validate all 4 required slots?
+**Sanity check:** Does `execute_forensic_pipeline` follow the 14-step sequence? Does the corpus floor gate return before any LLM calls? Does `update_llm_config` validate all 4 required slots? Does `reputation_records` appear in `context_bundle`? Is `compute_framing_volatility` called from analysis (step 9), not processing? Does `run_historical_backtest` have `@app.function` decorator? Does step 4 call `.spawn()` (not pass)?
 
 ---
 
@@ -1821,7 +2029,7 @@ git commit -m "feat: add static dashboard — 3-zone forensic report + settings 
 
 - [ ] **Step 1: Trace `execute_forensic_pipeline` flow against Section 8 ordered list**
 
-Verify each of the 13 steps has a corresponding code block.
+Verify each of the 14 steps has a corresponding code block.
 
 - [ ] **Step 2: Verify Contract A → Layer 2 input**
 
@@ -1920,14 +2128,37 @@ git commit -m "feat: implement full historical back-test worker with Modal spawn
 ## Execution Notes
 
 - **Each task = one commit stop.** Run the sanity check before committing.
-- **Tasks 9, 11, 12 contain TBD sections.** The Python core (Tasks 1-8, 10) is fully detailed. Frontend and back-test can be fleshed out after the pipeline works end-to-end.
+- **Tasks 9 and 12 contain TBD sections.** The Python core (Tasks 1-8, 10, 11) is fully detailed. Frontend and full back-test implementation can be fleshed out after the pipeline works end-to-end.
 - **Tests:** Each task's Sanity Check serves as the minimum verification. Full test suite (pytest with mocked Bright Data and LLM calls) is deferred to a follow-up plan — the current priority is a working pipeline for the hackathon demo.
-- **Hackathon deadline:** Event ends May 31. Tasks 1-8 (Python core) + 10 (integration) are the critical path. Frontend (Task 9) can use the existing `docs/preview-01.html` as a starting point. Back-test (Task 12) is Phase 2 infrastructure and can ship after the demo.
+- **Hackathon deadline:** Event ends May 31. **Critical path: Tasks 1-8, 10, 11.** Task 11 (`compute_pre_synthesis_context`) must be on the critical path — without it, all three v1.4 forensic output objects (`reality_divergence_zones`, `reality_fractures`, `narrative_regime_shifts`) will be empty arrays in the demo. Frontend (Task 9) can use the existing `docs/preview-01.html` as a starting point. Back-test Task 12 is Phase 2 infrastructure.
+- **Call 2 + Call 3 serial timeout risk:** Call 2 (linguistic neutralization) runs N sequential flash-tier calls — fast (~1–2s each) but cumulative. Call 3 (graph extraction) runs N thinking-mode calls at ~10–30s each. 20 articles × 20s = 400s for Call 3 alone, barely under Modal's 600s timeout. If demo runs slow, switch both `run_linguistic_neutralization` and `extract_all_graphs` to use `asyncio.gather` — articles are fully independent in both passes. The 20-doc hard cap (Task 3) limits worst-case exposure.
 
 ## Self-Review Checklist
 
 - [ ] Spec coverage: Section 14 validation gates → Task 3, Section 7 reputation → Task 4, Section 6 LLM sequence → Tasks 5+6, Section 5 metrics → Task 6, Section 11 frontend → Task 9, Section 9 settings → Task 8
-- [ ] No TBD placeholders in Tasks 1-8, 10 (core Python path)
-- [ ] Type consistency: `Contracts.py` model field names match dict keys used in `analysis.py`, `processing.py`, `app.py`
+- [ ] No TBD placeholders in Tasks 1-8, 10, 11 (critical path)
+- [ ] Type consistency: `contracts.py` model field names match dict keys used in `analysis.py`, `processing.py`, `app.py`
 - [ ] `compute_omission_index` in `analysis.py` uses `resolve_to_canonical` from same module
 - [ ] `inject_labels` covers `omission_label`, `framing_volatility_label`, `scatter_shot_label`, `consensus_stability`, `synchronization_label`
+- [ ] `compute_framing_volatility` is in `analysis.py`, NOT `processing.py` (layer decoupling — Issue #1 fix)
+- [ ] `validate_ingestion_payload` return dict includes `passed_validation: 1` (Issue #4 fix)
+- [ ] `build_ingestion_manifest` accepts `db_conn`, calls `write_ingestion_log`, applies 20-doc cap (Issues #3, #13 fix)
+- [ ] `handle_outlet_registration` stores `outlet_name` (Issue #15 fix)
+- [ ] `context_bundle` in `app.py` includes `reputation_records` dict (Issue #9 fix)
+- [ ] `run_historical_backtest` has `@app.function` decorator in `app.py`; step 4 calls `.spawn()` (Issue #10 fix)
+- [ ] Task 11 (`compute_pre_synthesis_context`) is on critical path — v1.4 forensic objects empty without it (Issue #7 fix)
+- [ ] SERP payload uses `"engine": "google"`, `"tbm": "nws"`, `"q"` — confirmed present in plan (Issue #5 was false positive)
+- [ ] `serp_data` raw response passed to both `build_ingestion_manifest` and `run_entity_normalization` — same object (Issue #8 confirmed correct)
+- [ ] `compute_pre_synthesis_context` stub raises `NotImplementedError` — fails loud before demo rather than returning hollow report (v2 Issue #1 fix)
+- [ ] `FORENSIC_SYNTHESIS_SYSTEM_PROMPT` contains explicit Contract B JSON schema skeleton — Call 4 not flying blind on output shape (v2 Issue #2 fix)
+- [ ] `_run_startup_init()` replaces `DB_INITIALIZED` flag — runs every cold start, no false cache (v2 Issue #3 fix)
+- [ ] `EventMeta` has `corpus_capped: bool = False`; app.py injects `manifest.get("corpus_capped")` into `report["event_meta"]` after Call 4 (v2 Issue #5 fix)
+- [ ] `compute_consensus_baseline` computes `n` from non-error graphs only — threshold not skewed by parse failures (v2 Issue #6 fix)
+- [ ] Execution Notes call out both Call 2 and Call 3 serial timeout risk (v2 Issue #7 fix)
+- [ ] `write_ingestion_log` uses `INSERT OR REPLACE` — both fetch attempts for same URL visible in debug log (v2 Issue #8 fix)
+- [ ] Task 10 Step 1 says "14 steps" not "13 steps" (v2 Issue #9 fix)
+- [ ] File map `processing.py` row no longer lists "embedding generation, Vf computation" (v2 Issue #10 fix)
+- [ ] `_write_with_retry` exists in `reputation.py`; `handle_outlet_registration` and `write_outlier_signal` use it (concurrent backtest write safety)
+- [ ] `extract_assistant_message()` exists in `llm_client.py`; checks for `reasoning_content` via `getattr` and includes it when present; `call_llm` docstring warns against manual dict reconstruction for multi-turn
+- [ ] `MIN_BODY_CHARS = 200` constant defined in `ingestion.py`; early exit after `extract_text` logs extraction-failed docs to `all_attempted` with `passed_validation: 0` before `validate_ingestion_payload` is called
+- [ ] `inject_labels` sets `fracture.setdefault("classification_method", "LLM_ASSISTED")` on all `reality_fractures` — field present in Pydantic model but absent from raw Call 4 dict without explicit injection
