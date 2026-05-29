@@ -48,7 +48,7 @@
 """Data contracts for Narrative Alpha — typed Pydantic models for all layers."""
 
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List, Optional, Literal
 
 
 # ── Contract A: Ingestion Manifest (Layer 1 → Layer 2) ──
@@ -60,6 +60,7 @@ class IngestionDocument(BaseModel):
     source_url: str
     title: str
     scrape_timestamp: str
+    published_at: Optional[str] = None
     author: str = "Staff"
     raw_text_content: str
 
@@ -69,7 +70,8 @@ class IngestionManifest(BaseModel):
     trigger_type: str
     search_query: str
     timestamp_utc: str
-    corpus_count: int
+    corpus_count: int = Field(ge=0)
+    corpus_capped: bool = False
     documents: List[IngestionDocument]
 
 
@@ -222,8 +224,15 @@ class PipelineInput(BaseModel):
     vertical: str  # "TECHNOLOGY" | "FINANCE" | ...
 
 
+class FloorGateTracking(BaseModel):
+    current_state: Literal["INSUFFICIENT_CORPUS_FLOOR"]
+    minimum_required: int
+    current_count: int
+
+
 class FloorGateResponse(BaseModel):
-    validation_tracking: dict  # { current_state, minimum_required, current_count }
+    status: Literal["INSUFFICIENT_CORPUS_FLOOR"]
+    validation_tracking: FloorGateTracking
 ```
 
 - [ ] **Step 2: Verify contracts import cleanly**
@@ -454,15 +463,13 @@ git commit -m "feat: add LLM client factory with runtime config and multi-provid
 ```python
 """Layer 1: Ingestion — Bright Data SERP discovery + Web Unlocker extraction."""
 
-import uuid
-import time
+import re
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Callable, Optional
+from urllib.parse import urlparse
 
 import requests
 import trafilatura
-
-from contracts import IngestionDocument
 
 
 SERP_ENDPOINT = "https://api.brightdata.com/serp/req"
@@ -525,6 +532,54 @@ def extract_text(html: str) -> str:
     """Strip HTML boilerplate via trafilatura. Returns clean text or ''."""
     text = trafilatura.extract(html)
     return (text or "").strip()
+
+
+# ── 2B. SERP Result Parser ──
+
+def parse_serp_result(result: dict) -> dict:
+    """
+    Extract and normalize fields from a single Bright Data SERP organic result.
+
+    Centralizes .get() fallback chains, domain normalization, and published_at
+    extraction so field-name volatility under parsed_light=true is contained here
+    rather than scattered across the discovery loop.
+    """
+    from urllib.parse import urlparse
+
+    url = result.get("link", "")
+    title = result.get("title", "").strip()
+    snippet = result.get("snippet", "").strip()
+    published_at = result.get("published_at") or None
+
+    source_name = result.get("source", "") or ""
+    display_link = result.get("display_link", "") or ""
+
+    # Domain always from display_link or url — never from source (human-readable name)
+    domain = ""
+    domain_source = display_link if display_link else url
+    if domain_source:
+        try:
+            parsed = urlparse(domain_source if "://" in domain_source else f"https://{domain_source}")
+            domain = parsed.netloc.lower()
+            if domain.startswith("www."):
+                domain = domain[4:]
+        except Exception:
+            pass
+
+    # Source name: prefer explicit source field; fall back to domain-derived name
+    if not source_name:
+        if domain:
+            name_part = domain.rsplit(".", 1)[0]
+            source_name = name_part.replace("-", " ").replace(".", " ").title()
+
+    return {
+        "url": url,
+        "title": title,
+        "source_name": source_name,
+        "domain": domain,
+        "published_at": published_at,
+        "snippet": snippet,
+    }
 
 
 # ── 3. Validation Gates ──
@@ -602,21 +657,22 @@ def build_ingestion_manifest(
     zone: str,
     api_key: str,
     db_conn=None,
+    logger_func: Optional[Callable] = None,
 ) -> dict:
     """
     Full Layer 1 pipeline: SERP results → Web Unlocker fetch → validate → manifest.
 
     Args:
-        db_conn: optional SQLite connection — if provided, logs ALL scrape attempts
-                 (pass and fail) to ingestion_manifest_log (Section 14.3, Issue #3 fix).
+        db_conn: optional SQLite connection — if provided AND logger_func is set,
+                 logs ALL scrape attempts (pass and fail) to ingestion_manifest_log.
+        logger_func: optional callable matching write_ingestion_log's signature.
+                     Passed downstream to avoid a hard import dependency on
+                     reputation.py (Task 4). The orchestrator wires this.
 
     Returns one of:
         - A valid IngestionManifest dict (corpus_count >= 5)
         - A FloorGateResponse dict (corpus_count < 5)
     """
-    from reputation import write_ingestion_log
-    from urllib.parse import urlparse
-
     now_utc = datetime.now(timezone.utc).isoformat()
     cluster_id = f"EVT-{datetime.now(timezone.utc).strftime('%Y%m%d')}-{keyword[:20].upper().replace(' ', '-')}"
 
@@ -625,9 +681,12 @@ def build_ingestion_manifest(
     all_attempted: list[dict] = []   # every fetch attempt — for ingestion log
 
     for idx, result in enumerate(organic):
-        url = result.get("link", "")
-        title = result.get("title", "")
-        source_name = result.get("source", "") or result.get("display_link", "")
+        parsed = parse_serp_result(result)
+        url = parsed["url"]
+        title = parsed["title"]
+        source_name = parsed["source_name"]
+        domain = parsed["domain"]
+        published_at = parsed["published_at"]
 
         if not url:
             continue
@@ -644,8 +703,9 @@ def build_ingestion_manifest(
                 "doc_id": f"DOC-{idx:03d}",
                 "source_name": source_name,
                 "source_url": url,
-                "source_domain": "",
+                "source_domain": domain,
                 "title": title,
+                "published_at": published_at,
                 "scrape_timestamp": now_utc,
                 "raw_text_content": "",
                 "fetch_status": fetch_status,
@@ -658,18 +718,13 @@ def build_ingestion_manifest(
         # Log immediately as failed rather than letting validate_ingestion_payload
         # reject it silently with no distinguishable reason in the ingestion log.
         if len(raw_text) < MIN_BODY_CHARS:
-            try:
-                domain = urlparse(url).netloc.lower()
-                if domain.startswith("www."):
-                    domain = domain[4:]
-            except Exception:
-                domain = ""
             all_attempted.append({
                 "doc_id": f"DOC-{idx:03d}",
                 "source_name": source_name,
                 "source_url": url,
                 "source_domain": domain,
                 "title": title,
+                "published_at": published_at,
                 "scrape_timestamp": now_utc,
                 "raw_text_content": raw_text,
                 "fetch_status": fetch_status,
@@ -683,6 +738,7 @@ def build_ingestion_manifest(
             "source_name": source_name,
             "source_url": url,
             "title": title,
+            "published_at": published_at,
             "scrape_timestamp": now_utc,
             "raw_text_content": raw_text,
             "fetch_status": fetch_status,
@@ -691,35 +747,33 @@ def build_ingestion_manifest(
         validated = validate_ingestion_payload(doc)
         if validated:
             validated["fetch_status"] = fetch_status
+            validated["published_at"] = published_at
             validated_docs.append(validated)
             all_attempted.append(validated)
         else:
-            try:
-                domain = urlparse(url).netloc.lower()
-                if domain.startswith("www."):
-                    domain = domain[4:]
-            except Exception:
-                domain = ""
             all_attempted.append({
                 "doc_id": f"DOC-{idx:03d}",
                 "source_name": source_name,
                 "source_url": url,
                 "source_domain": domain,
                 "title": title,
+                "published_at": published_at,
                 "scrape_timestamp": now_utc,
                 "raw_text_content": raw_text,
                 "fetch_status": fetch_status,
                 "passed_validation": 0,
             })
 
-    # Deduplicate by unique source_domain
+    # Deduplicate by unique source_domain, stripping internal tracking fields
     seen_domains: set[str] = set()
     unique_docs = []
     for doc in validated_docs:
         domain = doc.get("source_domain", "")
         if domain not in seen_domains:
             seen_domains.add(domain)
-            unique_docs.append(doc)
+            clean = {k: v for k, v in doc.items()
+                     if k not in ("passed_validation", "fetch_status")}
+            unique_docs.append(clean)
 
     # Hard cap at 20 documents — prevents context saturation + Modal timeout (Section 10)
     corpus_capped = False
@@ -727,19 +781,20 @@ def build_ingestion_manifest(
         unique_docs = unique_docs[:20]
         corpus_capped = True
 
-    # Log all attempted docs (pass and fail) if db_conn provided (Section 14.3)
-    if db_conn is not None:
-        write_ingestion_log(cluster_id, keyword, now_utc, all_attempted, db_conn)
+    # Log all attempted docs (pass and fail) if logger is wired (Section 14.3)
+    if db_conn is not None and logger_func is not None:
+        logger_func(cluster_id, keyword, now_utc, all_attempted, db_conn)
 
     corpus_count = len(unique_docs)
 
     if corpus_count < 5:
         return {
+            "status": "INSUFFICIENT_CORPUS_FLOOR",
             "validation_tracking": {
                 "current_state": "INSUFFICIENT_CORPUS_FLOOR",
                 "minimum_required": 5,
                 "current_count": corpus_count,
-            }
+            },
         }
 
     manifest = {
@@ -767,7 +822,7 @@ git add ingestion.py
 git commit -m "feat: add Layer 1 ingestion — SERP discovery, Web Unlocker extraction, validation gates"
 ```
 
-**Sanity check:** Does `build_ingestion_manifest` return `FloorGateResponse` shape when corpus < 5? Does it return `IngestionManifest` shape when corpus >= 5? Are extracted domains normalized (no www prefix, lowercased)? Does `passed_validation: 1` appear in the return dict of `validate_ingestion_payload`? Does the 20-doc hard cap apply before the floor gate check? Does `corpus_capped: True` appear in the manifest when cap fires? Does `write_ingestion_log` get called when `db_conn` is provided?
+**Sanity check:** Does `build_ingestion_manifest` accept `logger_func` as an optional keyword? Does it only call `logger_func` when BOTH `db_conn` and `logger_func` are provided? Does it return `FloorGateResponse` shape when corpus < 5? Does it return `IngestionManifest` shape when corpus >= 5? Does `parse_serp_result` normalize domains (no www prefix, lowercased) and derive clean source names? Does `published_at` appear in every `all_attempted` entry and in validated docs? Does `passed_validation: 1` appear in the return dict of `validate_ingestion_payload`? Does the 20-doc hard cap apply before the floor gate check? Does `corpus_capped: True` appear in the manifest when cap fires?
 
 ---
 
@@ -968,8 +1023,8 @@ def write_ingestion_log(
         conn.execute(
             "INSERT OR REPLACE INTO ingestion_manifest_log "
             "(query_id, topic, discovery_timestamp, source_domain, canonical_url, "
-            "title, fetch_status, body_text, body_length, passed_validation) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "title, published_at, fetch_status, body_text, body_length, passed_validation) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 query_id,
                 topic,
@@ -977,6 +1032,7 @@ def write_ingestion_log(
                 doc.get("source_domain", ""),
                 doc.get("source_url", ""),
                 doc.get("title", ""),
+                doc.get("published_at"),
                 doc.get("fetch_status"),
                 doc.get("raw_text_content", ""),
                 doc.get("body_length", len(doc.get("raw_text_content", ""))),
@@ -1022,6 +1078,8 @@ git commit -m "feat: add SQLite reputation ledger — outlet registration, outli
 **File:** Create `processing.py`
 
 **What:** Sections 6 (Call 1, Call 2) and 14.2C (search context). Two LLM calls: entity normalization and linguistic neutralization. Vf (framing volatility) computation lives in Layer 3 (`analysis.py`) per spec Section 2 decoupling rule: "Layer 2 contains zero analysis logic."
+
+**Contract note:** `IngestionDocument` includes optional `published_at` field from Layer 1. If Layer 2 does date-based filtering or temporal decay, field is available and populated. If unused, it passes through silently to Layer 3 via the manifest documents — no stripping needed.
 
 - [ ] **Step 1: Write `processing.py` — search context helper**
 

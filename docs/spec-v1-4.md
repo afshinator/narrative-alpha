@@ -1,8 +1,12 @@
 # NARRATIVE ALPHA — FORENSIC TRACKER
-## Implementation Specification v1.2
+## Implementation Specification v1.5
 **Hackathon:** Bright Data Web Data UNLOCKED | May 25–30, 2026  
 **Track:** Finance & Market Intelligence  
-**Status:** Authoritative. Supersedes v1.1 and all prior brainstorm documents.
+**Status:** Authoritative. Supersedes v1.4 and all prior versions.
+
+**v1.5 Changes (specification drift correction):**
+- Section 3: Corpus floor gate JSON example corrected — added missing top-level `status` field matching `FloorGateResponse` Pydantic model
+- Section 4 (Contract A): `IngestionDocument` updated with optional `published_at` field; `IngestionManifest` updated with optional `corpus_capped` flag. Pydantic models in `contracts.py` are the runtime source of truth — spec examples are descriptive, not exhaustive
 
 **v1.1 Changes:**
 - Section 5.1: $O_i$ node matching now routes through Call 1 canonical dictionary before set subtraction
@@ -154,6 +158,7 @@ POST https://api.brightdata.com/serp/req
 If fewer than **5 unique source domains** are successfully retrieved after deduplication, the pipeline halts and returns:
 ```json
 {
+  "status": "INSUFFICIENT_CORPUS_FLOOR",
   "validation_tracking": {
     "current_state": "INSUFFICIENT_CORPUS_FLOOR",
     "minimum_required": 5,
@@ -175,6 +180,7 @@ No LLM calls are made. No credits are consumed.
   "search_query": "Fab 7 manufacturing halt",
   "timestamp_utc": "2026-05-28T12:00:00Z",
   "corpus_count": 7,
+  "corpus_capped": false,
   "documents": [
     {
       "doc_id": "DOC-001",
@@ -183,6 +189,7 @@ No LLM calls are made. No credits are consumed.
       "source_url": "https://globalwire.com/fab7-status",
       "title": "Fab 7 Production Line Halted Following Power Anomaly",
       "scrape_timestamp": "2026-05-28T12:05:00Z",
+      "published_at": "2026-05-28T10:00:00Z",
       "raw_text_content": "..."
     }
   ]

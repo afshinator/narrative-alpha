@@ -1,6 +1,8 @@
 """Data contracts for Narrative Alpha — typed Pydantic models for all layers."""
 
-from typing import Dict, List, Literal
+__version__ = "1.4.1"
+
+from typing import Dict, List, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -21,6 +23,7 @@ class IngestionDocument(_Strict):
     source_url: str
     title: str
     scrape_timestamp: str
+    published_at: Optional[str] = None
     author: str = "Staff"
     raw_text_content: str
 
@@ -31,6 +34,7 @@ class IngestionManifest(_Strict):
     search_query: str
     timestamp_utc: str
     corpus_count: int = Field(ge=0)
+    corpus_capped: bool = False
     documents: List[IngestionDocument]
 
     @model_validator(mode="after")

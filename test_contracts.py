@@ -373,3 +373,78 @@ def test_floor_gate_rejects_arbitrary_dict():
     import pytest
     with pytest.raises(Exception):
         FloorGateResponse(validation_tracking={"anything": "goes"})
+
+
+# ── Round-trip: ingestion manifest through Pydantic ──
+
+def test_ingestion_manifest_round_trip():
+    """Full IngestionManifest dict, including corpus_capped and published_at,
+    must validate through the Pydantic model without error."""
+    from contracts import IngestionManifest
+    manifest = IngestionManifest(
+        cluster_id="EVT-20260529-TEST-QUERY",
+        trigger_type="KEYWORD",
+        search_query="test query",
+        timestamp_utc="2026-05-29T12:00:00Z",
+        corpus_count=20,
+        corpus_capped=True,
+        documents=[
+            {
+                "doc_id": f"DOC-{i:03d}",
+                "source_name": "Source",
+                "source_domain": f"src{i}.com",
+                "source_url": f"https://src{i}.com/a",
+                "title": f"Article {i}",
+                "scrape_timestamp": "2026-05-29T12:00:00Z",
+                "published_at": "2026-05-29T10:00:00Z",
+                "raw_text_content": f"Body text for article {i}.",
+            }
+            for i in range(20)
+        ],
+    )
+    assert manifest.corpus_count == 20
+    assert manifest.corpus_capped is True
+    assert len(manifest.documents) == 20
+    assert manifest.documents[0].published_at == "2026-05-29T10:00:00Z"
+    assert manifest.documents[3].doc_id == "DOC-003"
+
+
+def test_ingestion_manifest_round_trip_uncapped():
+    """Without corpus_capped, defaults to False."""
+    from contracts import IngestionManifest
+    manifest = IngestionManifest(
+        cluster_id="EVT-20260529-TEST-QUERY",
+        trigger_type="KEYWORD",
+        search_query="test",
+        timestamp_utc="2026-05-29T12:00:00Z",
+        corpus_count=5,
+        documents=[
+            {
+                "doc_id": f"DOC-{i:03d}",
+                "source_name": "S",
+                "source_domain": f"s{i}.com",
+                "source_url": f"https://s{i}.com/a",
+                "title": "A",
+                "scrape_timestamp": "now",
+                "raw_text_content": "Body.",
+            }
+            for i in range(5)
+        ],
+    )
+    assert manifest.corpus_capped is False
+
+
+def test_floor_gate_response_round_trip():
+    """FloorGateResponse must validate with status + nested tracking."""
+    from contracts import FloorGateResponse
+    fgr = FloorGateResponse(
+        status="INSUFFICIENT_CORPUS_FLOOR",
+        validation_tracking={
+            "current_state": "INSUFFICIENT_CORPUS_FLOOR",
+            "minimum_required": 5,
+            "current_count": 3,
+        },
+    )
+    assert fgr.status == "INSUFFICIENT_CORPUS_FLOOR"
+    assert fgr.validation_tracking.current_count == 3
+    assert fgr.validation_tracking.minimum_required == 5
