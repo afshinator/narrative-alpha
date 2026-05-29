@@ -37,9 +37,10 @@
 **Files:**
 - Create: `contracts.py`
 - Create: `.env.example` (verify existing, update if needed)
-- Create: `llm_config.json` (default, embedded)
 
 **What:** All JSON schemas from Sections 4, 5, 9.2 typed as Pydantic models. This is the single source of truth for data shapes across all layers.
+
+**Note:** `llm_config.json` is NOT created as a static file. The defaults are defined as a Pydantic `LLMConfig` model in `llm_client.py` and auto-written to the Modal Volume on first cold start. This ensures validation at import time — a static JSON file cannot be validated until runtime.
 
 - [ ] **Step 1: Write `contracts.py` with Contract A models**
 
