@@ -932,7 +932,7 @@ def init_db(conn: sqlite3.Connection) -> None:
             body_text TEXT NOT NULL,
             body_length INTEGER NOT NULL,
             passed_validation INTEGER NOT NULL DEFAULT 0,
-            PRIMARY KEY (canonical_url)
+            PRIMARY KEY (canonical_url, query_id)
         );
     """)
     conn.commit()
