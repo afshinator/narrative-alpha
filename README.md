@@ -16,6 +16,17 @@ Narrative Alpha ingests news articles about a target event from multiple outlets
 
 **This is not a fact-checker or misinformation detector.** It maps narrative topology — what the institutional press agrees on, who omitted what, and who spun it.
 
+| What This Is NOT | | What This Tries To Be |
+|---|---|---|
+| Generic "AI research assistant" | | **Opinionated** — makes explicit calls about omission, spin, and outlier provenance |
+| Scraping + summarization | | **Metricized** — every output is a scored, measurable claim, not prose summary |
+| RAG over web data | | **Forensic rather than assistive** — interrogates sources instead of answering user questions |
+| Autonomous browsing agents | | **Structurally decomposed** — graph extraction and set math, not agentic tool-calling loops |
+| Market-news summarizers | | Measures epistemic distortion across sources rather than retrieving relevant content |
+| Sentiment dashboards | | |
+| Lead generation / SEO automation | | |
+| Generic "multi-agent" wrappers | | |
+
 ## How It Works
 
 ```
