@@ -8,7 +8,7 @@ from typing import Optional
 
 from openai import OpenAI
 
-from contracts import LLMConfig, LLMSlotConfig
+from narrative.contracts import LLMConfig, LLMSlotConfig
 
 
 # ── Provider resolution maps ──

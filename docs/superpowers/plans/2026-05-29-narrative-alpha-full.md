@@ -13,15 +13,15 @@
 ## File Map
 
 | File | Layer | Responsibility |
-|---|---|---|
-| `contracts.py` | Shared | Pydantic models for all data contracts (Contract A, Contract B, LLM config) |
-| `llm_client.py` | Shared | Runtime LLM config loader, provider client factory, `call_llm()` |
-| `ingestion.py` | Layer 1 | SERP discovery, Web Unlocker extraction, `validate_ingestion_payload()`, manifest assembly, corpus floor gate |
-| `processing.py` | Layer 2 | `build_search_context_table()`, entity normalization (Call 1), linguistic neutralization (Call 2) |
-| `analysis.py` | Layer 3 | Graph extraction (Call 3), Python set-math (Gc, Oi, Sa), `compute_pre_synthesis_context()`, forensic synthesis (Call 4), label injection |
-| `reputation.py` | Persistence | SQLite schema, `get_hardened_db_connection()`, `handle_outlet_registration()`, read/write reputation, ingestion log |
-| `backtest.py` | Persistence | Background `.spawn()` worker for historical reputation back-test |
-| `app.py` | Orchestration | Modal endpoints: `execute_forensic_pipeline()`, `update_llm_config()` |
+|---|---|---|---|
+| `narrative/contracts.py` | Shared | Pydantic models for all data contracts (Contract A, Contract B, LLM config) |
+| `narrative/llm_client.py` | Shared | Runtime LLM config loader, provider client factory, `call_llm()` |
+| `narrative/ingestion.py` | Layer 1 | SERP discovery, Web Unlocker extraction, `validate_ingestion_payload()`, manifest assembly, corpus floor gate |
+| `narrative/processing.py` | Layer 2 | `build_search_context_table()`, entity normalization (Call 1), linguistic neutralization (Call 2) |
+| `narrative/analysis.py` | Layer 3 | Graph extraction (Call 3), Python set-math (Gc, Oi, Sa), `compute_pre_synthesis_context()`, forensic synthesis (Call 4), label injection |
+| `narrative/reputation.py` | Persistence | SQLite schema, `get_hardened_db_connection()`, `handle_outlet_registration()`, read/write reputation, ingestion log |
+| `narrative/backtest.py` | Persistence | Background `.spawn()` worker for historical reputation back-test |
+| `narrative/app.py` | Orchestration | Modal endpoints: `execute_forensic_pipeline()`, `update_llm_config()` |
 | `dashboard/index.html` | Layer 4 | Index page — list of processed clusters |
 | `dashboard/event.html` | Layer 4 | Per-cluster forensic report (3 zones + sub-panels) |
 | `dashboard/settings.html` | Layer 4 | Runtime LLM provider/model settings UI |
@@ -35,14 +35,14 @@
 ### Task 1: Project Scaffolding & Pydantic Data Contracts
 
 **Files:**
-- Create: `contracts.py`
+- Create: `narrative/contracts.py`
 - Create: `.env.example` (verify existing, update if needed)
 
 **What:** All JSON schemas from Sections 4, 5, 9.2 typed as Pydantic models. This is the single source of truth for data shapes across all layers.
 
-**Note:** `llm_config.json` is NOT created as a static file. The defaults are defined as a Pydantic `LLMConfig` model in `llm_client.py` and auto-written to the Modal Volume on first cold start. This ensures validation at import time — a static JSON file cannot be validated until runtime.
+**Note:** `llm_config.json` is NOT created as a static file. The defaults are defined as a Pydantic `LLMConfig` model in `narrative/llm_client.py` and auto-written to the Modal Volume on first cold start. This ensures validation at import time — a static JSON file cannot be validated until runtime.
 
-- [ ] **Step 1: Write `contracts.py` with Contract A models**
+- [ ] **Step 1: Write `narrative/contracts.py` with Contract A models**
 
 ```python
 """Data contracts for Narrative Alpha — typed Pydantic models for all layers."""
@@ -253,7 +253,7 @@ git commit -m "feat: add Pydantic data contracts for all pipeline layers"
 
 ### Task 2: LLM Client Factory
 
-**File:** Create `llm_client.py`
+**File:** Create `narrative/llm_client.py`
 
 **What:** Section 9.3 — Provider-agnostic LLM client. Loads runtime config from Modal Volume, resolves base URLs and API keys, executes calls with JSON mode + optional thinking. Single function `call_llm()` used by all 4 call slots.
 
@@ -266,7 +266,7 @@ git commit -m "feat: add Pydantic data contracts for all pipeline layers"
 | H3 | `content is None` guard before `json.loads` | Prevents `TypeError` from `json.loads(None)` — explicit `RuntimeError` instead |
 | H4 | Narrow exception handling: re-raise `BaseException` subclasses | Prevents swallowing `KeyboardInterrupt`, `asyncio.CancelledError`, `SystemExit` |
 
-- [ ] **Step 1: Write `llm_client.py`**
+- [ ] **Step 1: Write `narrative/llm_client.py`**
 
 ```python
 """Runtime LLM provider configuration and client factory."""
@@ -450,7 +450,7 @@ git commit -m "feat: add LLM client factory with runtime config and multi-provid
 
 ### Task 3: Ingestion Layer — Discovery, Extraction, Validation
 
-**File:** Create `ingestion.py`
+**File:** Create `narrative/ingestion.py`
 
 **What:** Full Layer 1 (Sections 3 and 14). Four sub-systems:
 1. SERP API discovery (`discover_articles`)
@@ -458,7 +458,7 @@ git commit -m "feat: add LLM client factory with runtime config and multi-provid
 3. Validation gates (`validate_ingestion_payload` — exact code from Section 14.1)
 4. Manifest assembly + corpus floor gate (`build_ingestion_manifest`)
 
-- [ ] **Step 1: Write `ingestion.py` — discovery and extraction**
+- [ ] **Step 1: Write `narrative/ingestion.py` — discovery and extraction**
 
 ```python
 """Layer 1: Ingestion — Bright Data SERP discovery + Web Unlocker extraction."""
@@ -828,11 +828,11 @@ git commit -m "feat: add Layer 1 ingestion — SERP discovery, Web Unlocker extr
 
 ### Task 4: Reputation Persistence Layer
 
-**File:** Create `reputation.py`
+**File:** Create `narrative/reputation.py`
 
 **What:** Section 7 — SQLite on Modal Volume. Schema creation, hardened connection, outlet registration with cold-start UNRATED pattern. Also Section 14.3 — ingestion manifest log table.
 
-- [ ] **Step 1: Write `reputation.py`**
+- [ ] **Step 1: Write `narrative/reputation.py`**
 
 ```python
 """Layer: Persistence — SQLite reputation ledger on Modal Volume."""
@@ -1075,13 +1075,13 @@ git commit -m "feat: add SQLite reputation ledger — outlet registration, outli
 
 ### Task 5: Processing Layer — Calls 1, 2 + Embeddings
 
-**File:** Create `processing.py`
+**File:** Create `narrative/processing.py`
 
-**What:** Sections 6 (Call 1, Call 2) and 14.2C (search context). Two LLM calls: entity normalization and linguistic neutralization. Vf (framing volatility) computation lives in Layer 3 (`analysis.py`) per spec Section 2 decoupling rule: "Layer 2 contains zero analysis logic."
+**What:** Sections 6 (Call 1, Call 2) and 14.2C (search context). Two LLM calls: entity normalization and linguistic neutralization. Vf (framing volatility) computation lives in Layer 3 (`narrative/analysis.py`) per spec Section 2 decoupling rule: "Layer 2 contains zero analysis logic."
 
 **Contract note:** `IngestionDocument` includes optional `published_at` field from Layer 1. If Layer 2 does date-based filtering or temporal decay, field is available and populated. If unused, it passes through silently to Layer 3 via the manifest documents — no stripping needed.
 
-- [ ] **Step 1: Write `processing.py` — search context helper**
+- [ ] **Step 1: Write `narrative/processing.py` — search context helper**
 
 ```python
 """Layer 2: Processing — entity normalization and linguistic neutralization only.
@@ -1122,9 +1122,16 @@ def build_search_context_table(serp_data: dict) -> str:
     return "\n".join(lines)
 ```
 
-- [ ] **Step 2: Write `processing.py` — Call 1 + Call 2 + Vf**
+- [ ] **Step 2: Write `narrative/processing.py` — Call 1 + Call 2 + Vf**
 
 ```python
+# ── Constants ──
+
+# Max characters per article fed to Call 1 entity normalization.
+# DeepSeek V4-Flash 128K context easily handles 15 × 6K + overhead.
+ARTICLE_CHAR_LIMIT = 6000
+
+
 # ── Call 1: Entity Normalization (Fast LLM, non-thinking) ──
 
 ENTITY_NORMALIZATION_SYSTEM_PROMPT = (
@@ -1144,18 +1151,20 @@ def run_entity_normalization(
     Resolve naming variants across articles to canonical identities.
 
     Returns: canonical_map = {lowercased_surface_form: canonical_reference_identity}
+    Returns empty dict if LLM returns unparseable JSON — pipeline continues degraded.
 
     Uses search context table from SERP data to seed the prompt with
     Google's pre-computed synonym resolution.
     """
     from llm_client import call_llm
+    import json
 
     # Build search context table
     search_context = build_search_context_table(serp_data)
 
-    # Concatenate all article texts
+    # Concatenate all article texts (truncated to ARTICLE_CHAR_LIMIT each)
     article_texts = "\n\n---\n\n".join(
-        f"[{doc['source_domain']}] {doc['title']}: {doc['raw_text_content'][:2000]}"
+        f"[{doc['source_domain']}] {doc['title']}: {doc['raw_text_content'][:ARTICLE_CHAR_LIMIT]}"
         for doc in documents
     )
 
@@ -1169,16 +1178,25 @@ def run_entity_normalization(
     ]
 
     slot_cfg = llm_config["call_1_entity_normalization"]
-    raw = call_llm(slot_cfg, messages, json_mode=True)
 
-    import json
-    data = json.loads(raw)
+    # Shield: LLM structural failure → empty map, don't crash pipeline
+    try:
+        raw = call_llm(slot_cfg, messages, json_mode=True)
+        data = json.loads(raw)
+    except (json.JSONDecodeError, RuntimeError):
+        return {}
+
     mappings = data.get("normalized_mappings", [])
+    if not isinstance(mappings, list):
+        return {}
 
     canonical_map: dict[str, str] = {}
     for m in mappings:
-        key = m["surface_form_variant"].strip().lower()
-        canonical_map[key] = m["canonical_reference_identity"]
+        try:
+            key = m["surface_form_variant"].strip().lower()
+            canonical_map[key] = m["canonical_reference_identity"]
+        except (KeyError, TypeError):
+            continue
 
     return canonical_map
 
@@ -1200,18 +1218,27 @@ def run_linguistic_neutralization(
 ) -> list[str]:
     """
     Strip emotional framing, adjectives, euphemisms from each article.
+    Uses ThreadPoolExecutor for parallel LLM calls (max 5 concurrent).
     Returns list of neutralized text strings (one per doc).
+    Failed articles return empty string — filtered downstream.
     """
-    slot_cfg = llm_config["call_2_linguistic_neutralization"]
-    results = []
+    from concurrent.futures import ThreadPoolExecutor
+    from llm_client import call_llm
 
-    for doc in documents:
+    slot_cfg = llm_config["call_2_linguistic_neutralization"]
+
+    def _neutralize_one(doc: dict) -> str:
         messages = [
             {"role": "system", "content": LINGUISTIC_NEUTRALIZATION_SYSTEM_PROMPT},
             {"role": "user", "content": doc["raw_text_content"]},
         ]
-        neutralized = call_llm(slot_cfg, messages, json_mode=False)
-        results.append(neutralized.strip())
+        try:
+            return call_llm(slot_cfg, messages, json_mode=False).strip()
+        except RuntimeError:
+            return ""
+
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        results = list(executor.map(_neutralize_one, documents))
 
     return results
 ```
@@ -1228,13 +1255,13 @@ git add processing.py
 git commit -m "feat: add Layer 2 processing — entity normalization and linguistic neutralization"
 ```
 
-**Sanity check:** Does `build_search_context_table` handle missing `people_also_ask` key (PAA loop just skips — graceful degrade, no code change needed for `merge_and_resolve`)? Does `run_entity_normalization` lowercase all map keys? Is `compute_framing_volatility` absent from `processing.py` (it belongs in `analysis.py`)?
+**Sanity check:** Does `build_search_context_table` handle missing `people_also_ask` key (PAA loop just skips — graceful degrade, no code change needed for `merge_and_resolve`)? Does `run_entity_normalization` lowercase all map keys? Is `compute_framing_volatility` absent from `narrative/processing.py` (it belongs in `narrative/analysis.py`)?
 
 ---
 
 ### Task 6: Analysis Layer — Calls 3, 4 + Python Set Math
 
-**File:** Create `analysis.py`
+**File:** Create `narrative/analysis.py`
 
 **What:** Sections 5, 6 (Call 3, Call 4), 5.2 (Vf), and pre-synthesis pass. This is the largest and most complex file. Seven sub-systems:
 1. Graph extraction (Call 3 — DeepSeek V4-Pro thinking)
@@ -1248,7 +1275,7 @@ git commit -m "feat: add Layer 2 processing — entity normalization and linguis
 
 **Call 3 timeout note:** Serial thinking-mode calls take ~10–30s each. 15 articles × 20s = 300s, leaving minimal headroom in Modal's 600s timeout. Consider `asyncio.gather` for parallel Call 3 invocations — articles are independent, no ordering dependency. The 20-doc hard cap (Task 3) bounds worst-case to 20 × 20s = 400s absolute ceiling.
 
-- [ ] **Step 1: Write `analysis.py` — Call 3 + Python metrics**
+- [ ] **Step 1: Write `narrative/analysis.py` — Call 3 + Python metrics**
 
 ```python
 """Layer 3: Analysis — graph extraction, forensic synthesis, metric computation.
@@ -1273,7 +1300,9 @@ GRAPH_EXTRACTION_SYSTEM_PROMPT = (
     "article text and entity reference dictionary, extract all factual "
     "claims as a structured node-and-edge graph. Nodes are named entities, "
     "events, timestamps, and quantities. Edges are directed relationships "
-    "with a verb. Output only valid JSON matching the schema provided. "
+    "with a verb. Entity dictionary keys are lowercased — match "
+    "case-insensitively against the article text (e.g. 'Apple' matches "
+    "'apple'). Output only valid JSON matching the schema provided. "
     "The word 'json' must appear in your response."
 )
 
@@ -1508,7 +1537,7 @@ def sync_label(score: float) -> str:
         return "LOW"
 ```
 
-- [ ] **Step 2: Write `analysis.py` — pre-synthesis pass**
+- [ ] **Step 2: Write `narrative/analysis.py` — pre-synthesis pass**
 
 ```python
 # ── Pre-Synthesis Context Aggregation (Section 6) ──
@@ -1551,7 +1580,7 @@ def compute_pre_synthesis_context(
     )
 ```
 
-- [ ] **Step 3: Write `analysis.py` — Call 4 forensic synthesis**
+- [ ] **Step 3: Write `narrative/analysis.py` — Call 4 forensic synthesis**
 
 ```python
 # ── Call 4: Forensic Synthesis (DeepSeek V4-Pro, thinking enabled) ──
@@ -1660,17 +1689,17 @@ git add analysis.py
 git commit -m "feat: add Layer 3 analysis — graph extraction, forensic synthesis, all metrics"
 ```
 
-**Sanity check:** Does `resolve_to_canonical` handle lowercase mapping correctly? Does `compute_consensus_baseline` use ceiling threshold (>75%, not >=)? Does `compute_omission_index` handle division by zero? Does `inject_labels` cover all 4 metric fields plus `classification_method` on `reality_fractures`? Is `compute_framing_volatility` in `analysis.py` (not `processing.py`)? Does `compute_framing_volatility` import `get_embedding` from `llm_client`?
+**Sanity check:** Does `resolve_to_canonical` handle lowercase mapping correctly? Does `compute_consensus_baseline` use ceiling threshold (>75%, not >=)? Does `compute_omission_index` handle division by zero? Does `inject_labels` cover all 4 metric fields plus `classification_method` on `reality_fractures`? Is `compute_framing_volatility` in `narrative/analysis.py` (not `narrative/processing.py`)? Does `compute_framing_volatility` import `get_embedding` from `llm_client`?
 
 ---
 
 ### Task 7: Back-Test Worker
 
-**File:** Create `backtest.py`
+**File:** Create `narrative/backtest.py`
 
 **What:** Section 7 — `run_historical_backtest()`. This is a detached Modal function invoked via `.spawn()` after cold-start outlet registration. It queries Bright Data SERP for historical articles from a domain, runs Call 1 + Call 3 against them, then writes reputation metrics to SQLite.
 
-- [ ] **Step 1: Write `backtest.py` — stub with full structure**
+- [ ] **Step 1: Write `narrative/backtest.py` — stub with full structure**
 
 ```python
 """Background back-test worker for outlet reputation scoring.
@@ -1725,15 +1754,15 @@ git commit -m "feat: add back-test worker stub for historical outlet reputation 
 
 ---
 
-### Task 8: Orchestration — `app.py` + Settings Endpoint
+### Task 8: Orchestration — `narrative/app.py` + Settings Endpoint
 
-**File:** Create `app.py`
+**File:** Create `narrative/app.py`
 
 **What:** Sections 8 and 9.4 — Modal orchestration. Two web endpoints:
 1. `execute_forensic_pipeline` (POST) — the main pipeline
 2. `update_llm_config` (POST) — runtime settings writer
 
-- [ ] **Step 1: Write `app.py`**
+- [ ] **Step 1: Write `narrative/app.py`**
 
 ```python
 """Modal orchestration — single-entry-point forensic pipeline + settings."""
@@ -2080,7 +2109,7 @@ git commit -m "feat: add static dashboard — 3-zone forensic report + settings 
 
 ### Task 10: Integration — End-to-End Wire-Up
 
-**Files:** None new. Modify `app.py` to connect TBD stubs.
+**Files:** None new. Modify `narrative/app.py` to connect TBD stubs.
 
 **What:** Ensure all imports resolve, data flows between layers match the spec contracts, edge cases from Section 10 are handled.
 
@@ -2118,7 +2147,7 @@ git commit -m "chore: integration wire-up, edge case hardening, contract verific
 
 ### Task 11: `compute_pre_synthesis_context` — Full Implementation
 
-**File:** Modify `analysis.py`
+**File:** Modify `narrative/analysis.py`
 
 **What:** Replace the TBD stub with the full Python implementation from Section 6. This is the most algorithmically dense function — narrative clustering, fracture candidate detection, term shift scanning.
 
@@ -2151,9 +2180,9 @@ git commit -m "feat: implement compute_pre_synthesis_context — narrative clust
 
 ### Task 12: `execute_historical_backtest` — Full Implementation
 
-**File:** Modify `backtest.py`
+**File:** Modify `narrative/backtest.py`
 
-**What:** Replace the TBD stub with a full Modal `.spawn()` worker. Wire into `app.py` reputation check step.
+**What:** Replace the TBD stub with a full Modal `.spawn()` worker. Wire into `narrative/app.py` reputation check step.
 
 - [ ] **Step 1: Implement the 7-step back-test flow**
 
@@ -2165,7 +2194,7 @@ git commit -m "feat: implement compute_pre_synthesis_context — narrative clust
 6. Count absorbed vs decayed nodes
 7. Write `scatter_shot_anomaly_factor`, `historical_origin_validation_rate`, `rating_status = 'RATED'` to SQLite
 
-- [ ] **Step 2: Wire spawn call in `app.py`**
+- [ ] **Step 2: Wire spawn call in `narrative/app.py`**
 
 Replace the `# TBD: spawn background back-test` comment with actual `modal.Function.spawn()` call.
 
@@ -2194,15 +2223,15 @@ git commit -m "feat: implement full historical back-test worker with Modal spawn
 
 - [ ] Spec coverage: Section 14 validation gates → Task 3, Section 7 reputation → Task 4, Section 6 LLM sequence → Tasks 5+6, Section 5 metrics → Task 6, Section 11 frontend → Task 9, Section 9 settings → Task 8
 - [ ] No TBD placeholders in Tasks 1-8, 10, 11 (critical path)
-- [ ] Type consistency: `contracts.py` model field names match dict keys used in `analysis.py`, `processing.py`, `app.py`
-- [ ] `compute_omission_index` in `analysis.py` uses `resolve_to_canonical` from same module
+- [ ] Type consistency: `narrative/contracts.py` model field names match dict keys used in `narrative/analysis.py`, `narrative/processing.py`, `narrative/app.py`
+- [ ] `compute_omission_index` in `narrative/analysis.py` uses `resolve_to_canonical` from same module
 - [ ] `inject_labels` covers `omission_label`, `framing_volatility_label`, `scatter_shot_label`, `consensus_stability`, `synchronization_label`
-- [ ] `compute_framing_volatility` is in `analysis.py`, NOT `processing.py` (layer decoupling — Issue #1 fix)
+- [ ] `compute_framing_volatility` is in `narrative/analysis.py`, NOT `narrative/processing.py` (layer decoupling — Issue #1 fix)
 - [ ] `validate_ingestion_payload` return dict includes `passed_validation: 1` (Issue #4 fix)
 - [ ] `build_ingestion_manifest` accepts `db_conn`, calls `write_ingestion_log`, applies 20-doc cap (Issues #3, #13 fix)
 - [ ] `handle_outlet_registration` stores `outlet_name` (Issue #15 fix)
-- [ ] `context_bundle` in `app.py` includes `reputation_records` dict (Issue #9 fix)
-- [ ] `run_historical_backtest` has `@app.function` decorator in `app.py`; step 4 calls `.spawn()` (Issue #10 fix)
+- [ ] `context_bundle` in `narrative/app.py` includes `reputation_records` dict (Issue #9 fix)
+- [ ] `run_historical_backtest` has `@app.function` decorator in `narrative/app.py`; step 4 calls `.spawn()` (Issue #10 fix)
 - [ ] Task 11 (`compute_pre_synthesis_context`) is on critical path — v1.4 forensic objects empty without it (Issue #7 fix)
 - [ ] SERP payload uses `"engine": "google"`, `"tbm": "nws"`, `"q"` — confirmed present in plan (Issue #5 was false positive)
 - [ ] `serp_data` raw response passed to both `build_ingestion_manifest` and `run_entity_normalization` — same object (Issue #8 confirmed correct)
@@ -2214,8 +2243,8 @@ git commit -m "feat: implement full historical back-test worker with Modal spawn
 - [ ] Execution Notes call out both Call 2 and Call 3 serial timeout risk (v2 Issue #7 fix)
 - [ ] `write_ingestion_log` uses `INSERT OR REPLACE` — both fetch attempts for same URL visible in debug log (v2 Issue #8 fix)
 - [ ] Task 10 Step 1 says "14 steps" not "13 steps" (v2 Issue #9 fix)
-- [ ] File map `processing.py` row no longer lists "embedding generation, Vf computation" (v2 Issue #10 fix)
-- [ ] `_write_with_retry` exists in `reputation.py`; `handle_outlet_registration` and `write_outlier_signal` use it (concurrent backtest write safety)
-- [ ] `extract_assistant_message()` exists in `llm_client.py`; checks for `reasoning_content` via `getattr` and includes it when present; `call_llm` docstring warns against manual dict reconstruction for multi-turn
-- [ ] `MIN_BODY_CHARS = 200` constant defined in `ingestion.py`; early exit after `extract_text` logs extraction-failed docs to `all_attempted` with `passed_validation: 0` before `validate_ingestion_payload` is called
+- [ ] File map `narrative/processing.py` row no longer lists "embedding generation, Vf computation" (v2 Issue #10 fix)
+- [ ] `_write_with_retry` exists in `narrative/reputation.py`; `handle_outlet_registration` and `write_outlier_signal` use it (concurrent backtest write safety)
+- [ ] `extract_assistant_message()` exists in `narrative/llm_client.py`; checks for `reasoning_content` via `getattr` and includes it when present; `call_llm` docstring warns against manual dict reconstruction for multi-turn
+- [ ] `MIN_BODY_CHARS = 200` constant defined in `narrative/ingestion.py`; early exit after `extract_text` logs extraction-failed docs to `all_attempted` with `passed_validation: 0` before `validate_ingestion_payload` is called
 - [ ] `inject_labels` sets `fracture.setdefault("classification_method", "LLM_ASSISTED")` on all `reality_fractures` — field present in Pydantic model but absent from raw Call 4 dict without explicit injection

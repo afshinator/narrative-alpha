@@ -1,4 +1,4 @@
-"""Tests for reputation.py — SQLite persistence layer."""
+"""Tests for narrative/reputation.py -- SQLite persistence layer."""
 from __future__ import annotations
 
 import sqlite3
@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from reputation import (
+from narrative.reputation import (
     _write_with_retry,
     handle_outlet_registration,
     init_db,

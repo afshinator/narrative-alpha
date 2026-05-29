@@ -1,4 +1,4 @@
-"""Tests for ingestion.py — Layer 1: Discovery, Extraction, Validation.
+"""Tests for narrative/ingestion.py -- Layer 1: Discovery, Extraction, Validation.
 
 Run with: python -m pytest test_ingestion.py -v
 """
@@ -35,17 +35,17 @@ class TestExtractText:
     """extract_text(html) — trafilatura wrapper, returns stripped text or ''."""
 
     def test_import(self):
-        from ingestion import extract_text
+        from narrative.ingestion import extract_text
         assert callable(extract_text)
 
     def test_strips_html(self):
-        from ingestion import extract_text
+        from narrative.ingestion import extract_text
         html = "<html><body><p>  Hello world  </p></body></html>"
         assert extract_text(html) == "Hello world"
 
     def test_handles_none_from_trafilatura(self):
         """When trafilatura returns None, extract_text returns ''."""
-        from ingestion import extract_text
+        from narrative.ingestion import extract_text
         assert extract_text("<script>no content</script>") == ""
 
 
@@ -53,11 +53,11 @@ class TestParseSerpResult:
     """parse_serp_result(result) — field extraction and domain normalisation."""
 
     def test_import(self):
-        from ingestion import parse_serp_result
+        from narrative.ingestion import parse_serp_result
         assert callable(parse_serp_result)
 
     def test_full_fields(self):
-        from ingestion import parse_serp_result
+        from narrative.ingestion import parse_serp_result
         r = parse_serp_result({
             "link": "https://example.com/article",
             "title": "  Test Article  ",
@@ -75,7 +75,7 @@ class TestParseSerpResult:
 
     def test_minimal(self):
         """Only link present — title/source derived, published_at None."""
-        from ingestion import parse_serp_result
+        from narrative.ingestion import parse_serp_result
         r = parse_serp_result({"link": "https://globalwire.com/report"})
         assert r["url"] == "https://globalwire.com/report"
         assert r["title"] == ""
@@ -85,7 +85,7 @@ class TestParseSerpResult:
 
     def test_empty_input(self):
         """Empty dict — all fields default gracefully."""
-        from ingestion import parse_serp_result
+        from narrative.ingestion import parse_serp_result
         r = parse_serp_result({})
         assert r["url"] == ""
         assert r["title"] == ""
@@ -94,30 +94,30 @@ class TestParseSerpResult:
 
     def test_www_domain_normalised(self):
         """www. prefix is stripped from domain."""
-        from ingestion import parse_serp_result
+        from narrative.ingestion import parse_serp_result
         r = parse_serp_result({"link": "https://www.example.com/article", "source": "Example"})
         assert r["domain"] == "example.com"
 
     def test_source_falls_back_to_display_link(self):
         """When source key is absent, display_link is used."""
-        from ingestion import parse_serp_result
+        from narrative.ingestion import parse_serp_result
         r = parse_serp_result({"link": "https://reuters.com/a", "display_link": "reuters.com"})
         assert r["source_name"] == "Reuters"
 
     def test_domain_from_url_when_source_is_empty(self):
         """When source and display_link both empty, domain derived from url."""
-        from ingestion import parse_serp_result
+        from narrative.ingestion import parse_serp_result
         r = parse_serp_result({"link": "https://globalwire.com/article"})
         assert r["domain"] == "globalwire.com"
         assert r["source_name"] == "Globalwire"
 
     def test_published_at_absent(self):
-        from ingestion import parse_serp_result
+        from narrative.ingestion import parse_serp_result
         r = parse_serp_result({"link": "https://a.com", "published_at": ""})
         assert r["published_at"] is None
 
     def test_published_at_present(self):
-        from ingestion import parse_serp_result
+        from narrative.ingestion import parse_serp_result
         r = parse_serp_result({"link": "https://a.com", "published_at": "2026-05-28T12:00:00Z"})
         assert r["published_at"] == "2026-05-28T12:00:00Z"
 
@@ -139,11 +139,11 @@ class TestValidateIngestionPayload:
         return base
 
     def test_import(self):
-        from ingestion import validate_ingestion_payload
+        from narrative.ingestion import validate_ingestion_payload
         assert callable(validate_ingestion_payload)
 
     def test_valid_payload(self):
-        from ingestion import validate_ingestion_payload
+        from narrative.ingestion import validate_ingestion_payload
         doc = self._make_doc()
         result = validate_ingestion_payload(doc)
         assert result is not None
@@ -152,25 +152,25 @@ class TestValidateIngestionPayload:
         assert result["title"] == "Test Article"
 
     def test_rejects_missing_source_url(self):
-        from ingestion import validate_ingestion_payload
+        from narrative.ingestion import validate_ingestion_payload
         assert validate_ingestion_payload(self._make_doc(source_url="")) is None
 
     def test_rejects_missing_title(self):
-        from ingestion import validate_ingestion_payload
+        from narrative.ingestion import validate_ingestion_payload
         assert validate_ingestion_payload(self._make_doc(title="")) is None
 
     def test_rejects_short_body_under_300_chars(self):
-        from ingestion import validate_ingestion_payload
+        from narrative.ingestion import validate_ingestion_payload
         assert validate_ingestion_payload(self._make_doc(raw_text_content="Short body.")) is None
 
     def test_rejects_fewer_than_50_words(self):
-        from ingestion import validate_ingestion_payload
+        from narrative.ingestion import validate_ingestion_payload
         text = "word " * 49  # 49 words, meets 300 chars
         assert validate_ingestion_payload(self._make_doc(raw_text_content=text)) is None
 
     def test_passes_50_words_and_300_chars(self):
         """Text needs both >= 300 chars and >= 50 words to pass."""
-        from ingestion import validate_ingestion_payload
+        from narrative.ingestion import validate_ingestion_payload
         text = ("word " * 61)  # 61 words, 305 chars raw (304 after strip)
         result = validate_ingestion_payload(self._make_doc(raw_text_content=text))
         assert result is not None
@@ -184,13 +184,13 @@ class TestValidateIngestionPayload:
         "members-only story",
     ])
     def test_rejects_paywall_patterns(self, pattern):
-        from ingestion import validate_ingestion_payload
+        from narrative.ingestion import validate_ingestion_payload
         doc = self._make_doc(raw_text_content=f"{_valid_body()}\n{pattern}")
         assert validate_ingestion_payload(doc) is None
 
     def test_rejects_nav_bloat_under_1500(self):
         """> 3 nav tokens AND body < 1500 chars -> rejection."""
-        from ingestion import validate_ingestion_payload
+        from narrative.ingestion import validate_ingestion_payload
         body = "cookie privacy policy all rights reserved terms of service share this article. " * 2
         assert len(body) < 1500
         doc = self._make_doc(raw_text_content=body)
@@ -198,7 +198,7 @@ class TestValidateIngestionPayload:
 
     def test_allows_nav_bloat_over_1500(self):
         "> 3 nav tokens BUT body >= 1500 chars -> passes."
-        from ingestion import validate_ingestion_payload
+        from narrative.ingestion import validate_ingestion_payload
         body = ("cookie privacy policy all rights reserved terms of service share this article. " * 10
                 + _valid_body())
         assert len(body) >= 1500
@@ -206,19 +206,19 @@ class TestValidateIngestionPayload:
         assert validate_ingestion_payload(doc) is not None
 
     def test_normalises_www_domain(self):
-        from ingestion import validate_ingestion_payload
+        from narrative.ingestion import validate_ingestion_payload
         doc = self._make_doc(source_url="https://www.example.com/article")
         result = validate_ingestion_payload(doc)
         assert result is not None
         assert result["source_domain"] == "example.com"
 
     def test_returns_none_on_bad_url(self):
-        from ingestion import validate_ingestion_payload
+        from narrative.ingestion import validate_ingestion_payload
         doc = self._make_doc(source_url="")
         assert validate_ingestion_payload(doc) is None
 
     def test_domain_falls_back_to_source_name(self):
-        from ingestion import validate_ingestion_payload
+        from narrative.ingestion import validate_ingestion_payload
         doc = self._make_doc(source_name="Custom Name", source_url="https://source.com/a")
         result = validate_ingestion_payload(doc)
         assert result is not None
@@ -234,12 +234,12 @@ class TestDiscoverArticles:
     """discover_articles(keyword, api_key, num) — SERP API call."""
 
     def test_import(self):
-        from ingestion import discover_articles, SERP_ENDPOINT
+        from narrative.ingestion import discover_articles, SERP_ENDPOINT
         assert callable(discover_articles)
         assert SERP_ENDPOINT == "https://api.brightdata.com/serp/req"
 
     def test_sends_correct_payload(self, monkeypatch):
-        from ingestion import discover_articles
+        from narrative.ingestion import discover_articles
 
         posted = {}
 
@@ -269,7 +269,7 @@ class TestDiscoverArticles:
         assert result == {"organic": []}
 
     def test_defaults_to_15_results(self, monkeypatch):
-        from ingestion import discover_articles
+        from narrative.ingestion import discover_articles
 
         def fake_post(url, json, headers, timeout):
             class FakeResp:
@@ -284,7 +284,7 @@ class TestDiscoverArticles:
         assert True
 
     def test_raises_on_http_error(self, monkeypatch):
-        from ingestion import discover_articles
+        from narrative.ingestion import discover_articles
 
         def fake_post(*a, **kw):
             class FakeResp:
@@ -302,12 +302,12 @@ class TestFetchArticleBody:
     """fetch_article_body(url, zone, api_key) — Web Unlocker call."""
 
     def test_import(self):
-        from ingestion import fetch_article_body, UNLOCKER_ENDPOINT
+        from narrative.ingestion import fetch_article_body, UNLOCKER_ENDPOINT
         assert callable(fetch_article_body)
         assert UNLOCKER_ENDPOINT == "https://api.brightdata.com/request"
 
     def test_sends_correct_payload(self, monkeypatch):
-        from ingestion import fetch_article_body
+        from narrative.ingestion import fetch_article_body
 
         posted = {}
 
@@ -335,7 +335,7 @@ class TestFetchArticleBody:
         assert html == "<html><body><p>Article body.</p></body></html>"
 
     def test_raises_on_http_error(self, monkeypatch):
-        from ingestion import fetch_article_body
+        from narrative.ingestion import fetch_article_body
 
         def fake_post(*a, **kw):
             class FakeResp:
@@ -368,15 +368,15 @@ class TestBuildIngestionManifest:
         }
 
     def test_import(self):
-        from ingestion import build_ingestion_manifest
+        from narrative.ingestion import build_ingestion_manifest
         assert callable(build_ingestion_manifest)
 
     def test_returns_manifest_with_5_sources(self, monkeypatch, serp_data):
-        from ingestion import build_ingestion_manifest
+        from narrative.ingestion import build_ingestion_manifest
 
-        monkeypatch.setattr("ingestion.fetch_article_body",
+        monkeypatch.setattr("narrative.ingestion.fetch_article_body",
                             lambda url, zone, key: "<html><p>body</p></html>")
-        monkeypatch.setattr("ingestion.extract_text",
+        monkeypatch.setattr("narrative.ingestion.extract_text",
                             lambda html: _valid_body())
 
         result = build_ingestion_manifest("test", serp_data, "zone", "key")
@@ -388,7 +388,7 @@ class TestBuildIngestionManifest:
 
     def test_floor_gate_below_5(self, monkeypatch, serp_data):
         """Only 2 sources pass validation -> INSUFFICIENT_CORPUS_FLOOR."""
-        from ingestion import build_ingestion_manifest
+        from narrative.ingestion import build_ingestion_manifest
 
         called = 0
         def fake_extract(html):
@@ -399,9 +399,9 @@ class TestBuildIngestionManifest:
                 return _valid_body()
             return ""
 
-        monkeypatch.setattr("ingestion.fetch_article_body",
+        monkeypatch.setattr("narrative.ingestion.fetch_article_body",
                             lambda url, zone, key: "<html><p>body</p></html>")
-        monkeypatch.setattr("ingestion.extract_text", fake_extract)
+        monkeypatch.setattr("narrative.ingestion.extract_text", fake_extract)
 
         result = build_ingestion_manifest("test", serp_data, "zone", "key")
         assert "validation_tracking" in result
@@ -411,7 +411,7 @@ class TestBuildIngestionManifest:
 
     def test_dedup_by_domain(self, monkeypatch):
         """Same domain appears twice — only one kept."""
-        from ingestion import build_ingestion_manifest
+        from narrative.ingestion import build_ingestion_manifest
 
         data = {
             "organic": [
@@ -424,9 +424,9 @@ class TestBuildIngestionManifest:
             ]
         }
 
-        monkeypatch.setattr("ingestion.fetch_article_body",
+        monkeypatch.setattr("narrative.ingestion.fetch_article_body",
                             lambda url, zone, key: "<html><p>body</p></html>")
-        monkeypatch.setattr("ingestion.extract_text",
+        monkeypatch.setattr("narrative.ingestion.extract_text",
                             lambda html: _valid_body())
 
         result = build_ingestion_manifest("test", data, "zone", "key")
@@ -435,8 +435,8 @@ class TestBuildIngestionManifest:
     def test_hard_cap_at_20(self, monkeypatch):
         """25 unique sources -> only 20 in manifest, corpus_capped=True.
         Validates through IngestionManifest Pydantic model."""
-        from ingestion import build_ingestion_manifest
-        from contracts import IngestionManifest
+        from narrative.ingestion import build_ingestion_manifest
+        from narrative.contracts import IngestionManifest
 
         items = []
         for i in range(25):
@@ -444,9 +444,9 @@ class TestBuildIngestionManifest:
 
         data = {"organic": items}
 
-        monkeypatch.setattr("ingestion.fetch_article_body",
+        monkeypatch.setattr("narrative.ingestion.fetch_article_body",
                             lambda url, zone, key: "<html><p>body</p></html>")
-        monkeypatch.setattr("ingestion.extract_text",
+        monkeypatch.setattr("narrative.ingestion.extract_text",
                             lambda html: _valid_body())
 
         result = build_ingestion_manifest("test", data, "zone", "key")
@@ -477,7 +477,7 @@ class TestBuildIngestionManifest:
 
     def test_extraction_failure_logged(self, monkeypatch, serp_data_6):
         """When fetch_article_body raises, the doc is logged as failed."""
-        from ingestion import build_ingestion_manifest
+        from narrative.ingestion import build_ingestion_manifest
 
         call_count = 0
 
@@ -488,8 +488,8 @@ class TestBuildIngestionManifest:
                 raise Exception("HTTP 403")
             return "<html><p>body</p></html>"
 
-        monkeypatch.setattr("ingestion.fetch_article_body", fake_fetch)
-        monkeypatch.setattr("ingestion.extract_text",
+        monkeypatch.setattr("narrative.ingestion.fetch_article_body", fake_fetch)
+        monkeypatch.setattr("narrative.ingestion.extract_text",
                             lambda html: _valid_body())
 
         result = build_ingestion_manifest("test", serp_data_6, "zone", "key")
@@ -497,7 +497,7 @@ class TestBuildIngestionManifest:
 
     def test_trafilatura_failure_logged(self, monkeypatch, serp_data_6):
         """When extract_text returns short text, doc is logged as failed."""
-        from ingestion import build_ingestion_manifest
+        from narrative.ingestion import build_ingestion_manifest
 
         call_count = 0
 
@@ -508,25 +508,25 @@ class TestBuildIngestionManifest:
                 return "short"
             return _valid_body()
 
-        monkeypatch.setattr("ingestion.fetch_article_body",
+        monkeypatch.setattr("narrative.ingestion.fetch_article_body",
                             lambda url, zone, key: "<html><p>body</p></html>")
-        monkeypatch.setattr("ingestion.extract_text", fake_extract)
+        monkeypatch.setattr("narrative.ingestion.extract_text", fake_extract)
 
         result = build_ingestion_manifest("test", serp_data_6, "zone", "key")
         assert result["corpus_count"] == 5  # 1 trafilatura failure, 5 passed
 
     def test_logger_func_called_when_wired(self, monkeypatch, serp_data):
         """logger_func is called with (query_id, topic, ts, docs, conn)."""
-        from ingestion import build_ingestion_manifest
+        from narrative.ingestion import build_ingestion_manifest
 
         logged = []
 
         def fake_logger(qid, topic, ts, docs, conn):
             logged.append((qid, topic, ts, len(docs), conn))
 
-        monkeypatch.setattr("ingestion.fetch_article_body",
+        monkeypatch.setattr("narrative.ingestion.fetch_article_body",
                             lambda url, zone, key: "<html><p>body</p></html>")
-        monkeypatch.setattr("ingestion.extract_text",
+        monkeypatch.setattr("narrative.ingestion.extract_text",
                             lambda html: _valid_body())
 
         fake_conn = object()  # any sentinel — not a real connection
@@ -543,7 +543,7 @@ class TestBuildIngestionManifest:
 
     def test_logger_func_skipped_when_no_db_conn(self, monkeypatch, serp_data):
         """logger_func not called when db_conn is None."""
-        from ingestion import build_ingestion_manifest
+        from narrative.ingestion import build_ingestion_manifest
 
         called = False
 
@@ -551,9 +551,9 @@ class TestBuildIngestionManifest:
             nonlocal called
             called = True
 
-        monkeypatch.setattr("ingestion.fetch_article_body",
+        monkeypatch.setattr("narrative.ingestion.fetch_article_body",
                             lambda url, zone, key: "<html><p>body</p></html>")
-        monkeypatch.setattr("ingestion.extract_text",
+        monkeypatch.setattr("narrative.ingestion.extract_text",
                             lambda html: _valid_body())
 
         build_ingestion_manifest("test", serp_data, "zone", "key", logger_func=fake_logger)
@@ -561,11 +561,11 @@ class TestBuildIngestionManifest:
 
     def test_logger_func_skipped_when_no_logger(self, monkeypatch, serp_data):
         """logger_func not called when logger_func is None (even with db_conn)."""
-        from ingestion import build_ingestion_manifest
+        from narrative.ingestion import build_ingestion_manifest
 
-        monkeypatch.setattr("ingestion.fetch_article_body",
+        monkeypatch.setattr("narrative.ingestion.fetch_article_body",
                             lambda url, zone, key: "<html><p>body</p></html>")
-        monkeypatch.setattr("ingestion.extract_text",
+        monkeypatch.setattr("narrative.ingestion.extract_text",
                             lambda html: _valid_body())
 
         result = build_ingestion_manifest(
@@ -575,7 +575,7 @@ class TestBuildIngestionManifest:
 
     def test_published_at_in_manifest(self, monkeypatch):
         """published_at is carried through to manifest documents."""
-        from ingestion import build_ingestion_manifest
+        from narrative.ingestion import build_ingestion_manifest
 
         data = {
             "organic": [
@@ -588,9 +588,9 @@ class TestBuildIngestionManifest:
             ]
         }
 
-        monkeypatch.setattr("ingestion.fetch_article_body",
+        monkeypatch.setattr("narrative.ingestion.fetch_article_body",
                             lambda url, zone, key: "<html><p>body</p></html>")
-        monkeypatch.setattr("ingestion.extract_text",
+        monkeypatch.setattr("narrative.ingestion.extract_text",
                             lambda html: _valid_body())
 
         result = build_ingestion_manifest("test", data, "zone", "key")
@@ -600,7 +600,7 @@ class TestBuildIngestionManifest:
 
     def test_published_at_absent(self, monkeypatch):
         """When SERP lacks published_at, field is absent/None in manifest."""
-        from ingestion import build_ingestion_manifest
+        from narrative.ingestion import build_ingestion_manifest
 
         data = {
             "organic": [
@@ -613,9 +613,9 @@ class TestBuildIngestionManifest:
             ]
         }
 
-        monkeypatch.setattr("ingestion.fetch_article_body",
+        monkeypatch.setattr("narrative.ingestion.fetch_article_body",
                             lambda url, zone, key: "<html><p>body</p></html>")
-        monkeypatch.setattr("ingestion.extract_text",
+        monkeypatch.setattr("narrative.ingestion.extract_text",
                             lambda html: _valid_body())
 
         result = build_ingestion_manifest("test", data, "zone", "key")

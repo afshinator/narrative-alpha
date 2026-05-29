@@ -1,4 +1,4 @@
-"""Tests for contracts.py — Pydantic data contracts for Narrative Alpha.
+"""Tests for narrative/contracts.py -- Pydantic data contracts for Narrative Alpha.
 
 Run with: python -m pytest test_contracts.py -v
 """
@@ -10,7 +10,7 @@ import pytest
 
 def test_import():
     """Contracts module exports the three root models without error."""
-    from contracts import IngestionManifest, ForensicReport, LLMConfig, PipelineInput, FloorGateResponse  # noqa: F401
+    from narrative.contracts import IngestionManifest, ForensicReport, LLMConfig, PipelineInput, FloorGateResponse  # noqa: F401
 
 
 # ── Helpers: minimal valid payloads ──
@@ -100,7 +100,7 @@ def _outlier_signal_payload(**overrides):
 
 
 def _forensic_report_payload(**overrides):
-    from contracts import (
+    from narrative.contracts import (
         EventMeta,
         ConsensusRealityGraph,
         DistortionMatrixEntry,
@@ -177,13 +177,13 @@ def _forensic_report_payload(**overrides):
 # ── Test 1: IngestionDocument and IngestionManifest instantiate ──
 
 def test_ingestion_document_instantiates():
-    from contracts import IngestionDocument
+    from narrative.contracts import IngestionDocument
     doc = IngestionDocument(**_ingestion_document_payload())
     assert doc.doc_id == "doc-001"
 
 
 def test_ingestion_manifest_instantiates():
-    from contracts import IngestionManifest
+    from narrative.contracts import IngestionManifest
     manifest = IngestionManifest(**_ingestion_manifest_payload())
     assert manifest.cluster_id == "cluster-001"
 
@@ -191,7 +191,7 @@ def test_ingestion_manifest_instantiates():
 # ── Test 2: IngestionDocument.author defaults to "Staff" ──
 
 def test_ingestion_document_author_default():
-    from contracts import IngestionDocument
+    from narrative.contracts import IngestionDocument
     doc = IngestionDocument(**_ingestion_document_payload())
     assert doc.author == "Staff"
 
@@ -199,7 +199,7 @@ def test_ingestion_document_author_default():
 # ── Test 3: EventMeta.corpus_capped defaults to False ──
 
 def test_event_meta_corpus_capped_default():
-    from contracts import EventMeta
+    from narrative.contracts import EventMeta
     meta = EventMeta(**_event_meta_payload())
     assert meta.corpus_capped is False
 
@@ -207,13 +207,13 @@ def test_event_meta_corpus_capped_default():
 # ── Test 4: DistortionMatrixEntry label defaults ──
 
 def test_distortion_matrix_omission_label_default():
-    from contracts import DistortionMatrixEntry
+    from narrative.contracts import DistortionMatrixEntry
     entry = DistortionMatrixEntry(**_distortion_matrix_entry_payload())
     assert entry.omission_label == "UNLABELED"
 
 
 def test_distortion_matrix_framing_volatility_label_default():
-    from contracts import DistortionMatrixEntry
+    from narrative.contracts import DistortionMatrixEntry
     entry = DistortionMatrixEntry(**_distortion_matrix_entry_payload())
     assert entry.framing_volatility_label == "UNLABELED"
 
@@ -221,13 +221,13 @@ def test_distortion_matrix_framing_volatility_label_default():
 # ── Test 5: OutlierProvenance defaults ──
 
 def test_outlier_provenance_scatter_shot_label_default():
-    from contracts import OutlierProvenance
+    from narrative.contracts import OutlierProvenance
     prov = OutlierProvenance(**_outlier_provenance_payload())
     assert prov.scatter_shot_label == "UNLABELED"
 
 
 def test_outlier_provenance_reputation_warning_triggered_default():
-    from contracts import OutlierProvenance
+    from narrative.contracts import OutlierProvenance
     prov = OutlierProvenance(**_outlier_provenance_payload())
     assert prov.reputation_warning_triggered is False
 
@@ -235,7 +235,7 @@ def test_outlier_provenance_reputation_warning_triggered_default():
 # ── Test 6: OutlierValidation.evaluation_window_days defaults to 30 ──
 
 def test_outlier_validation_evaluation_window_days_default():
-    from contracts import OutlierValidation
+    from narrative.contracts import OutlierValidation
     val = OutlierValidation(**_outlier_validation_payload())
     assert val.evaluation_window_days == 30
 
@@ -243,7 +243,7 @@ def test_outlier_validation_evaluation_window_days_default():
 # ── Test 7: RealityFracture.classification_method defaults to "LLM_ASSISTED" ──
 
 def test_reality_fracture_classification_method_default():
-    from contracts import RealityFracture, RealityFractureClaim
+    from narrative.contracts import RealityFracture, RealityFractureClaim
     fracture = RealityFracture(
         fracture_id="frac-001",
         topic="AI safety",
@@ -262,13 +262,13 @@ def test_reality_fracture_classification_method_default():
 # ── Test 8: LLMSlotConfig defaults ──
 
 def test_llm_slot_config_thinking_default():
-    from contracts import LLMSlotConfig
+    from narrative.contracts import LLMSlotConfig
     slot = LLMSlotConfig(provider="openai", model="gpt-4o")
     assert slot.thinking is False
 
 
 def test_llm_slot_config_temperature_default():
-    from contracts import LLMSlotConfig
+    from narrative.contracts import LLMSlotConfig
     slot = LLMSlotConfig(provider="openai", model="gpt-4o")
     assert slot.temperature == 0.1
 
@@ -276,7 +276,7 @@ def test_llm_slot_config_temperature_default():
 # ── Test 9: ForensicReport instantiates with all nested models ──
 
 def test_forensic_report_instantiates():
-    from contracts import ForensicReport
+    from narrative.contracts import ForensicReport
     report = ForensicReport(**_forensic_report_payload())
     assert report.event_meta.cluster_id == "cluster-001"
     assert len(report.distortion_matrix) == 1
@@ -286,14 +286,14 @@ def test_forensic_report_instantiates():
 
 
 def test_pipeline_input_instantiates():
-    from contracts import PipelineInput
+    from narrative.contracts import PipelineInput
     pi = PipelineInput(keyword="AI safety", vertical="TECHNOLOGY")
     assert pi.keyword == "AI safety"
     assert pi.vertical == "TECHNOLOGY"
 
 
 def test_floor_gate_response_instantiates():
-    from contracts import FloorGateResponse, FloorGateTracking
+    from narrative.contracts import FloorGateResponse, FloorGateTracking
     fgr = FloorGateResponse(
         status="INSUFFICIENT_CORPUS_FLOOR",
         validation_tracking=FloorGateTracking(
@@ -309,7 +309,7 @@ def test_floor_gate_response_instantiates():
 # ── Adversarial tests ──
 
 def test_omission_index_rejects_out_of_range():
-    from contracts import DistortionMatrixEntry
+    from narrative.contracts import DistortionMatrixEntry
     import pytest
     with pytest.raises(Exception):
         DistortionMatrixEntry(outlet_name="x", source_domain="x", omission_index=1.5, framing_volatility_score=0.5)
@@ -318,7 +318,7 @@ def test_omission_index_rejects_out_of_range():
 
 
 def test_detected_shift_rejects_wrong_keys():
-    from contracts import NarrativeRegimeShift
+    from narrative.contracts import NarrativeRegimeShift
     import pytest
     with pytest.raises(Exception):
         NarrativeRegimeShift(
@@ -331,7 +331,7 @@ def test_detected_shift_rejects_wrong_keys():
 
 
 def test_corpus_count_must_match_documents():
-    from contracts import IngestionManifest
+    from narrative.contracts import IngestionManifest
     import pytest
     with pytest.raises(Exception):
         IngestionManifest(
@@ -341,7 +341,7 @@ def test_corpus_count_must_match_documents():
 
 
 def test_extra_fields_rejected():
-    from contracts import DistortionMatrixEntry
+    from narrative.contracts import DistortionMatrixEntry
     import pytest
     with pytest.raises(Exception):
         DistortionMatrixEntry(
@@ -352,14 +352,14 @@ def test_extra_fields_rejected():
 
 
 def test_temperature_rejects_out_of_range():
-    from contracts import LLMSlotConfig
+    from narrative.contracts import LLMSlotConfig
     import pytest
     with pytest.raises(Exception):
         LLMSlotConfig(provider="deepseek", model="v4", temperature=5.0)
 
 
 def test_null_list_coerced_to_empty():
-    from contracts import DistortionMatrixEntry
+    from narrative.contracts import DistortionMatrixEntry
     entry = DistortionMatrixEntry(
         outlet_name="x", source_domain="x",
         omission_index=0.5, framing_volatility_score=0.5,
@@ -369,7 +369,7 @@ def test_null_list_coerced_to_empty():
 
 
 def test_floor_gate_rejects_arbitrary_dict():
-    from contracts import FloorGateResponse
+    from narrative.contracts import FloorGateResponse
     import pytest
     with pytest.raises(Exception):
         FloorGateResponse(validation_tracking={"anything": "goes"})
@@ -380,7 +380,7 @@ def test_floor_gate_rejects_arbitrary_dict():
 def test_ingestion_manifest_round_trip():
     """Full IngestionManifest dict, including corpus_capped and published_at,
     must validate through the Pydantic model without error."""
-    from contracts import IngestionManifest
+    from narrative.contracts import IngestionManifest
     manifest = IngestionManifest(
         cluster_id="EVT-20260529-TEST-QUERY",
         trigger_type="KEYWORD",
@@ -411,7 +411,7 @@ def test_ingestion_manifest_round_trip():
 
 def test_ingestion_manifest_round_trip_uncapped():
     """Without corpus_capped, defaults to False."""
-    from contracts import IngestionManifest
+    from narrative.contracts import IngestionManifest
     manifest = IngestionManifest(
         cluster_id="EVT-20260529-TEST-QUERY",
         trigger_type="KEYWORD",
@@ -436,7 +436,7 @@ def test_ingestion_manifest_round_trip_uncapped():
 
 def test_floor_gate_response_round_trip():
     """FloorGateResponse must validate with status + nested tracking."""
-    from contracts import FloorGateResponse
+    from narrative.contracts import FloorGateResponse
     fgr = FloorGateResponse(
         status="INSUFFICIENT_CORPUS_FLOOR",
         validation_tracking={
