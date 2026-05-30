@@ -1,6 +1,6 @@
 # Local API + Dashboard Wire-Up Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Replace Modal serverless with a local FastAPI backend and wire the React dashboard to live API calls, removing all fake data stubs.
 
@@ -41,7 +41,7 @@
 - Delete: `narrative/app.py`
 - Delete: `tests/test_app.py`
 
-- [ ] **Step 9.1: Update requirements.txt**
+- [x] **Step 9.1: Update requirements.txt**
 
 Replace contents:
 
@@ -56,7 +56,7 @@ numpy>=1.26.0
 trafilatura>=1.12.0
 ```
 
-- [ ] **Step 9.2: Extract pipeline core into `narrative/pipeline.py`**
+- [x] **Step 9.2: Extract pipeline core into `narrative/pipeline.py`**
 
 Copy `_run_pipeline()` and `_run_startup_init()` from `narrative/app.py` into a new file with no Modal imports.
 
@@ -74,7 +74,7 @@ Add `# __init__.py` already exists — no changes needed.
 
 Create `data/reports/` directory with `.gitkeep`.
 
-- [ ] **Step 9.3: Write failing tests for server.py**
+- [x] **Step 9.3: Write failing tests for server.py**
 
 **File:** `tests/test_server.py`
 
@@ -203,7 +203,7 @@ def test_get_report_missing_returns_404(client):
 Run: `pytest tests/test_server.py -v`
 Expected: 7 tests, all FAIL (import errors from server.py not existing yet)
 
-- [ ] **Step 9.4: Write minimal FastAPI server**
+- [x] **Step 9.4: Write minimal FastAPI server**
 
 **File:** `narrative/server.py`
 
@@ -341,7 +341,7 @@ def update_config(payload: dict) -> dict:
     return {"status": "ok", "config": payload}
 ```
 
-- [ ] **Step 9.5: Extract pipeline core into `narrative/pipeline.py`**
+- [x] **Step 9.5: Extract pipeline core into `narrative/pipeline.py`**
 
 **File:** `narrative/pipeline.py` — copy `_run_pipeline()` and `_run_startup_init()` from `narrative/app.py`, replacing `.spawn()` with threading:
 
@@ -361,25 +361,25 @@ def update_config(payload: dict) -> dict:
 
 Replace the `import modal` + `modal.Volume` + `modal.Image` + `modal.App` + `modal.Secret` blocks with just `import threading`. Strip all `vol.commit()` calls.
 
-- [ ] **Step 9.6: Run server tests to verify**
+- [x] **Step 9.6: Run server tests to verify**
 
 Run: `pytest tests/test_server.py -v`
 Expected: 7+ tests, all PASS
 
-- [ ] **Step 9.7: Migrate remaining test_app tests to test_server**
+- [x] **Step 9.7: Migrate remaining test_app tests to test_server**
 
 Copy the 10 existing test functions from `tests/test_app.py` that test `_run_pipeline` logic and `_run_startup_init` — these test the core pipeline, not Modal. Add them to `tests/test_server.py` with adjusted imports (`from narrative.pipeline import _run_pipeline, _run_startup_init`).
 
 Run: `pytest tests/ -v`
 Expected: 257+ tests, all PASS
 
-- [ ] **Step 9.8: Delete app.py and test_app.py**
+- [x] **Step 9.8: Delete app.py and test_app.py**
 
 ```bash
 rm narrative/app.py tests/test_app.py
 ```
 
-- [ ] **Step 9.9: Final verification**
+- [x] **Step 9.9: Final verification**
 
 Run: `pytest tests/ -v`
 Expected: 257+ tests (minus 10 deleted, plus ~10 new = roughly same count), all PASS
@@ -401,7 +401,7 @@ Expected: 257+ tests (minus 10 deleted, plus ~10 new = roughly same count), all 
 - Modify: `dashboard/src/components/SettingsPage.test.tsx` (update SettingsPage tests)
 - Delete: `dashboard/src/data/sample-data.ts`
 
-- [ ] **Step 10.1: Add Vite proxy config**
+- [x] **Step 10.1: Add Vite proxy config**
 
 **File:** `dashboard/vite.config.ts`
 
@@ -431,7 +431,7 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Step 10.2: Write api.ts with tests**
+- [x] **Step 10.2: Write api.ts with tests**
 
 **File:** `dashboard/src/api.ts`
 
@@ -534,7 +534,7 @@ describe("submitPipeline", () => {
 Run: `npx vitest run src/api.test.ts`
 Expected: 5+ tests, all PASS
 
-- [ ] **Step 10.3: Write HomePage component with tests**
+- [x] **Step 10.3: Write HomePage component with tests**
 
 **File:** `dashboard/src/components/HomePage.tsx`
 
@@ -620,7 +620,7 @@ it("renders report cards from fetch", async () => {
 Run: `npx vitest run src/components/HomePage.test.tsx`
 Expected: 4+ tests, all PASS
 
-- [ ] **Step 10.4: Update App.tsx — add HomePage route**
+- [x] **Step 10.4: Update App.tsx — add HomePage route**
 
 **File:** `dashboard/src/components/App.tsx`
 
@@ -663,7 +663,7 @@ export function App() {
 
 Update App tests if they exist (check for `App.test.tsx` — if present, update route references). If no App tests exist, skip.
 
-- [ ] **Step 10.5: Rewrite EventPage — fetch from API**
+- [x] **Step 10.5: Rewrite EventPage — fetch from API**
 
 **File:** `dashboard/src/components/EventPage.tsx`
 
@@ -772,7 +772,7 @@ it("renders report from API data", async () => {
 Run: `npx vitest run src/components/EventPage.test.tsx`
 Expected: 3+ tests, all PASS
 
-- [ ] **Step 10.6: Rewrite SettingsPage — fetch config from backend**
+- [x] **Step 10.6: Rewrite SettingsPage — fetch config from backend**
 
 **File:** `dashboard/src/components/SettingsPage.tsx`
 
@@ -911,13 +911,13 @@ it("shows Call 3 thinking = true from backend", async () => {
 Run: `npx vitest run src/components/SettingsPage.test.tsx`
 Expected: 4+ tests, all PASS
 
-- [ ] **Step 10.7: Delete sample-data.ts**
+- [x] **Step 10.7: Delete sample-data.ts**
 
 ```bash
 rm dashboard/src/data/sample-data.ts
 ```
 
-- [ ] **Step 10.8: Full verification**
+- [x] **Step 10.8: Full verification**
 
 ```bash
 cd dashboard && npx vitest run

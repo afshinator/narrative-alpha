@@ -1,6 +1,6 @@
 # Error Handling Fixes — Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Fix the broken error-handling chain across backend (FastAPI) and frontend (React/Vite) so that error messages include the real error detail from FastAPI's response body, pipeline crashes are caught gracefully, missing env vars return proper HTTP status codes, config endpoint uses Pydantic validation, path traversal is prevented, and all error paths have test coverage.
 
@@ -16,7 +16,7 @@
 - Modify: `dashboard/src/api.ts:8-10`
 - Modify: `dashboard/src/api.test.ts:13-17`
 
-- [ ] **Step 1: Write test for error body reading**
+- [x] **Step 1: Write test for error body reading**
 
 Update the existing "throws on non-ok response" test to verify that the error body's `detail` field is included in the thrown message, AND that the URL/method appear:
 
@@ -41,12 +41,12 @@ it("falls back to statusText when response body is not JSON", async () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `npx vitest run dashboard/src/api.test.ts`
 Expected: Both new tests fail with "expected to throw/not throw" (current implementation shows `statusText` only, no URL/method).
 
-- [ ] **Step 3: Implement the fix in `fetchJson`**
+- [x] **Step 3: Implement the fix in `fetchJson`**
 
 Replace lines 8-10 in `dashboard/src/api.ts`:
 
@@ -64,7 +64,7 @@ if (!res.ok) {
 }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `npx vitest run dashboard/src/api.test.ts`
 Expected: All tests PASS (2 new + existing 3).
@@ -77,7 +77,7 @@ Expected: All tests PASS (2 new + existing 3).
 - Modify: `narrative/server.py:42-59`
 - Modify: `tests/test_server.py`
 
-- [ ] **Step 1: Write tests for pipeline error scenarios**
+- [x] **Step 1: Write tests for pipeline error scenarios**
 
 Add to `tests/test_server.py`:
 
@@ -109,14 +109,14 @@ def test_pipeline_returns_500_on_crash(client):
         srv._run_pipeline = original
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `python -m pytest tests/test_server.py::test_pipeline_rejects_missing_env_vars tests/test_server.py::test_pipeline_returns_500_on_crash -v`
 Expected: First test fails (status 200, not 503). Second test fails (status 500 is returned by FastAPI's default handler, but the response body won't match — or the test helper itself fails).
 
 Note: The crash test `test_pipeline_returns_500_on_crash` uses monkey-patching because `_run_pipeline` is imported by name in `server.py` (`from narrative.pipeline import _run_pipeline`). The patching mutates the module directly. An alternative is to use `unittest.mock.patch.object(srv, '_run_pipeline', ...)` — but since `_run_pipeline` is imported at the top level of `server.py`, `srv._run_pipeline` refers to the module attribute, and `patch.object` won't intercept the local reference inside `execute_pipeline`. The monkey-patch approach above is the simplest working solution.
 
-- [ ] **Step 3: Implement the fix in `server.py`**
+- [x] **Step 3: Implement the fix in `server.py`**
 
 Replace lines 42-59 in `narrative/server.py`:
 
@@ -162,7 +162,7 @@ from fastapi.responses import JSONResponse
 logger = logging.getLogger(__name__)
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `python -m pytest tests/test_server.py -v`
 Expected: All 16+ tests PASS (14 original + 2 new).
@@ -175,7 +175,7 @@ Expected: All 16+ tests PASS (14 original + 2 new).
 - Modify: `dashboard/src/components/SettingsPage.tsx`
 - Modify: `dashboard/src/components/SettingsPage.test.tsx`
 
-- [ ] **Step 1: Write test for fetch-failure error state**
+- [x] **Step 1: Write test for fetch-failure error state**
 
 Add to `dashboard/src/components/SettingsPage.test.tsx`:
 
@@ -196,12 +196,12 @@ it("disables save button when config failed to load", async () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `npx vitest run dashboard/src/components/SettingsPage.test.tsx`
 Expected: New tests fail or timeout — current component always renders the settings table and Save button even when `fetchConfig` fails.
 
-- [ ] **Step 3: Implement the fix in `SettingsPage.tsx`**
+- [x] **Step 3: Implement the fix in `SettingsPage.tsx`**
 
 Replace the `saveStatus` / `loading` / error handling in `SettingsPage.tsx`:
 
@@ -300,7 +300,7 @@ The key changes:
 - When `!config`, a fall-through guard returns an empty-state message
 - The `??` fallbacks are removed since `config` is guaranteed non-null before rendering the table
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `npx vitest run dashboard/src/components/SettingsPage.test.tsx`
 Expected: All 6 tests PASS (existing 4 + 2 new).
@@ -315,7 +315,7 @@ Expected: All 6 tests PASS (existing 4 + 2 new).
 
 **Ambiguity note:** The existing `test_settings_rejects_invalid_slot_structure` sends `{"provider": "openai"}` for `call_1_entity_normalization`. `LLMSlotConfig` requires only `provider` and `model`, so `model` being absent triggers a `ValidationError`. This test passes as-is with the Pydantic change. No existing test covers extra field rejection; the `_Strict` base with `extra="forbid"` will now additionally reject unknown keys. This is a net improvement.
 
-- [ ] **Step 1: Write test for extra field rejection**
+- [x] **Step 1: Write test for extra field rejection**
 
 Add to `tests/test_server.py`:
 
@@ -333,12 +333,12 @@ def test_post_config_rejects_unknown_fields(client):
     assert resp.status_code == 422
 ```
 
-- [ ] **Step 2: Run the new test to verify it fails (with current `dict` endpoint)**
+- [x] **Step 2: Run the new test to verify it fails (with current `dict` endpoint)**
 
 Run: `python -m pytest tests/test_server.py::test_post_config_rejects_unknown_fields -v`
 Expected: FAIL — currently accepts extra fields silently.
 
-- [ ] **Step 3: Modify `update_config` to use `LLMConfig`**
+- [x] **Step 3: Modify `update_config` to use `LLMConfig`**
 
 Replace lines 103-123 in `narrative/server.py`:
 
@@ -355,7 +355,7 @@ def update_config(payload: LLMConfig) -> dict:
 
 This replaces the manual slot-check loop and the `except Exception` block with FastAPI's built-in Pydantic validation. When `LLMConfig(**payload)` fails (missing slot, invalid slot structure, extra field), FastAPI returns 422 with a detailed error message automatically.
 
-- [ ] **Step 4: Run all config test_server tests**
+- [x] **Step 4: Run all config test_server tests**
 
 Run: `python -m pytest tests/test_server.py -v`
 Expected: All 19+ tests PASS (14 original + 2 pipeline + 2 settings + 1 extra_field). The existing tests that posted invalid config (`test_post_config_rejects_missing_slot`, `test_settings_rejects_invalid_slot_structure`) now get their 422 from FastAPI's auto-validation rather than the manual loop — same result, same status code.
@@ -368,7 +368,7 @@ Expected: All 19+ tests PASS (14 original + 2 pipeline + 2 settings + 1 extra_fi
 - Modify: `narrative/server.py:89-95`
 - Modify: `tests/test_server.py`
 
-- [ ] **Step 1: Write test for path traversal rejection**
+- [x] **Step 1: Write test for path traversal rejection**
 
 Add to `tests/test_server.py`:
 
@@ -380,12 +380,12 @@ def test_get_report_rejects_path_traversal(client):
     assert "Invalid cluster_id" in resp.json()["detail"]
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `python -m pytest tests/test_server.py::test_get_report_rejects_path_traversal -v`
 Expected: FAIL — currently accepts the path traversal.
 
-- [ ] **Step 3: Add guard to `get_report`**
+- [x] **Step 3: Add guard to `get_report`**
 
 Replace lines 89-95 in `narrative/server.py`:
 
@@ -401,7 +401,7 @@ def get_report(cluster_id: str) -> dict:
         return json.load(f)
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `python -m pytest tests/test_server.py -v`
 Expected: All tests PASS.

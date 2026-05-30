@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import type { LLMConfig, LLMSlotConfig } from "../types";
 import { SettingsRow } from "./SettingsRow";
+import { EnvHealthPanel } from "./EnvHealthPanel";
 import { fetchConfig, saveConfig } from "../api";
 
 const SLOTS: { key: keyof LLMConfig; name: string; description: string }[] = [
@@ -50,17 +51,15 @@ export function SettingsPage() {
     <div className="page settings-page">
       <h2 className="section-title">LLM Configuration</h2>
       <p className="section-subtitle">
-        Configure per-slot LLM providers and parameters for the forensic pipeline.
-        Defaults are loaded from the backend.
+        Configure the model name for each pipeline call slot. Other parameters are managed via server config.
       </p>
+
+      <EnvHealthPanel />
 
       <div className="settings-table">
         <div className="settings-header">
           <div>Call Slot</div>
-          <div>Provider</div>
           <div>Model</div>
-          <div>Temperature</div>
-          <div>Thinking</div>
         </div>
 
         {SLOTS.map(({ key, name, description }) => (
@@ -68,11 +67,8 @@ export function SettingsPage() {
             key={key}
             slotName={name}
             slotDescription={description}
-            provider={config[key].provider}
             model={config[key].model}
-            thinking={config[key].thinking}
-            temperature={config[key].temperature}
-            onUpdate={(updates) => handleUpdate(key, updates)}
+            onChange={(model) => handleUpdate(key, { model })}
           />
         ))}
       </div>

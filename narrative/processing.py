@@ -91,7 +91,10 @@ def run_entity_normalization(
     except (json.JSONDecodeError, RuntimeError):
         return {}
 
-    mappings = data.get("normalized_mappings", [])
+    if isinstance(data, list):
+        mappings = data
+    else:
+        mappings = data.get("normalized_mappings", [])
     if not isinstance(mappings, list):
         return {}
 

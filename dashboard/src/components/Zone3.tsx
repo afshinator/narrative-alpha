@@ -37,6 +37,20 @@ export function Zone3({ report }: Zone3Props) {
                 </svg>
                 Reputation alert: high scatter-shot ratio — {w.outlet_name}
               </div>
+              <div className="rep-warning-meta">
+                <span className="rep-warning-meta-item">
+                  Scatter-shot factor: <strong>{(w.scatter_shot_anomaly_factor * 100).toFixed(0)}%</strong>
+                </span>
+                <span className="rep-warning-meta-item">
+                  Label: <span className={`badge badge-${w.scatter_shot_label === "HIGH" ? "high" : w.scatter_shot_label === "MED" ? "med" : "low"}`}>{w.scatter_shot_label}</span>
+                </span>
+                <span className="rep-warning-meta-item">
+                  Validation rate: <strong>{(w.historical_origin_validation_rate * 100).toFixed(0)}%</strong>
+                </span>
+                <span className="rep-warning-meta-item">
+                  Domain: <strong>{w.source_domain}</strong>
+                </span>
+              </div>
               <div className="rep-warning-body">{w.warning_message}</div>
             </div>
           ))}

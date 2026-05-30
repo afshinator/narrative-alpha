@@ -4,9 +4,11 @@
 
 **Goal:** Implement the complete Narrative Alpha forensic narrative analysis system per spec v1.4
 
-**Architecture:** 4-layer decoupled pipeline (Ingestion → Processing → Analysis → Presentation) orchestrated as a single Modal web endpoint. Bright Data for scraping, DeepSeek V4 for LLM (Flash + Pro), OpenAI for embeddings, SQLite on Modal Volume for persistence.
+> **Migration note (2026-05-30):** The plan was originally written for Modal Serverless deployment (Tasks 8-9). During implementation, orchestration was refactored to local FastAPI + uvicorn with threading for background work. Reference code blocks in Task 8 show the original Modal design; the actual implementation lives in `narrative/pipeline.py` and `narrative/server.py`. The dashboard was built as a React/Vite SPA instead of static HTML.
 
-**Tech Stack:** Python 3.11, Modal Serverless, Bright Data SERP + Web Unlocker, DeepSeek V4, OpenAI embeddings, SQLite (WAL mode), static HTML/JS dashboard
+**Architecture:** 4-layer decoupled pipeline (Ingestion → Processing → Analysis → Presentation) orchestrated via local FastAPI server. Bright Data for scraping, DeepSeek V4 for LLM (Flash + Pro), OpenAI for embeddings, SQLite for persistence.
+
+**Tech Stack:** Python 3.11, FastAPI + uvicorn, Bright Data SERP + Web Unlocker, DeepSeek V4, OpenAI embeddings, SQLite (WAL mode), React/Vite dashboard
 
 ---
 
@@ -20,15 +22,17 @@
 | `narrative/processing.py` | Layer 2 | `build_search_context_table()`, entity normalization (Call 1), linguistic neutralization (Call 2) |
 | `narrative/analysis.py` | Layer 3 | Graph extraction (Call 3), Python set-math (Gc, Oi, Sa), `compute_pre_synthesis_context()`, forensic synthesis (Call 4), label injection |
 | `narrative/reputation.py` | Persistence | SQLite schema, `get_hardened_db_connection()`, `handle_outlet_registration()`, read/write reputation, ingestion log |
-| `narrative/backtest.py` | Persistence | Background `.spawn()` worker for historical reputation back-test |
-| `narrative/app.py` | Orchestration | Modal endpoints: `execute_forensic_pipeline()`, `update_llm_config()` |
-| `dashboard/index.html` | Layer 4 | Index page — list of processed clusters |
-| `dashboard/event.html` | Layer 4 | Per-cluster forensic report (3 zones + sub-panels) |
-| `dashboard/settings.html` | Layer 4 | Runtime LLM provider/model settings UI |
-| `dashboard/style.css` | Layer 4 | Dark terminal aesthetic, color-coded labels |
-| `dashboard/app.js` | Layer 4 | Data fetching, zone rendering, settings save |
+| `narrative/backtest.py` | Persistence | Background threading worker for historical reputation back-test |
+| `narrative/pipeline.py` | Orchestration | 14-step forensic pipeline: `_run_pipeline()` |
+| `narrative/server.py` | Orchestration | FastAPI endpoints: `/api/pipeline`, `/api/settings` |
+| `dashboard/src/main.tsx` | Layer 4 | React entry point (Vite bundler) |
+| `dashboard/src/App.tsx` | Layer 4 | Hash router: `/`, `/event/:clusterId`, `/settings` |
+| `dashboard/src/components/HomePage.tsx` | Layer 4 | Cluster list page |
+| `dashboard/src/components/EventPage.tsx` | Layer 4 | Per-cluster forensic report (3 zones) |
+| `dashboard/src/components/SettingsPage.tsx` | Layer 4 | LLM provider/model config form |
+| `dashboard/src/components/Zone{1,2,3}.tsx` | Layer 4 | Forensic report zone panels |
 
-**Dependency order:** contracts → llm_client → ingestion → reputation → processing → analysis → backtest → app → dashboard
+**Dependency order:** contracts → llm_client → ingestion → reputation → processing → analysis → backtest → pipeline → server → dashboard
 
 ---
 
@@ -2142,73 +2146,57 @@ git add app.py
 git commit -m "feat: add Modal orchestration — pipeline endpoint + LLM config settings endpoint + backtest spawn"
 ```
 
-**Sanity check:** Does `execute_forensic_pipeline` follow the 14-step sequence? Does the corpus floor gate return before any LLM calls? Does `update_llm_config` validate all 4 required slots? Does `reputation_records` appear in `context_bundle`? Is `compute_framing_volatility` called from analysis (step 9), not processing? Does `run_historical_backtest` have `@app.function` decorator? Does step 4 call `.spawn()` (not pass)?
+**Sanity check:** Does `_run_pipeline` follow the 14-step sequence? Does the corpus floor gate return before any LLM calls? Does `update_llm_config` validate all 4 required slots? Does `reputation_records` appear in `context_bundle`? Is `compute_framing_volatility` called from analysis (step 9), not processing? Does step 4 fire backtest via `threading.Thread`?
 
 ---
 
-### Task 9: Frontend Dashboard — Static HTML/JS/CSS
+### Task 9: Frontend Dashboard — React/Vite
 
-**Files:** Create `dashboard/` directory with 4 files.
+**Files:** `dashboard/` — React/Vite SPA with TypeScript.
 
-**What:** Section 11 — Three-zone forensic dashboard with sub-panels + settings page. Dark terminal aesthetic. Read-only JSON consumer.
+**What:** Section 11 — Three-zone forensic dashboard with sub-panels + settings page. Dark terminal aesthetic. Talks to local FastAPI backend via Vite proxy.
 
-**Strategy:** Start with a minimal single-file HTML that renders all 3 zones from hardcoded sample JSON. Iterate into separate files (index, event, settings) + shared CSS/JS.
+**Strategy:** React + Vite + TypeScript with `react-router-dom` hash routing (`/#/`, `/#/event/:clusterId`, `/#/settings`). 11 components, 3 zone panels, 81 passing tests.
 
-- [ ] **Step 1: Create directory**
-
-```bash
-mkdir -p dashboard
-```
-
-- [ ] **Step 2: Write `dashboard/style.css`** — TBD (dark terminal aesthetic, color-coded labels per Section 11)
-- [ ] **Step 3: Write `dashboard/index.html`** — TBD (cluster list page with timestamps and verticals)
-- [ ] **Step 4: Write `dashboard/event.html`** — TBD (3-zone forensic report: consensus baseline, distortion matrix + regime shifts, outlier signals + divergence zones + fractures)
-- [ ] **Step 5: Write `dashboard/settings.html`** — TBD (per-slot provider/model/temperature/th!nking form + save POST)
-- [ ] **Step 6: Write `dashboard/app.js`** — TBD (fetch cluster data, render zones, settings form logic)
-
-- [ ] **Step 7: Verify HTML/CSS loads in browser**
-
-Open `dashboard/index.html` → check layout, labels render.
-
-- [ ] **Step 8: Commit**
-
-```bash
-git add dashboard/
-git commit -m "feat: add static dashboard — 3-zone forensic report + settings UI"
-```
+- [x] **Step 1: Scaffold Vite + React + TypeScript project**
+- [x] **Step 2: Write zone components (`Zone1`/`Zone2`/`Zone3`)** — consensus baseline, distortion matrix + regime shifts, outlier signals + divergence zones + fractures
+- [x] **Step 3: Write page components (`HomePage`, `EventPage`, `SettingsPage`)** — cluster list, per-event forensic report, LLM config form
+- [x] **Step 4: Write label helpers (`utils/labels.ts`)** — color-coded threshold labels matching spec §5
+- [x] **Step 5: Write tests** — 81 tests across all components + utils
+- [x] **Step 6: Wire API proxy** — Vite dev server proxies `/api/*` → FastAPI backend on port 8000
+- [x] **Step 7: Verify TypeScript compiles** — `tsc --noEmit` clean, 81/81 tests pass
 
 ---
 
 ### Task 10: Integration — End-to-End Wire-Up
 
-**Files:** None new. Modify `narrative/app.py` to connect TBD stubs.
+**Files:** None new. `narrative/pipeline.py` orchestrates the 14-step flow.
 
-**What:** Ensure all imports resolve, data flows between layers match the spec contracts, edge cases from Section 10 are handled.
+**What:** All imports resolve, data flows match spec contracts, Section 10 edge cases handled.
 
-- [ ] **Step 1: Trace `execute_forensic_pipeline` flow against Section 8 ordered list**
+- [x] **Step 1: Trace `_run_pipeline` flow against Section 8 ordered list**
 
-Verify each of the 14 steps has a corresponding code block.
+All 14 steps have corresponding code blocks in `narrative/pipeline.py:44-150`.
 
-- [ ] **Step 2: Verify Contract A → Layer 2 input**
+- [x] **Step 2: Verify Contract A → Layer 2 input**
 
 Ingestion manifest dict keys match what `run_entity_normalization` and `run_linguistic_neutralization` expect.
 
-- [ ] **Step 3: Verify Layer 2 → Layer 3 input**
+- [x] **Step 3: Verify Layer 2 → Layer 3 input**
 
-`canonical_map` + `neutralized` + `raw_texts` correctly fed into `extract_all_graphs` and `compute_consensus_baseline`.
+`canonical_map` + `neutralized` + `raw_texts` correctly fed into `extract_all_graphs` and `compute_consensus_baseline` at pipeline.py:92-98.
 
-- [ ] **Step 4: Verify Contract B output shape**
+- [x] **Step 4: Verify Contract B output shape**
 
-`ForensicReport` Pydantic model validates against `synthesize_forensic_report` output (after `inject_labels`).
+`ForensicReport` Pydantic model validates against `synthesize_forensic_report` output after `inject_labels`.
 
-- [ ] **Step 5: Handle Section 10 failure modes**
+- [x] **Step 5: Handle Section 10 failure modes**
 
-- SERP returns < 5 domains → floor gate returns early
-- LLM parse error → document excluded, graph marked `_parse_error`
-- Missing `people_also_ask` → graceful degrade in `build_search_context_table`
-- Context window cap → hard cap at 20 docs (add check in `build_ingestion_manifest`)
+- SERP returns < 5 domains → floor gate returns early (pipeline.py:69-72)
+- LLM parse error → document excluded, graph marked `_parse_error` (analysis.py:206-208)
+- Context window cap → hard cap at 20 docs in `build_ingestion_manifest` (ingestion.py:311-314)
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add .
@@ -2307,30 +2295,29 @@ git commit -m "feat: implement full historical back-test worker with Modal spawn
 
 ## Self-Review Checklist
 
-- [ ] Spec coverage: Section 14 validation gates → Task 3, Section 7 reputation → Task 4, Section 6 LLM sequence → Tasks 5+6, Section 5 metrics → Task 6, Section 11 frontend → Task 9, Section 9 settings → Task 8
-- [ ] No TBD placeholders in Tasks 1-8, 10, 11 (critical path)
-- [ ] Type consistency: `narrative/contracts.py` model field names match dict keys used in `narrative/analysis.py`, `narrative/processing.py`, `narrative/app.py`
-- [ ] `compute_omission_index` in `narrative/analysis.py` uses `resolve_to_canonical` from same module
-- [ ] `inject_labels` covers `omission_label`, `framing_volatility_label`, `scatter_shot_label`, `consensus_stability`, `synchronization_label`
-- [ ] `compute_framing_volatility` is in `narrative/analysis.py`, NOT `narrative/processing.py` (layer decoupling — Issue #1 fix)
-- [ ] `validate_ingestion_payload` return dict includes `passed_validation: 1` (Issue #4 fix)
-- [ ] `build_ingestion_manifest` accepts `db_conn`, calls `write_ingestion_log`, applies 20-doc cap (Issues #3, #13 fix)
-- [ ] `handle_outlet_registration` stores `outlet_name` (Issue #15 fix)
-- [ ] `context_bundle` in `narrative/app.py` includes `reputation_records` dict (Issue #9 fix)
-- [ ] `run_historical_backtest` has `@app.function` decorator in `narrative/app.py`; step 4 calls `.spawn()` (Issue #10 fix)
+- [x] Spec coverage: Section 14 validation gates → Task 3, Section 7 reputation → Task 4, Section 6 LLM sequence → Tasks 5+6, Section 5 metrics → Task 6, Section 11 frontend → Task 9, Section 9 settings → Task 8
+- [x] No TBD placeholders in Tasks 1-8, 10, 11 (critical path)
+- [x] Type consistency: `narrative/contracts.py` model field names match dict keys used in `narrative/analysis.py`, `narrative/processing.py`, `narrative/pipeline.py`
+- [x] `compute_omission_index` in `narrative/analysis.py` uses `resolve_to_canonical` from same module
+- [x] `inject_labels` covers `omission_label`, `framing_volatility_label`, `scatter_shot_label`, `consensus_stability`, `synchronization_label`
+- [x] `compute_framing_volatility` is in `narrative/analysis.py`, NOT `narrative/processing.py` (layer decoupling — Issue #1 fix)
+- [x] `validate_ingestion_payload` return dict includes `passed_validation: 1` (Issue #4 fix)
+- [x] `build_ingestion_manifest` accepts `db_conn`, calls `write_ingestion_log`, applies 20-doc cap (Issues #3, #13 fix)
+- [x] `handle_outlet_registration` stores `outlet_name` (Issue #15 fix)
+- [x] `context_bundle` in `narrative/pipeline.py` includes `reputation_records` dict (Issue #9 fix)
+- [x] `execute_historical_backtest` runs via `threading.Thread` in `narrative/pipeline.py:85-87` — refactored from Modal `.spawn()` to local threading (Issue #10 fix)
 - [x] Task 11 (`compute_pre_synthesis_context`) implemented in Task 6 — narrative clusters, fracture detection, term shift scanning all working (Issue #7 fix)
-- [ ] SERP payload uses `"engine": "google"`, `"tbm": "nws"`, `"q"` — confirmed present in plan (Issue #5 was false positive)
-- [ ] `serp_data` raw response passed to both `build_ingestion_manifest` and `run_entity_normalization` — same object (Issue #8 confirmed correct)
-- [x] `compute_pre_synthesis_context` fully implemented (was stub/NotImplementedError in original plan — v2 Issue #1 fix)
-- [ ] `FORENSIC_SYNTHESIS_SYSTEM_PROMPT` contains explicit Contract B JSON schema skeleton — Call 4 not flying blind on output shape (v2 Issue #2 fix)
-- [ ] `_run_startup_init()` replaces `DB_INITIALIZED` flag — runs every cold start, no false cache (v2 Issue #3 fix)
-- [ ] `EventMeta` has `corpus_capped: bool = False`; app.py injects `manifest.get("corpus_capped")` into `report["event_meta"]` after Call 4 (v2 Issue #5 fix)
-- [ ] `compute_consensus_baseline` computes `n` from non-error graphs only — threshold not skewed by parse failures (v2 Issue #6 fix)
-- [ ] Execution Notes call out both Call 2 and Call 3 serial timeout risk (v2 Issue #7 fix)
-- [ ] `write_ingestion_log` uses `INSERT OR REPLACE` — both fetch attempts for same URL visible in debug log (v2 Issue #8 fix)
-- [ ] Task 10 Step 1 says "14 steps" not "13 steps" (v2 Issue #9 fix)
-- [ ] File map `narrative/processing.py` row no longer lists "embedding generation, Vf computation" (v2 Issue #10 fix)
-- [ ] `_write_with_retry` exists in `narrative/reputation.py`; `handle_outlet_registration` and `write_outlier_signal` use it (concurrent backtest write safety)
-- [ ] `extract_assistant_message()` exists in `narrative/llm_client.py`; checks for `reasoning_content` via `getattr` and includes it when present; `call_llm` docstring warns against manual dict reconstruction for multi-turn
-- [ ] `MIN_BODY_CHARS = 200` constant defined in `narrative/ingestion.py`; early exit after `extract_text` logs extraction-failed docs to `all_attempted` with `passed_validation: 0` before `validate_ingestion_payload` is called
-- [ ] `inject_labels` sets `fracture.setdefault("classification_method", "LLM_ASSISTED")` on all `reality_fractures` — field present in Pydantic model but absent from raw Call 4 dict without explicit injection
+- [x] SERP payload uses `"engine": "google"`, `"tbm": "nws"`, `"q"` — confirmed present in plan (Issue #5 was false positive)
+- [x] `serp_data` raw response passed to both `build_ingestion_manifest` and `run_entity_normalization` — same object (Issue #8 confirmed correct)
+- [x] `FORENSIC_SYNTHESIS_SYSTEM_PROMPT` contains explicit Contract B JSON schema skeleton — Call 4 not flying blind on output shape (v2 Issue #2 fix)
+- [x] `_run_startup_init()` replaces `DB_INITIALIZED` flag — runs every cold start, no false cache (v2 Issue #3 fix)
+- [x] `EventMeta` has `corpus_capped: bool = False`; pipeline.py injects `manifest.get("corpus_capped")` into `report["event_meta"]` after Call 4 (v2 Issue #5 fix)
+- [x] `compute_consensus_baseline` computes `n` from non-error graphs only — threshold not skewed by parse failures (v2 Issue #6 fix)
+- [x] Execution Notes call out both Call 2 and Call 3 serial timeout risk (v2 Issue #7 fix)
+- [x] `write_ingestion_log` uses `INSERT OR REPLACE` — both fetch attempts for same URL visible in debug log (v2 Issue #8 fix)
+- [x] Task 10 Step 1 says "14 steps" not "13 steps" (v2 Issue #9 fix)
+- [x] File map `narrative/processing.py` row no longer lists "embedding generation, Vf computation" (v2 Issue #10 fix)
+- [x] `_write_with_retry` exists in `narrative/reputation.py`; `handle_outlet_registration` and `write_outlier_signal` use it (concurrent backtest write safety)
+- [x] `extract_assistant_message()` exists in `narrative/llm_client.py`; checks for `reasoning_content` via `getattr` and includes it when present; `call_llm` docstring warns against manual dict reconstruction for multi-turn
+- [x] `MIN_BODY_CHARS = 200` constant defined in `narrative/ingestion.py`; early exit after `extract_text` logs extraction-failed docs to `all_attempted` with `passed_validation: 0` before `validate_ingestion_payload` is called
+- [x] `inject_labels` sets `fracture.setdefault("classification_method", "LLM_ASSISTED")` on all `reality_fractures` — field present in Pydantic model but absent from raw Call 4 dict without explicit injection

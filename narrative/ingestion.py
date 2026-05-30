@@ -1,37 +1,41 @@
 """Layer 1: Ingestion — Bright Data SERP discovery + Web Unlocker extraction."""
 
+import json
 import re
 from datetime import datetime, timezone
+from concurrent.futures import ThreadPoolExecutor
 from typing import Callable, Optional
-from urllib.parse import urlparse
+from urllib.parse import urlparse, quote
 
 import requests
 import trafilatura
 
 
-SERP_ENDPOINT = "https://api.brightdata.com/serp/req"
+SERP_ENDPOINT = "https://api.brightdata.com/request"
 UNLOCKER_ENDPOINT = "https://api.brightdata.com/request"
 MIN_BODY_CHARS = 200  # trafilatura extraction floor — JS-heavy / paywalled sites return ""
 
 
 # ── 1. SERP Discovery ──
 
-def discover_articles(keyword: str, api_key: str, num: int = 15) -> dict:
+def discover_articles(keyword: str, zone: str, api_key: str, num: int = 15, time_range: str = "") -> dict:
     """
     Query Bright Data SERP API for Google News results.
 
-    Returns parsed SERP response dict. Uses engine=google + tbm=nws
-    for the News tab; parsed_light=true for structured metadata.
+    Uses the unified /request endpoint with a Google News search URL.
+    Returns dict with news[] containing structured results.
+
+    Args:
+        time_range: if non-empty, appended as &tbs=qdr:{time_range}
+                    (e.g. "y" for past year, "m" for past month).
     """
-    payload = {
-        "engine": "google",
-        "q": keyword,
-        "tbm": "nws",
-        "num": num,
-        "gl": "us",
-        "hl": "en",
-        "parsed_light": True,
-    }
+    search_url = (
+        f"https://www.google.com/search?q={quote(keyword)}"
+        f"&tbm=nws&num={num}&gl=us&hl=en"
+    )
+    if time_range:
+        search_url += f"&tbs=qdr:{time_range}"
+    payload = {"zone": zone, "url": search_url, "format": "json"}
     response = requests.post(
         SERP_ENDPOINT,
         json=payload,
@@ -39,7 +43,8 @@ def discover_articles(keyword: str, api_key: str, num: int = 15) -> dict:
         timeout=30,
     )
     response.raise_for_status()
-    return response.json()
+    data = response.json()
+    return json.loads(data["body"])
 
 
 # ── 2. Web Unlocker Extraction ──
@@ -69,7 +74,7 @@ def extract_text(html: str) -> str:
     return (text or "").strip()
 
 
-# ── 2B. SERP Result Parser ──
+# ── 2B. SERP Result Parser + parallel processing helper ──
 
 def parse_serp_result(result: dict) -> dict:
     """
@@ -81,11 +86,11 @@ def parse_serp_result(result: dict) -> dict:
     """
     url = result.get("link", "")
     title = result.get("title", "").strip()
-    snippet = result.get("snippet", "").strip()
-    published_at = result.get("published_at") or None
+    snippet = result.get("snippet") or result.get("description", "").strip()
+    published_at = result.get("published_at") or result.get("date") or None
 
     source_name = result.get("source", "") or ""
-    display_link = result.get("display_link", "") or ""
+    display_link = result.get("display_link") or result.get("link", "") or ""
 
     # Domain always from display_link or url — never from source (human-readable name)
     domain = ""
@@ -116,6 +121,86 @@ def parse_serp_result(result: dict) -> dict:
         "published_at": published_at,
         "snippet": snippet,
     }
+
+
+def _process_one_result(
+    idx: int, result: dict, zone: str, api_key: str,
+    now_utc: str,
+    progress_cb: Optional[Callable] = None,
+    total: int = 0,
+) -> tuple[dict, dict | None]:
+    """Fetch, extract, and validate one SERP result. Returns (attempted_doc, validated_doc_or_None)."""
+    parsed = parse_serp_result(result)
+    url = parsed["url"]
+    title = parsed["title"]
+    source_name = parsed["source_name"]
+    domain = parsed["domain"]
+    published_at = parsed["published_at"]
+
+    if progress_cb:
+        label = source_name or domain or url
+        count_str = f" ({idx + 1}/{total})" if total else ""
+        progress_cb("ingesting", f"Fetching {label}{count_str}")
+
+    if not url:
+        return _attempted_doc(idx, source_name, url, domain, title, published_at, now_utc, "", 0, 0), None
+
+    fetch_status = 0
+    raw_text = ""
+    try:
+        html = fetch_article_body(url, zone, api_key)
+        fetch_status = 200
+        raw_text = extract_text(html)
+    except Exception as e:
+        fetch_status = getattr(getattr(e, "response", None), "status_code", 0) or -1
+        return _attempted_doc(idx, source_name, url, domain, title, published_at, now_utc, "", fetch_status, 0), None
+
+    if len(raw_text) < MIN_BODY_CHARS:
+        return _attempted_doc(idx, source_name, url, domain, title, published_at, now_utc, raw_text, fetch_status, 0, body_length=len(raw_text)), None
+
+    doc = {
+        "doc_id": f"DOC-{idx:03d}",
+        "source_name": source_name,
+        "source_url": url,
+        "title": title,
+        "published_at": published_at,
+        "scrape_timestamp": now_utc,
+        "raw_text_content": raw_text,
+        "fetch_status": fetch_status,
+    }
+
+    validated = validate_ingestion_payload(doc)
+    if validated:
+        validated["fetch_status"] = fetch_status
+        validated["published_at"] = published_at
+        return dict(validated), validated
+    else:
+        return _attempted_doc(idx, source_name, url, domain, title, published_at, now_utc, raw_text, fetch_status, 0), None
+
+
+# ── 2C. Attempted-doc builder (shared by sequential and parallel code paths) ──
+
+def _attempted_doc(
+    idx: int, source_name: str, url: str, domain: str, title: str,
+    published_at: str | None, now_utc: str, raw_text: str,
+    fetch_status: int, passed_validation: int,
+    body_length: int | None = None,
+) -> dict:
+    doc: dict = {
+        "doc_id": f"DOC-{idx:03d}",
+        "source_name": source_name,
+        "source_url": url,
+        "source_domain": domain,
+        "title": title,
+        "published_at": published_at,
+        "scrape_timestamp": now_utc,
+        "raw_text_content": raw_text,
+        "fetch_status": fetch_status,
+        "passed_validation": passed_validation,
+    }
+    if body_length is not None:
+        doc["body_length"] = body_length
+    return doc
 
 
 # ── 3. Validation Gates ──
@@ -193,6 +278,7 @@ def build_ingestion_manifest(
     api_key: str,
     db_conn=None,
     logger_func: Optional[Callable] = None,
+    progress_cb: Optional[Callable] = None,
 ) -> dict:
     """
     Full Layer 1 pipeline: SERP results → Web Unlocker fetch → validate → manifest.
@@ -211,90 +297,22 @@ def build_ingestion_manifest(
     now_utc = datetime.now(timezone.utc).isoformat()
     cluster_id = f"EVT-{datetime.now(timezone.utc).strftime('%Y%m%d')}-{keyword[:20].upper().replace(' ', '-')}"
 
-    organic = serp_data.get("organic", [])
+    organic = serp_data.get("news", serp_data.get("organic", []))
     validated_docs: list[dict] = []
     all_attempted: list[dict] = []
 
-    for idx, result in enumerate(organic):
-        parsed = parse_serp_result(result)
-        url = parsed["url"]
-        title = parsed["title"]
-        source_name = parsed["source_name"]
-        domain = parsed["domain"]
-        published_at = parsed["published_at"]
-
-        if not url:
-            continue
-
-        fetch_status = None
-        raw_text = ""
-        try:
-            html = fetch_article_body(url, zone, api_key)
-            fetch_status = 200
-            raw_text = extract_text(html)
-        except Exception as e:
-            fetch_status = getattr(getattr(e, "response", None), "status_code", 0) or -1
-            all_attempted.append({
-                "doc_id": f"DOC-{idx:03d}",
-                "source_name": source_name,
-                "source_url": url,
-                "source_domain": domain,
-                "title": title,
-                "published_at": published_at,
-                "scrape_timestamp": now_utc,
-                "raw_text_content": "",
-                "fetch_status": fetch_status,
-                "passed_validation": 0,
-            })
-            continue
-
-        # Explicit extraction failure: HTTP succeeded but trafilatura returned nothing
-        if len(raw_text) < MIN_BODY_CHARS:
-            all_attempted.append({
-                "doc_id": f"DOC-{idx:03d}",
-                "source_name": source_name,
-                "source_url": url,
-                "source_domain": domain,
-                "title": title,
-                "published_at": published_at,
-                "scrape_timestamp": now_utc,
-                "raw_text_content": raw_text,
-                "fetch_status": fetch_status,
-                "body_length": len(raw_text),
-                "passed_validation": 0,
-            })
-            continue
-
-        doc = {
-            "doc_id": f"DOC-{idx:03d}",
-            "source_name": source_name,
-            "source_url": url,
-            "title": title,
-            "published_at": published_at,
-            "scrape_timestamp": now_utc,
-            "raw_text_content": raw_text,
-            "fetch_status": fetch_status,
-        }
-
-        validated = validate_ingestion_payload(doc)
-        if validated:
-            validated["fetch_status"] = fetch_status
-            validated["published_at"] = published_at
-            validated_docs.append(validated)
-            all_attempted.append(validated)
-        else:
-            all_attempted.append({
-                "doc_id": f"DOC-{idx:03d}",
-                "source_name": source_name,
-                "source_url": url,
-                "source_domain": domain,
-                "title": title,
-                "published_at": published_at,
-                "scrape_timestamp": now_utc,
-                "raw_text_content": raw_text,
-                "fetch_status": fetch_status,
-                "passed_validation": 0,
-            })
+    total = len(organic)
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        futures = [
+            executor.submit(_process_one_result, idx, result, zone, api_key, now_utc,
+                            progress_cb, total)
+            for idx, result in enumerate(organic)
+        ]
+        for future in futures:
+            attempted_doc, validated_doc = future.result()
+            all_attempted.append(attempted_doc)
+            if validated_doc is not None:
+                validated_docs.append(validated_doc)
 
     # Deduplicate by unique source_domain, stripping internal tracking fields
     seen_domains: set[str] = set()

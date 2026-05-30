@@ -231,15 +231,16 @@ class TestValidateIngestionPayload:
 # ════════════════════════════════════════════════════
 
 class TestDiscoverArticles:
-    """discover_articles(keyword, api_key, num) — SERP API call."""
+    """discover_articles(keyword, zone, api_key, num) — SERP API call."""
 
     def test_import(self):
         from narrative.ingestion import discover_articles, SERP_ENDPOINT
         assert callable(discover_articles)
-        assert SERP_ENDPOINT == "https://api.brightdata.com/serp/req"
+        assert SERP_ENDPOINT == "https://api.brightdata.com/request"
 
     def test_sends_correct_payload(self, monkeypatch):
         from narrative.ingestion import discover_articles
+        import json as _json
 
         posted = {}
 
@@ -251,36 +252,36 @@ class TestDiscoverArticles:
 
             class FakeResp:
                 def raise_for_status(self): pass
-                def json(self): return {"organic": []}
+                def json(self): return {"body": _json.dumps({"news": []})}
 
             return FakeResp()
 
         monkeypatch.setattr("requests.post", fake_post)
-        result = discover_articles("test query", "key-123", num=10)
+        result = discover_articles("test query", "serp_api1", "key-123", num=10)
 
-        assert posted["url"] == "https://api.brightdata.com/serp/req"
-        assert posted["json"]["q"] == "test query"
-        assert posted["json"]["engine"] == "google"
-        assert posted["json"]["tbm"] == "nws"
-        assert posted["json"]["num"] == 10
-        assert posted["json"]["parsed_light"] is True
+        assert posted["url"] == "https://api.brightdata.com/request"
+        assert posted["json"]["zone"] == "serp_api1"
+        assert "google.com/search" in posted["json"]["url"]
+        assert "q=test+query" in posted["json"]["url"] or "q=test%20query" in posted["json"]["url"]
+        assert "tbm=nws" in posted["json"]["url"]
+        assert "num=10" in posted["json"]["url"]
+        assert posted["json"]["format"] == "json"
         assert posted["headers"]["Authorization"] == "Bearer key-123"
         assert posted["timeout"] == 30
-        assert result == {"organic": []}
+        assert result == {"news": []}
 
     def test_defaults_to_15_results(self, monkeypatch):
         from narrative.ingestion import discover_articles
+        import json
 
         def fake_post(url, json, headers, timeout):
             class FakeResp:
                 def raise_for_status(self): pass
-                def json(self): return {}
+                def json(self): return {"body": "{}"}
             return FakeResp()
 
         monkeypatch.setattr("requests.post", fake_post)
-        discover_articles("q", "key")
-        # We already verified num defaults via the previous test's num param.
-        # Just confirm the call doesn't crash with default.
+        discover_articles("q", "serp_api1", "key")
         assert True
 
     def test_raises_on_http_error(self, monkeypatch):
@@ -295,7 +296,49 @@ class TestDiscoverArticles:
 
         monkeypatch.setattr("requests.post", fake_post)
         with pytest.raises(Exception, match="HTTP 403"):
-            discover_articles("q", "key")
+            discover_articles("q", "serp_api1", "key")
+
+    def test_appends_time_range_when_set(self, monkeypatch):
+        from narrative.ingestion import discover_articles
+        import json as _json
+
+        posted = {}
+
+        def fake_post(url, json, headers, timeout):
+            posted["url"] = url
+            posted["json"] = json
+
+            class FakeResp:
+                def raise_for_status(self): pass
+                def json(self): return {"body": _json.dumps({"news": []})}
+
+            return FakeResp()
+
+        monkeypatch.setattr("requests.post", fake_post)
+        discover_articles("test", "z", "k", time_range="y")
+
+        assert "tbs=qdr:y" in posted["json"]["url"]
+
+    def test_omits_time_range_by_default(self, monkeypatch):
+        from narrative.ingestion import discover_articles
+        import json as _json
+
+        posted = {}
+
+        def fake_post(url, json, headers, timeout):
+            posted["url"] = url
+            posted["json"] = json
+
+            class FakeResp:
+                def raise_for_status(self): pass
+                def json(self): return {"body": _json.dumps({"news": []})}
+
+            return FakeResp()
+
+        monkeypatch.setattr("requests.post", fake_post)
+        discover_articles("test", "z", "k")
+
+        assert "tbs=" not in posted["json"]["url"]
 
 
 class TestFetchArticleBody:
@@ -597,6 +640,60 @@ class TestBuildIngestionManifest:
         found = [d for d in result["documents"] if d.get("source_domain") == "src1.com"]
         assert len(found) == 1
         assert found[0].get("published_at") == "2026-05-28T10:00:00Z"
+
+    def test_progress_cb_called_once_per_article(self, monkeypatch, serp_data):
+        """progress_cb is called exactly once per SERP result, step='ingesting'."""
+        from narrative.ingestion import build_ingestion_manifest
+
+        monkeypatch.setattr("narrative.ingestion.fetch_article_body",
+                            lambda url, zone, key: "<html><p>body</p></html>")
+        monkeypatch.setattr("narrative.ingestion.extract_text",
+                            lambda html: _valid_body())
+
+        calls = []
+        build_ingestion_manifest("test", serp_data, "zone", "key",
+                                 progress_cb=lambda step, msg: calls.append((step, msg)))
+
+        assert len(calls) == 5
+        assert all(step == "ingesting" for step, _ in calls)
+
+    def test_progress_cb_message_includes_source_name(self, monkeypatch):
+        """progress_cb message contains the source_name of each article."""
+        from narrative.ingestion import build_ingestion_manifest
+
+        data = {
+            "organic": [
+                _serp_item("https://reuters.com/a", "reuters.com", "A1", source="Reuters"),
+                _serp_item("https://bbc.com/b",     "bbc.com",     "A2", source="BBC"),
+                _serp_item("https://ap.com/c",      "ap.com",      "A3", source="AP"),
+                _serp_item("https://nyt.com/d",     "nyt.com",     "A4", source="NYT"),
+                _serp_item("https://wsj.com/e",     "wsj.com",     "A5", source="WSJ"),
+            ]
+        }
+        monkeypatch.setattr("narrative.ingestion.fetch_article_body",
+                            lambda url, zone, key: "<html><p>body</p></html>")
+        monkeypatch.setattr("narrative.ingestion.extract_text",
+                            lambda html: _valid_body())
+
+        messages = []
+        build_ingestion_manifest("test", data, "zone", "key",
+                                 progress_cb=lambda step, msg: messages.append(msg))
+
+        combined = " ".join(messages)
+        assert "Reuters" in combined
+        assert "BBC"     in combined
+
+    def test_progress_cb_defaults_to_none(self, monkeypatch, serp_data):
+        """Calling without progress_cb raises no error."""
+        from narrative.ingestion import build_ingestion_manifest
+
+        monkeypatch.setattr("narrative.ingestion.fetch_article_body",
+                            lambda url, zone, key: "<html><p>body</p></html>")
+        monkeypatch.setattr("narrative.ingestion.extract_text",
+                            lambda html: _valid_body())
+
+        result = build_ingestion_manifest("test", serp_data, "zone", "key")
+        assert result["corpus_count"] == 5
 
     def test_published_at_absent(self, monkeypatch):
         """When SERP lacks published_at, field is absent/None in manifest."""

@@ -366,6 +366,50 @@ class TestExtractAllGraphs:
         assert results[0].get("_parse_error") is None
         assert results[1].get("_parse_error") is True
 
+    def test_progress_cb_called_once_per_doc(self, monkeypatch):
+        """progress_cb fires once per document, step='analyzing', includes source_name."""
+        monkeypatch.setattr(
+            "narrative.llm_client.call_llm",
+            lambda *a, **kw: '{"nodes": ["X"], "edges": []}',
+        )
+        docs = [
+            {"source_domain": "reuters.com", "source_name": "Reuters"},
+            {"source_domain": "bbc.com",     "source_name": "BBC"},
+        ]
+        calls = []
+        extract_all_graphs(
+            docs, ["text a", "text b"], {}, {"call_3_graph_extraction": {}},
+            progress_cb=lambda step, msg: calls.append((step, msg)),
+        )
+        assert len(calls) == 2
+        assert all(step == "analyzing" for step, _ in calls)
+        messages = [msg for _, msg in calls]
+        assert any("Reuters" in m for m in messages)
+        assert any("BBC"     in m for m in messages)
+
+    def test_progress_cb_fires_on_parse_error(self, monkeypatch):
+        """progress_cb still fires even when graph extraction fails."""
+        monkeypatch.setattr("narrative.llm_client.call_llm",
+                            lambda *a, **kw: (_ for _ in ()).throw(RuntimeError("fail")))
+        docs = [{"source_domain": "a.com", "source_name": "A"}]
+        calls = []
+        extract_all_graphs(
+            docs, ["text"], {}, {"call_3_graph_extraction": {}},
+            progress_cb=lambda step, msg: calls.append((step, msg)),
+        )
+        assert len(calls) == 1
+        assert calls[0][0] == "analyzing"
+
+    def test_progress_cb_defaults_to_none(self, monkeypatch):
+        """Calling without progress_cb raises no error."""
+        monkeypatch.setattr(
+            "narrative.llm_client.call_llm",
+            lambda *a, **kw: '{"nodes": [], "edges": []}',
+        )
+        docs = [{"source_domain": "a.com", "source_name": "A"}]
+        results = extract_all_graphs(docs, ["text"], {}, {"call_3_graph_extraction": {}})
+        assert len(results) == 1
+
     def test_uses_neutralized_text_not_raw(self, monkeypatch):
         captured_texts = []
 
@@ -458,7 +502,7 @@ class TestComputePreSynthesisContext:
             _cluster_graph([("CompanyA", "Profits rose", "reports")], "source2.com"),
         ]
         result = compute_pre_synthesis_context(
-            graphs, [], [], {}, {"CompanyA"},
+            graphs, [], {}, {"CompanyA"},
         )
         clusters = result["narrative_clusters"]
         assert "CompanyA" in clusters
@@ -470,7 +514,7 @@ class TestComputePreSynthesisContext:
             _cluster_graph([("CompanyA", "Stock fell", "contradicts")], "source2.com"),
         ]
         result = compute_pre_synthesis_context(
-            graphs, [], [], {}, {"CompanyA"},
+            graphs, [], {}, {"CompanyA"},
         )
         assert len(result["fracture_candidates"]) >= 1
         topic, claim_a, outlets_a, claim_b, outlets_b = result["fracture_candidates"][0]
@@ -483,7 +527,7 @@ class TestComputePreSynthesisContext:
             _cluster_graph([("CompanyA", "Profits rose", "reports")], "s3.com"),
         ]
         result = compute_pre_synthesis_context(
-            graphs, [], [], {}, {"CompanyA"},
+            graphs, [], {}, {"CompanyA"},
         )
         assert result["fracture_candidates"] == []
 
@@ -498,7 +542,7 @@ class TestComputePreSynthesisContext:
         ]
         canonical_map = {"enterprise": "company", "firm": "company"}
         result = compute_pre_synthesis_context(
-            graphs, [], raw_texts, canonical_map, {"CompanyA"},
+            graphs, raw_texts, canonical_map, {"CompanyA"},
         )
         assert len(result["term_shifts"]) >= 1
         shift = result["term_shifts"][0]
@@ -510,7 +554,7 @@ class TestComputePreSynthesisContext:
             _cluster_graph([("OtherTopic", "Something", "says")], "s1.com"),
         ]
         result = compute_pre_synthesis_context(
-            graphs, [], [], {}, set(),
+            graphs, [], {}, set(),
         )
         assert result["narrative_clusters"] == {}
         assert result["fracture_candidates"] == []
@@ -518,7 +562,7 @@ class TestComputePreSynthesisContext:
 
     def test_no_edges_empty_results(self):
         result = compute_pre_synthesis_context(
-            [], [], [], {}, set(),
+            [], [], {}, set(),
         )
         assert result["narrative_clusters"] == {}
         assert result["fracture_candidates"] == []
@@ -530,7 +574,7 @@ class TestComputePreSynthesisContext:
             _cluster_graph([("apple", "Profits rose", "reports")], "s2.com"),
         ]
         result = compute_pre_synthesis_context(
-            graphs, [], [], {"apple": "Apple"}, {"Apple"},
+            graphs, [], {"apple": "Apple"}, {"Apple"},
         )
         clusters = result["narrative_clusters"]
         assert "Apple" in clusters

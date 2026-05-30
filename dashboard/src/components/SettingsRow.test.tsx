@@ -1,15 +1,12 @@
-import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { SettingsRow } from "./SettingsRow";
 
 const defaultProps = {
   slotName: "Call 1",
   slotDescription: "Entity normalization",
-  provider: "deepseek",
   model: "deepseek-v4-flash",
-  thinking: false,
-  temperature: 0.1,
-  onUpdate: () => {},
+  onChange: vi.fn(),
 };
 
 describe("SettingsRow", () => {
@@ -19,34 +16,30 @@ describe("SettingsRow", () => {
     expect(screen.getByText("Entity normalization")).toBeInTheDocument();
   });
 
-  it("renders provider select with current value", () => {
-    render(<SettingsRow {...defaultProps} />);
-    const select = screen.getByRole("combobox") as HTMLSelectElement;
-    expect(select.value).toBe("deepseek");
-  });
-
   it("renders model input with current value", () => {
     render(<SettingsRow {...defaultProps} />);
-    const input = screen.getByDisplayValue("deepseek-v4-flash") as HTMLInputElement;
-    expect(input).toBeInTheDocument();
+    expect(screen.getByDisplayValue("deepseek-v4-flash")).toBeInTheDocument();
   });
 
-  it("shows thinking checkbox for deepseek provider", () => {
+  it("calls onChange with new value when model input changes", () => {
+    const onChange = vi.fn();
+    render(<SettingsRow {...defaultProps} onChange={onChange} />);
+    fireEvent.change(screen.getByDisplayValue("deepseek-v4-flash"), { target: { value: "deepseek-v4-pro" } });
+    expect(onChange).toHaveBeenCalledWith("deepseek-v4-pro");
+  });
+
+  it("does not render a provider select", () => {
     render(<SettingsRow {...defaultProps} />);
-    const checkboxes = document.querySelectorAll('.thinking-toggle input[type="checkbox"]');
-    expect(checkboxes.length).toBe(1);
+    expect(screen.queryByRole("combobox")).toBeNull();
   });
 
-  it("shows N/A text instead of checkbox for non-deepseek provider", () => {
-    render(
-      <SettingsRow {...defaultProps} provider="openai" thinking={false} />
-    );
-    expect(screen.getByText("N/A")).toBeInTheDocument();
-  });
-
-  it("renders temperature slider", () => {
+  it("does not render a temperature range slider", () => {
     render(<SettingsRow {...defaultProps} />);
-    const slider = document.querySelector('input[type="range"]');
-    expect(slider).toBeInTheDocument();
+    expect(document.querySelector('input[type="range"]')).toBeNull();
+  });
+
+  it("does not render a thinking checkbox", () => {
+    render(<SettingsRow {...defaultProps} />);
+    expect(document.querySelector('input[type="checkbox"]')).toBeNull();
   });
 });

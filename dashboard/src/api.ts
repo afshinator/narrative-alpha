@@ -1,4 +1,4 @@
-import type { ForensicReport, ClusterSummary, LLMConfig } from "./types";
+import type { ForensicReport, ClusterSummary, LLMConfig, PipelineEvent, EnvHealth } from "./types";
 
 const BASE = "/api";
 
@@ -39,10 +39,33 @@ export function saveConfig(config: LLMConfig): Promise<{ status: string; config:
   });
 }
 
+export function fetchEnvHealth(): Promise<EnvHealth> {
+  return fetchJson<EnvHealth>(`${BASE}/health/env`);
+}
+
 export function submitPipeline(keyword: string, vertical: string): Promise<ForensicReport> {
   return fetchJson(`${BASE}/pipeline`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ keyword, vertical }),
   });
+}
+
+export function streamPipeline(
+  keyword: string,
+  vertical: string,
+  onEvent: (e: PipelineEvent) => void,
+  onError: (err: Event) => void,
+): EventSource {
+  const params = new URLSearchParams({ keyword, vertical });
+  const es = new EventSource(`${BASE}/pipeline/stream?${params.toString()}`);
+  es.onmessage = (msg: MessageEvent) => {
+    try {
+      onEvent(JSON.parse(msg.data) as PipelineEvent);
+    } catch {
+      // malformed event — ignore
+    }
+  };
+  es.onerror = onError;
+  return es;
 }

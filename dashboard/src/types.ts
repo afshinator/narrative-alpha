@@ -139,3 +139,25 @@ export interface ClusterSummary {
   corpus_count: number;
   corpus_capped: boolean;
 }
+
+export type PipelineStep =
+  | "discovering"
+  | "ingesting"
+  | "analyzing"
+  | "synthesizing"
+  | "complete"
+  | "error";
+
+export interface PipelineEvent {
+  step: PipelineStep;
+  message: string;
+  cluster_id?: string;
+  detail?: string;
+}
+
+export interface EnvHealth {
+  status: "ok" | "degraded";
+  detail: string;
+  present: string[];
+  missing: string[];
+}

@@ -55,9 +55,9 @@ Articles → Knowledge Graphs → Consensus Baseline → Distortion Matrix → D
 | **Scraping** | Bright Data SERP API + Web Unlocker |
 | **LLM** | DeepSeek V4 (Flash + Pro w/ thinking mode) |
 | **Embeddings** | OpenAI `text-embedding-3-small` |
-| **Compute** | Modal Serverless (Python 3.11) |
-| **Storage** | SQLite (WAL mode, Modal Volume) |
-| **Frontend** | Static HTML/JS |
+| **Backend** | FastAPI + uvicorn (Python 3.11) |
+| **Storage** | SQLite (WAL mode) |
+| **Frontend** | React + Vite |
 
 ## Track
 
@@ -65,19 +65,33 @@ Finance & Market Intelligence — Web Data UNLOCKED Hackathon, 2026.
 
 ## Quick Start
 
-> Implementation in progress. See `docs/spec-v1-4.md` for the full technical specification.
-
 ```bash
 # Clone
 git clone git@github.com:afshinator/narrative-alpha.git
 cd narrative-alpha
 
-# Install
+# Python environment
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-# Deploy to Modal
-modal deploy app.py
+# Dashboard dependencies
+cd dashboard && npm install && cd ..
+
+# Configure
+cp .env.example .env
+# Edit .env — fill in BRIGHTDATA_API_KEY, DEEPSEEK_API_KEY, OPENAI_API_KEY
+
+# Start both backend (port 3001) and dashboard (port 5173)
+./start-demo.sh
+```
+
+Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+The backend API is at [http://localhost:3001](http://localhost:3001). To run the backend alone:
+
+```bash
+source .env
+uvicorn narrative.server:app --host 0.0.0.0 --port 3001
 ```
 
 ## License

@@ -59,3 +59,57 @@ describe("submitPipeline", () => {
     }));
   });
 });
+
+describe("fetchEnvHealth", () => {
+  it("calls /api/health/env and returns env health object", async () => {
+    const fake = { status: "ok", detail: "All required vars set", present: ["DEEPSEEK_API_KEY"], missing: [] };
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({ ok: true, json: () => Promise.resolve(fake) } as Response);
+    const { fetchEnvHealth } = await import("./api");
+    const result = await fetchEnvHealth();
+    expect(result).toEqual(fake);
+    expect(globalThis.fetch).toHaveBeenCalledWith("/api/health/env");
+  });
+
+  it("throws on non-ok response", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
+      ok: false, status: 500, statusText: "Internal Server Error",
+      json: () => Promise.reject(new Error("not JSON")),
+    } as Response);
+    const { fetchEnvHealth } = await import("./api");
+    await expect(fetchEnvHealth()).rejects.toThrow("GET /api/health/env failed (500): Internal Server Error");
+  });
+});
+
+describe("streamPipeline", () => {
+  it("constructs EventSource with correct URL", async () => {
+    const fakeEs = { onmessage: null, onerror: null } as unknown as EventSource;
+    const MockEs = vi.fn(() => fakeEs);
+    vi.stubGlobal("EventSource", MockEs);
+    const { streamPipeline } = await import("./api");
+    streamPipeline("ai regulation", "TECHNOLOGY", vi.fn(), vi.fn());
+    expect(MockEs).toHaveBeenCalledWith(
+      "/api/pipeline/stream?keyword=ai+regulation&vertical=TECHNOLOGY"
+    );
+    vi.unstubAllGlobals();
+  });
+
+  it("calls onEvent with parsed JSON when message arrives", async () => {
+    const fakeEs: any = { onmessage: null, onerror: null };
+    vi.stubGlobal("EventSource", vi.fn(() => fakeEs));
+    const onEvent = vi.fn();
+    const { streamPipeline } = await import("./api");
+    streamPipeline("test", "TECHNOLOGY", onEvent, vi.fn());
+    fakeEs.onmessage({ data: '{"step":"discovering","message":"Searching..."}' });
+    expect(onEvent).toHaveBeenCalledWith({ step: "discovering", message: "Searching..." });
+    vi.unstubAllGlobals();
+  });
+
+  it("returns the EventSource so the caller can close it", async () => {
+    const fakeEs = { onmessage: null, onerror: null };
+    vi.stubGlobal("EventSource", vi.fn(() => fakeEs));
+    const { streamPipeline } = await import("./api");
+    const es = streamPipeline("test", "TECHNOLOGY", vi.fn(), vi.fn());
+    expect(es).toBe(fakeEs);
+    vi.unstubAllGlobals();
+  });
+});

@@ -91,6 +91,18 @@ describe("Zone3", () => {
     expect(screen.getByText(/Test warning message/)).toBeInTheDocument();
   });
 
+  it("renders scatter_shot_anomaly_factor and label in warning card", () => {
+    render(<Zone3 report={baseReport} />);
+    expect(screen.getByText(/72%/)).toBeInTheDocument();
+    expect(screen.getByText("HIGH")).toBeInTheDocument();
+  });
+
+  it("renders historical_origin_validation_rate in warning card", () => {
+    render(<Zone3 report={baseReport} />);
+    const rates = screen.getAllByText(/84%/);
+    expect(rates.length).toBe(2);
+  });
+
   it("renders outlier signal claim text", () => {
     render(<Zone3 report={baseReport} />);
     expect(screen.getByText(/test outlier claim/)).toBeInTheDocument();

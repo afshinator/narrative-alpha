@@ -549,9 +549,9 @@ This step aggregates cross-corpus signals that Call 4 needs as structured input.
 ```python
 def compute_pre_synthesis_context(
     all_source_graphs: list,        # Call 3 outputs, one per doc
-    neutralized_texts: list,        # Call 2 outputs, one per doc
+    raw_texts: list,                # Original article texts, one per doc
     canonical_map: dict,            # Call 1 output
-    consensus_nodes: list           # Gc computed after Call 3
+    consensus_nodes: set            # Gc computed after Call 3
 ) -> dict:
     """
     Produces three structured inputs for Call 4:
@@ -568,7 +568,7 @@ def compute_pre_synthesis_context(
     # semantically distant targets across different sources
     fracture_candidates = []  # [(topic, claim_a, outlets_a, claim_b, outlets_b)]
 
-    # 3. Term frequency shift detection across neutralized texts
+    # 3. Term frequency shift detection across raw (un-neutralized) texts
     # For each canonical entity pair in canonical_map, count raw-text usage rates
     # of each surface form variant across all un-neutralized article texts
     term_shifts = []  # [{previous_term, replacement_term, observed_across, total_sources}]

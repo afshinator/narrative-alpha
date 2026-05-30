@@ -5,8 +5,11 @@ decoupling rule: Layer 2 contains zero analysis logic.
 """
 
 import json
+import logging
+import time
 from concurrent.futures import ThreadPoolExecutor
 
+logger = logging.getLogger(__name__)
 
 GRAPH_EXTRACTION_SYSTEM_PROMPT = (
     "You are a knowledge graph extraction engine. Given the normalized "
@@ -50,14 +53,22 @@ def extract_all_graphs(
     neutralized_texts: list[str],
     canonical_map: dict[str, str],
     llm_config: dict,
+    progress_cb=None,
 ) -> list[dict]:
-    def _extract_one(doc: dict, neut_text: str) -> dict:
+    total = len(documents)
+
+    def _extract_one(doc: dict, neut_text: str, idx: int) -> dict:
+        _t = time.time()
+        source_name = doc.get("source_name", "") or doc.get("source_domain", "unknown")
+        count_str = f" ({idx + 1}/{total})" if total else ""
         try:
             graph = extract_graph(neut_text, canonical_map, llm_config)
             graph["_source_domain"] = doc.get("source_domain", "unknown")
             graph["_source_name"] = doc.get("source_name", "")
+            logger.info("Doc %d graph extraction done — %.1fs", idx, time.time() - _t)
             return graph
         except Exception:
+            logger.warning("Doc %d graph extraction failed — %.1fs", idx, time.time() - _t)
             return {
                 "_source_domain": doc.get("source_domain", "unknown"),
                 "_source_name": doc.get("source_name", ""),
@@ -65,13 +76,18 @@ def extract_all_graphs(
                 "nodes": [],
                 "edges": [],
             }
+        finally:
+            if progress_cb:
+                progress_cb("analyzing", f"Graph extraction — {source_name}{count_str}")
 
     with ThreadPoolExecutor(max_workers=5) as executor:
         futures = [
-            executor.submit(_extract_one, doc, neut)
-            for doc, neut in zip(documents, neutralized_texts)
+            executor.submit(_extract_one, doc, neut, i)
+            for i, (doc, neut) in enumerate(zip(documents, neutralized_texts))
         ]
-        return [f.result() for f in futures]
+        results = [f.result() for f in futures]
+        logger.info("All %d graph extractions collected", len(results))
+        return results
 
 
 def compute_framing_volatility(
@@ -110,9 +126,11 @@ FORENSIC_SYNTHESIS_SYSTEM_PROMPT = (
     "single-source outlier claims exist. "
     "Your output must reflect narrative structure, not truth arbitration. "
     "Output only valid JSON. The word 'json' must appear in your response.\n\n"
-    "Required output schema (Contract B):\n"
-    "{\n"
-    "  \"event_meta\": {\"cluster_id\": str, \"search_query\": str, \"industry_vertical\": str, \"timestamp_utc\": str, \"corpus_count\": int},\n"
+     "IMPORTANT: Use the cluster_id, search_query, industry_vertical, timestamp_utc, and corpus_count "
+     "directly from the input context data — do not invent them.\n\n"
+     "Required output schema (Contract B):\n"
+     "{\n"
+     "  \"event_meta\": {\"cluster_id\": str, \"search_query\": str, \"industry_vertical\": str, \"timestamp_utc\": str, \"corpus_count\": int},\n"
     "  \"consensus_reality_graph\": {\"consensus_summary\": str, \"verified_anchor_nodes\": [str], \"primary_verifications\": [{\"authority\": str, \"reference_id\": str, \"status\": str}]},\n"
     "  \"distortion_matrix\": [{\"outlet_name\": str, \"source_domain\": str, \"omission_index\": float, \"framing_volatility_score\": float, \"identifiable_omissions\": [str], \"linguistic_camouflage\": [{\"raw_expression\": str, \"clinical_translation\": str}]}],\n"
     "  \"outlier_signals\": [{\"signal_id\": str, \"origin_outlet\": str, \"origin_domain\": str, \"extracted_claim\": str, \"timestamp_first_seen\": str, \"outlier_origin_provenance\": {\"classification\": str, \"historical_origin_validation_rate\": float, \"scatter_shot_anomaly_factor\": float, \"reputation_warning_triggered\": bool, \"echo_chamber_mimics\": [str]}, \"validation_tracking\": {\"current_state\": str, \"last_checked_timestamp\": str, \"consensus_absorption_status\": str, \"evaluation_window_days\": int}}],\n"
@@ -192,7 +210,6 @@ def inject_labels(report: dict) -> dict:
 
 def compute_pre_synthesis_context(
     all_source_graphs: list[dict],
-    neutralized_texts: list[str],
     raw_texts: list[str],
     canonical_map: dict[str, str],
     consensus_nodes: set[str],
@@ -256,7 +273,10 @@ def compute_pre_synthesis_context(
             all_forms_for_target = {
                 f for f, c in canonical_map.items() if c == canonical_target
             }
-            if dominant_count / total_sources >= 0.3 and len(all_forms_for_target) >= 2:
+            # Threshold ≥0.35 aligns with the MED label boundary (§5.7).
+            # Shifts below this are LOW-confidence noise; Call 4 would label
+            # them LOW anyway.
+            if dominant_count / total_sources >= 0.35 and len(all_forms_for_target) >= 2:
                 alternative_forms = all_forms_for_target - {dominant_form}
                 previous_term = min(alternative_forms, key=lambda f: form_counts.get(f, 0))
                 term_shifts.append({
@@ -273,9 +293,10 @@ def compute_pre_synthesis_context(
     }
 
 
-def resolve_to_canonical(node: str, canonical_map: dict[str, str]) -> str:
+def resolve_to_canonical(node: str | int, canonical_map: dict[str, str]) -> str:
     """Map a surface-form node string to its canonical identity."""
-    return canonical_map.get(node.strip().lower(), node)
+    key = str(node).strip().lower()
+    return canonical_map.get(key, str(node))
 
 
 def omission_label(oi: float) -> str:
@@ -287,7 +308,8 @@ def omission_label(oi: float) -> str:
         return "HIGH"
 
 
-def framing_volatility_label(vf: float) -> str:
+def framing_volatility_label(vf: float | None) -> str:
+    vf = vf if vf is not None else 0.0
     if vf < 0.25:
         return "LOW"
     elif vf < 0.55:
@@ -296,7 +318,8 @@ def framing_volatility_label(vf: float) -> str:
         return "HIGH"
 
 
-def scatter_shot_label(sa: float) -> str:
+def scatter_shot_label(sa: float | None) -> str:
+    sa = sa if sa is not None else 0.0
     if sa < 0.35:
         return "LOW"
     elif sa < 0.60:
@@ -369,7 +392,8 @@ def compute_omission_index(
     return round(omission, 4), list(missing)
 
 
-def sync_label(score: float) -> str:
+def sync_label(score: float | None) -> str:
+    score = score if score is not None else 0.0
     if score >= 0.65:
         return "HIGH"
     elif score >= 0.35:
