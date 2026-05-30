@@ -1,13 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { LLMConfig, LLMSlotConfig } from "../types";
 import { SettingsRow } from "./SettingsRow";
-
-const DEFAULT_CONFIG: LLMConfig = {
-  call_1_entity_normalization: { provider: "deepseek", model: "deepseek-v4-flash", thinking: false, temperature: 0.1 },
-  call_2_linguistic_neutralization: { provider: "deepseek", model: "deepseek-v4-flash", thinking: false, temperature: 0.2 },
-  call_3_graph_extraction: { provider: "deepseek", model: "deepseek-v4-flash", thinking: true, temperature: 0.3 },
-  call_4_forensic_synthesis: { provider: "deepseek", model: "deepseek-v4-flash", thinking: true, temperature: 0.4 },
-};
+import { fetchConfig, saveConfig } from "../api";
 
 const SLOTS: { key: keyof LLMConfig; name: string; description: string }[] = [
   { key: "call_1_entity_normalization", name: "Call 1", description: "Entity normalization" },
@@ -17,24 +11,47 @@ const SLOTS: { key: keyof LLMConfig; name: string; description: string }[] = [
 ];
 
 export function SettingsPage() {
-  const [config, setConfig] = useState<LLMConfig>(DEFAULT_CONFIG);
+  const [config, setConfig] = useState<LLMConfig | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [saveStatus, setSaveStatus] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchConfig()
+      .then(setConfig)
+      .catch((e: Error) => setError(e.message))
+      .finally(() => setLoading(false));
+  }, []);
 
   const handleUpdate = (key: keyof LLMConfig, updates: Partial<LLMSlotConfig>) => {
-    setConfig((prev) => ({
-      ...prev,
-      [key]: { ...prev[key], ...updates },
-    }));
+    setConfig((prev) => {
+      if (!prev) return prev;
+      return { ...prev, [key]: { ...prev[key], ...updates } };
+    });
   };
 
-  const handleSave = () => {
-    localStorage.setItem("llmConfig", JSON.stringify(config));
+  const handleSave = async () => {
+    if (!config) return;
+    setSaveStatus("Saving…");
+    try {
+      const result = await saveConfig(config);
+      setSaveStatus(result.status === "ok" ? "Saved" : `Error: ${result.status}`);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setSaveStatus(`Save failed: ${msg}`);
+    }
   };
+
+  if (loading) return <div className="page settings-page"><p className="loading">Loading config…</p></div>;
+  if (error) return <div className="page settings-page"><p className="error">Error: {error}</p></div>;
+  if (!config) return <div className="page settings-page"><p className="empty">No configuration loaded.</p></div>;
 
   return (
     <div className="page settings-page">
       <h2 className="section-title">LLM Configuration</h2>
       <p className="section-subtitle">
         Configure per-slot LLM providers and parameters for the forensic pipeline.
+        Defaults are loaded from the backend.
       </p>
 
       <div className="settings-table">
@@ -60,9 +77,10 @@ export function SettingsPage() {
         ))}
       </div>
 
-      <button className="btn-save" onClick={handleSave}>
-        Save Configuration
-      </button>
+      <div className="settings-actions">
+        <button className="btn-save" onClick={handleSave}>Save Configuration</button>
+        {saveStatus && <span className="save-status">{saveStatus}</span>}
+      </div>
     </div>
   );
 }
