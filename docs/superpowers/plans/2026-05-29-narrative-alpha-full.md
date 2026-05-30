@@ -1752,20 +1752,20 @@ import os
 import json
 import modal
 
-from contracts import PipelineInput
-from reputation import (
+from narrative.reputation import (
     get_hardened_db_connection,
     init_db,
     handle_outlet_registration,
     read_outlet_reputation,
     write_outlier_signal,
+    write_ingestion_log,
 )
-from ingestion import discover_articles, build_ingestion_manifest
-from processing import (
+from narrative.ingestion import discover_articles, build_ingestion_manifest
+from narrative.processing import (
     run_entity_normalization,
     run_linguistic_neutralization,
 )
-from analysis import (
+from narrative.analysis import (
     extract_all_graphs,
     compute_consensus_baseline,
     compute_omission_index,
@@ -1778,7 +1778,7 @@ from analysis import (
     synthesize_forensic_report,
     inject_labels,
 )
-from llm_client import load_llm_config
+from narrative.llm_client import load_llm_config
 
 
 # ── Modal infrastructure ──
@@ -1826,7 +1826,7 @@ def _run_startup_init():
     secrets=[modal.Secret.from_dotenv(".env.production")],
     timeout=600,
 )
-@modal.web_endpoint(method="POST")
+@modal.fastapi_endpoint(method="POST")
 async def execute_forensic_pipeline(payload: dict) -> dict:
     """
     Single synchronous pipeline entry point.
@@ -1857,6 +1857,9 @@ async def execute_forensic_pipeline(payload: dict) -> dict:
     api_key = os.environ.get("BRIGHTDATA_API_KEY", "")
     unlocker_zone = os.environ.get("BRIGHTDATA_UNLOCKER_ZONE", "")
 
+    if not api_key or not unlocker_zone:
+        return {"status": "ERROR", "error": "BRIGHTDATA_API_KEY and BRIGHTDATA_UNLOCKER_ZONE must be set"}
+
     llm_config = load_llm_config()
 
     db_path = os.path.join(
@@ -1865,10 +1868,14 @@ async def execute_forensic_pipeline(payload: dict) -> dict:
     )
 
     # ── Step 1-2: Ingestion + ingestion log ──
-    # Pass db_conn so build_ingestion_manifest logs all fetch attempts (pass+fail)
+    # Wire db_conn + logger_func so build_ingestion_manifest logs all fetch attempts (pass+fail)
     db_conn = get_hardened_db_connection(db_path)
     serp_data = discover_articles(keyword, api_key)
-    manifest = build_ingestion_manifest(keyword, serp_data, unlocker_zone, api_key, db_conn=db_conn)
+    manifest = build_ingestion_manifest(
+        keyword, serp_data, unlocker_zone, api_key,
+        db_conn=db_conn,
+        logger_func=write_ingestion_log,
+    )
 
     # ── Step 3: Corpus floor gate ──
     if "validation_tracking" in manifest:
@@ -1904,6 +1911,9 @@ async def execute_forensic_pipeline(payload: dict) -> dict:
     # ── Step 8: Consensus baseline + Omission index ──
     consensus_nodes = compute_consensus_baseline(all_graphs, canonical_map)
 
+    # Signal degraded analysis when consensus baseline could not be established (< 5 valid graphs)
+    analysis_degraded = not consensus_nodes
+
     omission_results = []
     for i, graph in enumerate(all_graphs):
         if graph.get("_parse_error"):
@@ -1931,9 +1941,9 @@ async def execute_forensic_pipeline(payload: dict) -> dict:
                 "domain": g.get("_source_domain", ""),
                 "name": g.get("_source_name", ""),
                 "graph": g,
-                "omission_index": omission_results[i][0],
-                "omission_label": omission_results[i][2],
-                "missing_nodes": omission_results[i][1],
+                "omission_index": omission_results[i][0] if i < len(omission_results) else 0.0,
+                "omission_label": omission_results[i][2] if i < len(omission_results) else "LOW",
+                "missing_nodes": omission_results[i][1] if i < len(omission_results) else [],
                 "framing_volatility": vf_scores[i] if i < len(vf_scores) else 0.0,
                 "framing_volatility_label": vf_labels[i] if i < len(vf_labels) else "MED",
                 # Neutralized text pairs for linguistic camouflage detection
@@ -1949,6 +1959,10 @@ async def execute_forensic_pipeline(payload: dict) -> dict:
         "term_shifts": pre_context["term_shifts"],
         "corpus_capped": manifest.get("corpus_capped", False),
     }
+
+    # Signal degraded analysis to Call 4 when consensus baseline could not be established
+    if analysis_degraded:
+        context_bundle["_degraded"] = "INSUFFICIENT_CONSENSUS"
 
     # ── Step 11: Call 4 — Forensic synthesis ──
     report = synthesize_forensic_report(context_bundle, llm_config)
@@ -1983,11 +1997,11 @@ async def execute_forensic_pipeline(payload: dict) -> dict:
     volumes={"/root/.narrative_alpha": vol},
     secrets=[modal.Secret.from_dotenv(".env.production")],
 )
-@modal.web_endpoint(method="POST")
+@modal.fastapi_endpoint(method="POST")
 async def update_llm_config(payload: dict) -> dict:
     """
     Accepts updated llm_config.json from settings UI.
-    Validates required slots, writes to volume, commits.
+    Validates required slots + slot structure via LLMConfig model, writes to volume, commits.
 
     Required slots (Section 9.4):
         call_1_entity_normalization
@@ -2006,6 +2020,13 @@ async def update_llm_config(payload: dict) -> dict:
     for slot in required_slots:
         if slot not in payload:
             return {"error": f"Missing required slot: {slot}"}
+
+    # Validate slot structure against LLMConfig model
+    from narrative.contracts import LLMConfig
+    try:
+        LLMConfig(**payload)
+    except Exception as e:
+        return {"error": f"Invalid config: {e}"}
 
     config_path = os.path.join(
         os.environ.get("NARRATIVE_ALPHA_ROOT", "/root/.narrative_alpha"),
@@ -2039,10 +2060,26 @@ def run_historical_backtest(domain: str, vertical: str) -> None:
     vol.commit()
 ```
 
-- [ ] **Step 2: Verify imports**
+- [ ] **Step 2: Verify imports resolve from project root**
 
-Run: `python -c "print('app.py not importable without Modal runtime — structural check only')"`
-Expected: structural OK (Modal decorators only load inside Modal container)
+```bash
+uv run python -c "
+from narrative.reputation import (
+    get_hardened_db_connection, init_db, handle_outlet_registration,
+    read_outlet_reputation, write_outlier_signal, write_ingestion_log,
+)
+from narrative.ingestion import discover_articles, build_ingestion_manifest
+from narrative.processing import run_entity_normalization, run_linguistic_neutralization
+from narrative.analysis import (
+    extract_all_graphs, compute_consensus_baseline, compute_omission_index,
+    compute_framing_volatility, omission_label, framing_volatility_label,
+    compute_sa_for_outlet, scatter_shot_label,
+    compute_pre_synthesis_context, synthesize_forensic_report, inject_labels,
+)
+from narrative.llm_client import load_llm_config
+print('All imports OK')
+```
+Expected: `All imports OK`
 
 - [ ] **Step 3: Commit**
 

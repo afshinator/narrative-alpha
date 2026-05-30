@@ -1,0 +1,82 @@
+{
+  "/project/narrative/narrative/ingestion.py": {
+    "mtime": 1780092018.4636214,
+    "ast_hash": "68da0078e198d317b665fb07c572ded5",
+    "semantic_hash": "68da0078e198d317b665fb07c572ded5"
+  },
+  "/project/narrative/narrative/__init__.py": {
+    "mtime": 1780096946.1818779,
+    "ast_hash": "b6d8e0c905cac240bf746cdd9bafa278",
+    "semantic_hash": "b6d8e0c905cac240bf746cdd9bafa278"
+  },
+  "/project/narrative/narrative/analysis.py": {
+    "mtime": 1780101027.9445233,
+    "ast_hash": "7b6b351d277302000c47eeedc2724cd4",
+    "semantic_hash": "7b6b351d277302000c47eeedc2724cd4"
+  },
+  "/project/narrative/narrative/contracts.py": {
+    "mtime": 1780092161.8855627,
+    "ast_hash": "64b6790f3d3e337662fd3ce8e8fcd8c4",
+    "semantic_hash": "64b6790f3d3e337662fd3ce8e8fcd8c4"
+  },
+  "/project/narrative/narrative/reputation.py": {
+    "mtime": 1780095045.8527856,
+    "ast_hash": "1bd5e8a13364f040f956a60b415d0313",
+    "semantic_hash": "1bd5e8a13364f040f956a60b415d0313"
+  },
+  "/project/narrative/narrative/backtest.py": {
+    "mtime": 1780105551.0492768,
+    "ast_hash": "57db7554f3d98167def35973633c9cfc",
+    "semantic_hash": "57db7554f3d98167def35973633c9cfc"
+  },
+  "/project/narrative/narrative/processing.py": {
+    "mtime": 1780096794.273094,
+    "ast_hash": "ba36b9a2d48b698004154fc084467f89",
+    "semantic_hash": "ba36b9a2d48b698004154fc084467f89"
+  },
+  "/project/narrative/narrative/llm_client.py": {
+    "mtime": 1780096785.1979902,
+    "ast_hash": "88928f0a4367309476eb7bd7347b63de",
+    "semantic_hash": "88928f0a4367309476eb7bd7347b63de"
+  },
+  "/project/narrative/tests/__init__.py": {
+    "mtime": 1780096765.8677704,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "/project/narrative/tests/test_processing.py": {
+    "mtime": 1780097132.0601583,
+    "ast_hash": "0b13748af7bc2062b0e85d68bfa890d3",
+    "semantic_hash": "0b13748af7bc2062b0e85d68bfa890d3"
+  },
+  "/project/narrative/tests/test_contracts.py": {
+    "mtime": 1780097132.059158,
+    "ast_hash": "8f6fc945293f9ba24d4d2fed1a4ef51d",
+    "semantic_hash": "8f6fc945293f9ba24d4d2fed1a4ef51d"
+  },
+  "/project/narrative/tests/test_backtest.py": {
+    "mtime": 1780105535.0980651,
+    "ast_hash": "98a4f1f0af4b75883dfc5a462d657d74",
+    "semantic_hash": "98a4f1f0af4b75883dfc5a462d657d74"
+  },
+  "/project/narrative/tests/test_llm_client.py": {
+    "mtime": 1780097132.0601583,
+    "ast_hash": "60a36cf6ee323404d7230aa8e40831b6",
+    "semantic_hash": "60a36cf6ee323404d7230aa8e40831b6"
+  },
+  "/project/narrative/tests/test_reputation.py": {
+    "mtime": 1780097132.0601583,
+    "ast_hash": "66a4b662ed09d607d0bff5347970361c",
+    "semantic_hash": "66a4b662ed09d607d0bff5347970361c"
+  },
+  "/project/narrative/tests/test_ingestion.py": {
+    "mtime": 1780097132.059158,
+    "ast_hash": "512b9c1005238d9aebb62c1cab77e551",
+    "semantic_hash": "512b9c1005238d9aebb62c1cab77e551"
+  },
+  "/project/narrative/tests/test_analysis.py": {
+    "mtime": 1780101044.1416872,
+    "ast_hash": "90f5d0b10796fb43653ec34a1497c9f6",
+    "semantic_hash": "90f5d0b10796fb43653ec34a1497c9f6"
+  }
+}
