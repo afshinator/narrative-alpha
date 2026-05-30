@@ -42,7 +42,7 @@
 
 **Note:** `llm_config.json` is NOT created as a static file. The defaults are defined as a Pydantic `LLMConfig` model in `narrative/llm_client.py` and auto-written to the Modal Volume on first cold start. This ensures validation at import time — a static JSON file cannot be validated until runtime.
 
-- [ ] **Step 1: Write `narrative/contracts.py` with Contract A models**
+- [x] **Step 1: Write `narrative/contracts.py` with Contract A models**
 
 ```python
 """Data contracts for Narrative Alpha — typed Pydantic models for all layers."""
@@ -235,17 +235,12 @@ class FloorGateResponse(BaseModel):
     validation_tracking: FloorGateTracking
 ```
 
-- [ ] **Step 2: Verify contracts import cleanly**
+- [x] **Step 2: Verify contracts import cleanly**
 
 Run: `python -c "from contracts import IngestionManifest, ForensicReport, LLMConfig; print('contracts OK')"`
 Expected: `contracts OK`
 
-- [ ] **Step 3: Commit**
-
-```bash
-git add contracts.py
-git commit -m "feat: add Pydantic data contracts for all pipeline layers"
-```
+- [x] **Step 3: Commit**
 
 **Sanity check:** Do all Contract B fields from Section 4 have a matching Pydantic model? Count fields in JSON example vs. models. Does `LLMSlotConfig` match the `llm_config.json` structure from Section 9.2?
 
@@ -266,7 +261,7 @@ git commit -m "feat: add Pydantic data contracts for all pipeline layers"
 | H3 | `content is None` guard before `json.loads` | Prevents `TypeError` from `json.loads(None)` — explicit `RuntimeError` instead |
 | H4 | Narrow exception handling: re-raise `BaseException` subclasses | Prevents swallowing `KeyboardInterrupt`, `asyncio.CancelledError`, `SystemExit` |
 
-- [ ] **Step 1: Write `narrative/llm_client.py`**
+- [x] **Step 1: Write `narrative/llm_client.py`**
 
 ```python
 """Runtime LLM provider configuration and client factory."""
@@ -432,17 +427,12 @@ def get_embedding(text: str) -> list[float]:
     return response.data[0].embedding
 ```
 
-- [ ] **Step 2: Verify imports + instantiation**
+- [x] **Step 2: Verify imports + instantiation**
 
 Run: `python -c "from llm_client import load_llm_config, get_llm_client, call_llm; print('llm_client OK')"`
 Expected: `llm_client OK`
 
-- [ ] **Step 3: Commit**
-
-```bash
-git add llm_client.py
-git commit -m "feat: add LLM client factory with runtime config and multi-provider support"
-```
+- [x] **Step 3: Commit**
 
 **Sanity check:** Verify `_config_path()` reads `NARRATIVE_ALPHA_ROOT` from env. Verify thinking flag only writes `extra_body` when provider is DeepSeek. Verify `get_embedding()` uses the env-configured embedding model. Verify `get_llm_client` uses double-checked locking (H1). Verify `call_llm` raises `RuntimeError` on None content (H3). Verify `BaseException` subclasses pass through (H4).
 
@@ -458,7 +448,7 @@ git commit -m "feat: add LLM client factory with runtime config and multi-provid
 3. Validation gates (`validate_ingestion_payload` — exact code from Section 14.1)
 4. Manifest assembly + corpus floor gate (`build_ingestion_manifest`)
 
-- [ ] **Step 1: Write `narrative/ingestion.py` — discovery and extraction**
+- [x] **Step 1: Write `narrative/ingestion.py` — discovery and extraction**
 
 ```python
 """Layer 1: Ingestion — Bright Data SERP discovery + Web Unlocker extraction."""
@@ -810,17 +800,12 @@ def build_ingestion_manifest(
     return manifest
 ```
 
-- [ ] **Step 2: Verify imports + basic structure**
+- [x] **Step 2: Verify imports + basic structure**
 
 Run: `python -c "from ingestion import discover_articles, fetch_article_body, extract_text, validate_ingestion_payload, build_ingestion_manifest; print('ingestion OK')"`
 Expected: `ingestion OK`
 
-- [ ] **Step 3: Commit**
-
-```bash
-git add ingestion.py
-git commit -m "feat: add Layer 1 ingestion — SERP discovery, Web Unlocker extraction, validation gates"
-```
+- [x] **Step 3: Commit**
 
 **Sanity check:** Does `build_ingestion_manifest` accept `logger_func` as an optional keyword? Does it only call `logger_func` when BOTH `db_conn` and `logger_func` are provided? Does it return `FloorGateResponse` shape when corpus < 5? Does it return `IngestionManifest` shape when corpus >= 5? Does `parse_serp_result` normalize domains (no www prefix, lowercased) and derive clean source names? Does `published_at` appear in every `all_attempted` entry and in validated docs? Does `passed_validation: 1` appear in the return dict of `validate_ingestion_payload`? Does the 20-doc hard cap apply before the floor gate check? Does `corpus_capped: True` appear in the manifest when cap fires?
 
@@ -832,7 +817,7 @@ git commit -m "feat: add Layer 1 ingestion — SERP discovery, Web Unlocker extr
 
 **What:** Section 7 — SQLite on Modal Volume. Schema creation, hardened connection, outlet registration with cold-start UNRATED pattern. Also Section 14.3 — ingestion manifest log table.
 
-- [ ] **Step 1: Write `narrative/reputation.py`**
+- [x] **Step 1: Write `narrative/reputation.py`**
 
 ```python
 """Layer: Persistence — SQLite reputation ledger on Modal Volume."""
@@ -1042,7 +1027,7 @@ def write_ingestion_log(
     conn.commit()
 ```
 
-- [ ] **Step 2: Verify + test with in-memory SQLite**
+- [x] **Step 2: Verify + test with in-memory SQLite**
 
 Run: `python -c "
 from reputation import get_hardened_db_connection, init_db, handle_outlet_registration
@@ -1062,12 +1047,7 @@ print('reputation tests pass')
 "`
 Expected: `reputation tests pass`
 
-- [ ] **Step 3: Commit**
-
-```bash
-git add reputation.py
-git commit -m "feat: add SQLite reputation ledger — outlet registration, outlier tracking, ingestion log"
-```
+- [x] **Step 3: Commit**
 
 **Sanity check:** Does `init_db` create 3 tables with correct PKs? Does `handle_outlet_registration` use composite PK (domain, vertical)? Does WAL mode actually activate (PRAGMA journal_mode)? Does `handle_outlet_registration` write `outlet_name` to the INSERT statement?
 
@@ -1081,7 +1061,7 @@ git commit -m "feat: add SQLite reputation ledger — outlet registration, outli
 
 **Contract note:** `IngestionDocument` includes optional `published_at` field from Layer 1. If Layer 2 does date-based filtering or temporal decay, field is available and populated. If unused, it passes through silently to Layer 3 via the manifest documents — no stripping needed.
 
-- [ ] **Step 1: Write `narrative/processing.py` — search context helper**
+- [x] **Step 1: Write `narrative/processing.py` — search context helper**
 
 ```python
 """Layer 2: Processing — entity normalization and linguistic neutralization only.
@@ -1122,7 +1102,7 @@ def build_search_context_table(serp_data: dict) -> str:
     return "\n".join(lines)
 ```
 
-- [ ] **Step 2: Write `narrative/processing.py` — Call 1 + Call 2 + Vf**
+- [x] **Step 2: Write `narrative/processing.py` — Call 1 + Call 2 + Vf**
 
 ```python
 # ── Constants ──
@@ -1243,17 +1223,12 @@ def run_linguistic_neutralization(
     return results
 ```
 
-- [ ] **Step 3: Verify imports**
+- [x] **Step 3: Verify imports**
 
 Run: `python -c "from processing import build_search_context_table, run_entity_normalization, run_linguistic_neutralization; print('processing OK')"`
 Expected: `processing OK`
 
-- [ ] **Step 4: Commit**
-
-```bash
-git add processing.py
-git commit -m "feat: add Layer 2 processing — entity normalization and linguistic neutralization"
-```
+- [x] **Step 4: Commit**
 
 **Sanity check:** Does `build_search_context_table` handle missing `people_also_ask` key (PAA loop just skips — graceful degrade, no code change needed for `merge_and_resolve`)? Does `run_entity_normalization` lowercase all map keys? Is `compute_framing_volatility` absent from `narrative/processing.py` (it belongs in `narrative/analysis.py`)?
 
@@ -1275,7 +1250,7 @@ git commit -m "feat: add Layer 2 processing — entity normalization and linguis
 
 **Call 3 timeout note:** Serial thinking-mode calls take ~10–30s each. 15 articles × 20s = 300s, leaving minimal headroom in Modal's 600s timeout. Consider `asyncio.gather` for parallel Call 3 invocations — articles are independent, no ordering dependency. The 20-doc hard cap (Task 3) bounds worst-case to 20 × 20s = 400s absolute ceiling.
 
-- [ ] **Step 1: Write `narrative/analysis.py` — Call 3 + Python metrics**
+- [x] **Step 1: Write `narrative/analysis.py` — Call 3 + Python metrics**
 
 ```python
 """Layer 3: Analysis — graph extraction, forensic synthesis, metric computation.
@@ -1537,7 +1512,7 @@ def sync_label(score: float) -> str:
         return "LOW"
 ```
 
-- [ ] **Step 2: Write `narrative/analysis.py` — pre-synthesis pass**
+- [x] **Step 2: Write `narrative/analysis.py` — pre-synthesis pass**
 
 ```python
 # ── Pre-Synthesis Context Aggregation (Section 6) ──
@@ -1580,7 +1555,7 @@ def compute_pre_synthesis_context(
     )
 ```
 
-- [ ] **Step 3: Write `narrative/analysis.py` — Call 4 forensic synthesis**
+- [x] **Step 3: Write `narrative/analysis.py` — Call 4 forensic synthesis**
 
 ```python
 # ── Call 4: Forensic Synthesis (DeepSeek V4-Pro, thinking enabled) ──
@@ -1677,12 +1652,12 @@ def inject_labels(report: dict) -> dict:
     return report
 ```
 
-- [ ] **Step 4: Verify imports**
+- [x] **Step 4: Verify imports**
 
 Run: `python -c "from analysis import extract_graph, compute_omission_index, compute_consensus_baseline, compute_framing_volatility, synthesize_forensic_report, inject_labels; print('analysis OK')"`
 Expected: `analysis OK`
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add analysis.py
