@@ -1690,34 +1690,40 @@ def execute_historical_backtest(domain: str, vertical: str) -> None:
     """
     Background task: back-test an outlet's historical accuracy.
 
-    1. SERP API: site:{domain} news, date filter past 12 months, up to 15 articles
-    2. Web Unlocker: fetch article bodies
-    3. If < 5 articles retrieved: leave rating_status = 'UNRATED', exit
-    4. Call 1 + Call 3 on historical articles against present-day ground truth
-    5. Count absorbed vs decayed nodes
-    6. Write Sa, historical_origin_validation_rate, rating_status = 'RATED' to SQLite
-    7. vol.commit()
+    Historical backtesting does not attempt to reconstruct 30-day absorption
+    behavior (that belongs to the online outlier_tracking system). Instead, it
+    approximates outlet reliability through cross-source persistence.
+
+    1. SERP Query 1 (target): site:{domain} {vertical}, tbm=nws, num=15, tbs=qdr:y
+    2. SERP Query 2 (baseline): {vertical}, tbm=nws, num=15, tbs=qdr:y — no site filter
+    3. Web Unlocker: fetch article bodies from both queries
+    4. Floor gate: if either query < 5 articles → UNRATED, exit
+    5. Call 1 + Call 3 on both article sets independently
+    6. Classify claims from target against consensus baseline:
+       - consensus-supported: claim appears in multi-source consensus
+       - consensus-isolated: claim appears only in target outlet's graph
+    7. Compute metrics:
+       historical_origin_validation_rate = consensus_supported / total_claims
+       scatter_shot_anomaly_factor       = consensus_isolated / total_claims
+    8. Write Sa, historical_origin_validation_rate, rating_status='RATED' to SQLite
+
+    Naming discipline: consensus-supported/consensus-isolated are distinct from
+    the Section 5 absorbed/decayed lifecycle, which is exclusive to real-time
+    outlier_tracking. The output metrics have the same names and ranges — only
+    the data source and time window differ.
 
     Args:
         domain: source domain to back-test (e.g. "globalwire.com")
         vertical: industry vertical (e.g. "TECHNOLOGY")
     """
-    # TBD: full implementation.
-    # Overview:
-    # - Uses the same discover_articles + fetch_article_body from ingestion.py
-    #   but with a site:domain query modifier and 12-month date range
-    # - Runs Call 1 (entity normalization) and Call 3 (graph extraction)
-    #   against historical articles
-    # - Compares historical outlier claims against known-consensus baseline
-    #   (what was eventually acknowledged)
-    # - Counts absorbed (verified later) vs decayed (never verified) nodes
-    # - Updates outlet_reputation table with computed metrics
+    # Full implementation in Task 12. See docs/spec-v1-4.md Section 7 for the
+    # dual-SERP algorithm and scoring formulas.
     pass
 ```
 
 - [ ] **Step 2: Verify import**
 
-Run: `python -c "from backtest import execute_historical_backtest; print('backtest OK')"`
+Run: `python -c "from narrative.backtest import execute_historical_backtest; print('backtest OK')"`
 Expected: `backtest OK`
 
 - [ ] **Step 3: Commit**
@@ -2025,10 +2031,10 @@ async def update_llm_config(payload: dict) -> dict:
 def run_historical_backtest(domain: str, vertical: str) -> None:
     """
     Non-blocking background task. Runs after main pipeline returns.
-    Imports execute_historical_backtest from backtest.py.
+    Imports execute_historical_backtest from narrative.backtest.
     On completion: writes reputation metrics to SQLite and commits volume.
     """
-    from backtest import execute_historical_backtest
+    from narrative.backtest import execute_historical_backtest
     execute_historical_backtest(domain, vertical)
     vol.commit()
 ```
@@ -2159,19 +2165,33 @@ git commit -m "feat: implement compute_pre_synthesis_context — narrative clust
 
 **What:** Replace the TBD stub with a full Modal `.spawn()` worker. Wire into `narrative/app.py` reputation check step.
 
-- [ ] **Step 1: Implement the 7-step back-test flow**
+**Design decision (2026-05-30):** Historical backtesting does not attempt to reconstruct 30-day absorption behavior (that belongs to the *online* `outlier_tracking` system). Instead, it approximates outlet reliability through **cross-source persistence**. Claims extracted from the target outlet's historical articles are compared against a contemporaneous multi-source consensus baseline derived from a second SERP query for the same vertical. Claims appearing in the consensus baseline are classified as **consensus-supported**; claims unique to the target outlet are classified as **consensus-isolated**. These terms are deliberately distinct from the Section 5 `absorbed`/`decayed` lifecycle to avoid semantic collision with the real-time outlier tracking system.
 
-1. Bright Data SERP `site:{domain}` query with 12-month date range
-2. Web Unlocker fetch of up to 15 historical articles
-3. < 5 articles → exit with UNRATED
-4. Call 1 (entity normalization) + Call 3 (graph extraction) against historical articles
-5. Compare historical claim nodes against known-consensus baseline for that topic
-6. Count absorbed vs decayed nodes
-7. Write `scatter_shot_anomaly_factor`, `historical_origin_validation_rate`, `rating_status = 'RATED'` to SQLite
+- [ ] **Step 1: Implement the 8-step back-test flow**
 
-- [ ] **Step 2: Wire spawn call in `narrative/app.py`**
+1. **SERP Query 1 (target outlet):** `site:{domain} {vertical}`, `tbm=nws`, `num=15`, `tbs=qdr:y` (past 12 months)
+2. **SERP Query 2 (consensus baseline):** `{vertical}`, `tbm=nws`, `num=15`, `tbs=qdr:y` — NO site filter, captures multi-source consensus for the same vertical/time window
+3. **Web Unlocker fetch** of up to 15 articles from each query
+4. **Floor gate:** If either query returns < 5 articles, leave `rating_status = 'UNRATED'`, exit
+5. **Call 1** (entity normalization) + **Call 3** (graph extraction) against both article sets independently
+6. **Classify claims:** For each claim from the target outlet, check if it appears in the consensus baseline's graph
+   - **consensus-supported** = claim appears in the multi-source consensus → other outlets reported it too
+   - **consensus-isolated** = claim appears only in the target outlet's graph → nobody else picked it up
+7. **Compute metrics:**
+   ```
+   historical_origin_validation_rate = consensus_supported / total_claims
+   scatter_shot_anomaly_factor       = consensus_isolated / total_claims
+   ```
+   Where `total_claims = consensus_supported + consensus_isolated`
+8. **Write to SQLite:** `UPDATE outlet_reputation SET scatter_shot_anomaly_factor=?, historical_origin_validation_rate=?, back_test_article_count=?, rating_status='RATED', last_updated=datetime('now') WHERE domain=? AND industry_vertical=?`
 
-Replace the `# TBD: spawn background back-test` comment with actual `modal.Function.spawn()` call.
+**Naming discipline:** The backtest uses `consensus-supported`/`consensus-isolated` internally. The 30-day `absorbed`/`decayed` lifecycle (Section 5) is exclusive to the real-time `outlier_tracking` table. The output metrics (`historical_origin_validation_rate`, `scatter_shot_anomaly_factor`) have the same names and ranges as the online system — only the data source and time window differ.
+
+**SERP query construction:** The `q` parameter is a plain string — `discover_articles(f"site:{domain} {vertical}", api_key)` works as-is for the target outlet query. However, `discover_articles` does not expose a `tbs` parameter for date ranges. The backtest should either (a) add an optional `tbs` kwarg to `discover_articles` in `ingestion.py`, or (b) construct the payload manually in `backtest.py`, bypassing `discover_articles` for the dual-SERP queries. Either approach is fine — the key requirement is that both queries use `tbs=qdr:y` to restrict results to the past 12 months.
+
+- [ ] **Step 2: Verify spawn integration**
+
+The `.spawn()` call already exists in `narrative/app.py` step 4 (`run_historical_backtest.spawn(domain, vertical)`). This step is a verification checkpoint: confirm that `execute_historical_backtest(domain, vertical)` is importable from `narrative.backtest` and that the Modal function wrapper in `app.py` correctly passes both arguments.
 
 - [ ] **Step 3: Verify**
 
