@@ -652,7 +652,7 @@ class TestBuildIngestionManifest:
 
         calls = []
         build_ingestion_manifest("test", serp_data, "zone", "key",
-                                 progress_cb=lambda step, msg: calls.append((step, msg)))
+                                 progress_cb=lambda step, msg, _detail=None: calls.append((step, msg)))
 
         assert len(calls) == 5
         assert all(step == "ingesting" for step, _ in calls)
@@ -677,7 +677,7 @@ class TestBuildIngestionManifest:
 
         messages = []
         build_ingestion_manifest("test", data, "zone", "key",
-                                 progress_cb=lambda step, msg: messages.append(msg))
+                                 progress_cb=lambda step, msg, _detail=None: messages.append(msg))
 
         combined = " ".join(messages)
         assert "Reuters" in combined
@@ -694,6 +694,39 @@ class TestBuildIngestionManifest:
 
         result = build_ingestion_manifest("test", serp_data, "zone", "key")
         assert result["corpus_count"] == 5
+
+    def test_progress_cb_detail_has_source_domain_and_status(self, monkeypatch):
+        """progress_cb per-article detail includes source_name, domain, and status."""
+        from narrative.ingestion import build_ingestion_manifest
+
+        data = {
+            "organic": [
+                _serp_item("https://reuters.com/a", "reuters.com", "A1", source="Reuters"),
+                _serp_item("https://bbc.com/b",     "bbc.com",     "A2", source="BBC"),
+            ]
+        }
+        monkeypatch.setattr("narrative.ingestion.fetch_article_body",
+                            lambda url, zone, key: "<html><p>body</p></html>")
+        monkeypatch.setattr("narrative.ingestion.extract_text",
+                            lambda html: _valid_body())
+
+        details = []
+        build_ingestion_manifest("test", data, "zone", "key",
+                                 progress_cb=lambda step, msg, detail=None: (
+                                     details.append(detail) if detail else None
+                                 ))
+
+        assert len(details) == 2
+        statuses = {d.get("domain"): d.get("status") for d in details}
+        assert statuses.get("reuters.com") == "ok"
+        assert statuses.get("bbc.com") == "ok"
+        for d in details:
+            assert "source_name" in d
+            assert "title" in d, f"Expected 'title' in detail dict {d}"
+
+        titles = {d.get("domain"): d.get("title") for d in details}
+        assert titles.get("reuters.com") == "A1"
+        assert titles.get("bbc.com") == "A2"
 
     def test_published_at_absent(self, monkeypatch):
         """When SERP lacks published_at, field is absent/None in manifest."""

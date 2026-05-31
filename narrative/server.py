@@ -7,6 +7,7 @@ import logging
 import os
 import queue
 import time
+from typing import Optional
 from contextlib import asynccontextmanager
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
@@ -116,8 +117,8 @@ async def stream_pipeline(keyword: str, vertical: str = "TECHNOLOGY"):
 
     progress_q: queue.SimpleQueue = queue.SimpleQueue()
 
-    def _progress_cb(step: str, message: str) -> None:
-        progress_q.put((step, message))
+    def _progress_cb(step: str, message: str, detail: Optional[dict] = None) -> None:
+        progress_q.put((step, message, detail))
 
     db_path = os.path.join(_narrative_root(), "outlet_reputation.db")
 
@@ -134,23 +135,40 @@ async def stream_pipeline(keyword: str, vertical: str = "TECHNOLOGY"):
         )
 
         done = False
+        keepalive_interval = 30.0
+        last_event_time = time.time()
         while not done:
             while True:
                 try:
-                    step, message = progress_q.get_nowait()
-                    yield f"data: {json.dumps({'step': step, 'message': message})}\n\n"
+                    received = progress_q.get_nowait()
+                    step, message = received[0], received[1]
+                    detail = received[2] if len(received) > 2 else None
+                    payload: dict = {'step': step, 'message': message}
+                    if detail is not None:
+                        payload['detail'] = detail
+                    yield f"data: {json.dumps(payload)}\n\n"
+                    last_event_time = time.time()
                 except queue.Empty:
                     break
             if pipeline_future.done():
                 done = True
             else:
                 await asyncio.sleep(0.5)
+                now = time.time()
+                if now - last_event_time > keepalive_interval:
+                    yield ": keepalive\n\n"
+                    last_event_time = now
 
         # drain any events queued in the final tick
         while True:
             try:
-                step, message = progress_q.get_nowait()
-                yield f"data: {json.dumps({'step': step, 'message': message})}\n\n"
+                received = progress_q.get_nowait()
+                step, message = received[0], received[1]
+                detail = received[2] if len(received) > 2 else None
+                payload: dict = {'step': step, 'message': message}
+                if detail is not None:
+                    payload['detail'] = detail
+                yield f"data: {json.dumps(payload)}\n\n"
             except queue.Empty:
                 break
 

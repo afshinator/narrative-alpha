@@ -35,12 +35,12 @@ Layer 3 with Call 3 graph extraction via DeepSeek V4-Pro thinking mode (one per 
 ---
 
 ## Task 7 (backtest.py)
-Background Modal `.spawn()` worker that runs SERP + extraction + Call 1 + Call 3 on up to 15 historical articles for a given outlet domain, computes absorbed vs decayed node counts, writes Sa + historical_origin_validation_rate + rating_status = `RATED` to SQLite. Runs asynchronously after main pipeline returns, never blocks the response timeout. Leaves outlet as `UNRATED` if fewer than 5 historical articles available.
+Synchronous local worker that runs dual SERP queries (target outlet + cross-source consensus baseline), fetches bodies, runs Call 1 (entity normalization) + Call 3 (graph extraction) on both sets independently, classifies claims as consensus-supported vs consensus-isolated, and writes `scatter_shot_anomaly_factor` + `historical_origin_validation_rate` + `rating_status = 'RATED'` to SQLite. Called inline from `_run_pipeline()` for UNRATED outlets with a post-execution reputation re-read to ensure fresh data. Leaves outlet as `UNRATED` if fewer than 5 historical articles available.
 
 ---
 
-## Task 8 (app.py)
-Single Modal web endpoint orchestrating the full 13-step pipeline: SERP → Web Unlocker → floor gate → outlet registration + backtest spawn → Call 1 → Call 2 → embeddings → Call 3 → Python set-math → Call 4 → label injection → `vol.commit()`. Also exposes a `/settings` POST endpoint for runtime LLM config updates.
+## Task 8 (server.py)
+FastAPI + uvicorn web server (`narrative/server.py`) orchestrating the full 7-step pipeline: SERP discovery → article fetch → outlet registration + backtest → entity normalization → linguistic neutralization → graph extraction → forensic synthesis → persistence. Exposes `POST /api/pipeline`, `GET /api/pipeline/stream` (SSE with real-time progress events and 30s keepalive), `GET /api/reports`, `GET /api/reports/{cluster_id}`, `POST /api/settings`, `GET /api/env`, and `GET /api/ping`. Runs on port 3001, bound to `0.0.0.0`.
 
 ---
 
@@ -50,4 +50,4 @@ Static HTML/JS frontend with 3-zone forensic report layout: Zone 1 (consensus re
 ---
 
 ## Task 10 (settings UI)
-`/settings` route with one form row per call slot: provider dropdown (deepseek / openai / google / groq), model text input, thinking toggle (visible only for DeepSeek), and temperature slider. Saves updated `llm_config.json` to Modal Volume via POST endpoint, calls `vol.commit()`. No pipeline redeployment required.
+`/settings` route with one form row per call slot: model text input per slot. Saves updated `llm_config.json` to the local filesystem under `NARRATIVE_ALPHA_ROOT` via `POST /api/settings`. Includes `EnvHealthPanel` component showing credential status for each API provider (DeepSeek, OpenAI, Google, Groq, Bright Data). No pipeline redeployment required.

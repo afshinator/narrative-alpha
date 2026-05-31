@@ -123,6 +123,23 @@ def parse_serp_result(result: dict) -> dict:
     }
 
 
+def _emit_article_progress(
+    progress_cb, source_name: str, domain: str, status: str,
+    title: str = "",
+) -> None:
+    """Emit a per-article progress event with structured detail."""
+    if progress_cb:
+        label = source_name or domain or "unknown"
+        payload: dict = {
+            "source_name": source_name or "",
+            "domain": domain or "",
+            "status": status,
+        }
+        if title:
+            payload["title"] = title
+        progress_cb("ingesting", label, payload)
+
+
 def _process_one_result(
     idx: int, result: dict, zone: str, api_key: str,
     now_utc: str,
@@ -137,12 +154,8 @@ def _process_one_result(
     domain = parsed["domain"]
     published_at = parsed["published_at"]
 
-    if progress_cb:
-        label = source_name or domain or url
-        count_str = f" ({idx + 1}/{total})" if total else ""
-        progress_cb("ingesting", f"Fetching {label}{count_str}")
-
     if not url:
+        _emit_article_progress(progress_cb, source_name, domain, "skipped", title)
         return _attempted_doc(idx, source_name, url, domain, title, published_at, now_utc, "", 0, 0), None
 
     fetch_status = 0
@@ -153,9 +166,11 @@ def _process_one_result(
         raw_text = extract_text(html)
     except Exception as e:
         fetch_status = getattr(getattr(e, "response", None), "status_code", 0) or -1
+        _emit_article_progress(progress_cb, source_name, domain, "failed", title)
         return _attempted_doc(idx, source_name, url, domain, title, published_at, now_utc, "", fetch_status, 0), None
 
     if len(raw_text) < MIN_BODY_CHARS:
+        _emit_article_progress(progress_cb, source_name, domain, "rejected", title)
         return _attempted_doc(idx, source_name, url, domain, title, published_at, now_utc, raw_text, fetch_status, 0, body_length=len(raw_text)), None
 
     doc = {
@@ -173,8 +188,10 @@ def _process_one_result(
     if validated:
         validated["fetch_status"] = fetch_status
         validated["published_at"] = published_at
+        _emit_article_progress(progress_cb, source_name, domain, "ok", title)
         return dict(validated), validated
     else:
+        _emit_article_progress(progress_cb, source_name, domain, "rejected", title)
         return _attempted_doc(idx, source_name, url, domain, title, published_at, now_utc, raw_text, fetch_status, 0), None
 
 

@@ -37,7 +37,7 @@ DEFAULT_LLM_CONFIG = LLMConfig(
         provider="deepseek", model="deepseek-v4-flash", thinking=False, temperature=0.1
     ),
     call_3_graph_extraction=LLMSlotConfig(
-        provider="deepseek", model="deepseek-v4-pro", thinking=True, temperature=0.1
+        provider="deepseek", model="deepseek-v4-flash", thinking=False, temperature=0.1
     ),
     call_4_forensic_synthesis=LLMSlotConfig(
         provider="deepseek", model="deepseek-v4-pro", thinking=True, temperature=0.1

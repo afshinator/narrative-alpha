@@ -1,0 +1,26 @@
+{
+  "call_1_entity_normalization": {
+    "provider": "deepseek",
+    "model": "deepseek-v4-flash",
+    "thinking": false,
+    "temperature": 0.1
+  },
+  "call_2_linguistic_neutralization": {
+    "provider": "deepseek",
+    "model": "deepseek-v4-flash",
+    "thinking": false,
+    "temperature": 0.1
+  },
+  "call_3_graph_extraction": {
+    "provider": "deepseek",
+    "model": "deepseek-v4-flash",
+    "thinking": false,
+    "temperature": 0.1
+  },
+  "call_4_forensic_synthesis": {
+    "provider": "deepseek",
+    "model": "deepseek-v4-pro",
+    "thinking": true,
+    "temperature": 0.1
+  }
+}

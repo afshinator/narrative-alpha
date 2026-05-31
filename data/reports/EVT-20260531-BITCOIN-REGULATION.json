@@ -1,0 +1,350 @@
+{
+  "event_meta": {
+    "cluster_id": "EVT-20260531-BITCOIN-REGULATION",
+    "search_query": "bitcoin regulation",
+    "industry_vertical": "UNKNOWN",
+    "timestamp_utc": "2026-05-31T20:20:47.900286+00:00",
+    "corpus_count": 8,
+    "corpus_capped": false
+  },
+  "consensus_reality_graph": {
+    "consensus_summary": "The Clarity Act is a legislative bill seeking to create a regulatory framework for digital assets. It advanced through the Senate Banking Committee on May 14 with a 15-9 vote, with some bipartisan support, and now moves to the full Senate. The bill aims to clarify regulators' jurisdiction over crypto, but faces opposition from banking, law enforcement, and consumer groups over concerns about weakening enforcement and financial stability.",
+    "verified_anchor_nodes": [
+      "Clarity Act advanced by Senate Banking Committee",
+      "Vote was 15-9, with Democrats Ruben Gallego and Angela Alsobrooks joining Republicans",
+      "Bill needs full Senate and House approval to become law",
+      "President Trump and White House support the bill"
+    ],
+    "primary_verifications": [
+      {
+        "authority": "Reuters",
+        "reference_id": "Reuters report May 14",
+        "status": "verified"
+      },
+      {
+        "authority": "CNBC",
+        "reference_id": "CNBC report on Senate vote",
+        "status": "verified"
+      },
+      {
+        "authority": "NYTimes",
+        "reference_id": "NYTimes analysis of crypto lobbying",
+        "status": "verified"
+      }
+    ]
+  },
+  "distortion_matrix": [
+    {
+      "outlet_name": "The New York Times",
+      "source_domain": "nytimes.com",
+      "omission_index": 0.0,
+      "framing_volatility_score": 0.2062,
+      "identifiable_omissions": [],
+      "linguistic_camouflage": [
+        {
+          "raw_expression": "Crypto Industry Is Pushing a Bill to Tilt Regulation in Its Favor",
+          "clinical_translation": "Crypto industry lobbying for favorable regulatory framework"
+        },
+        {
+          "raw_expression": "guts the government\u2019s enforcement powers",
+          "clinical_translation": "reduces enforcement authority"
+        }
+      ],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "Reuters",
+      "source_domain": "reuters.com",
+      "omission_index": 0.0,
+      "framing_volatility_score": 0.0978,
+      "identifiable_omissions": [],
+      "linguistic_camouflage": [
+        {
+          "raw_expression": "landmark step",
+          "clinical_translation": "significant procedural advancement"
+        },
+        {
+          "raw_expression": "huge win for the crypto sector",
+          "clinical_translation": "positive outcome for crypto industry advocacy"
+        }
+      ],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "The Regulatory Review",
+      "source_domain": "theregreview.org",
+      "omission_index": 1.0,
+      "framing_volatility_score": 0.0441,
+      "identifiable_omissions": [
+        "Clarity Act"
+      ],
+      "linguistic_camouflage": [
+        {
+          "raw_expression": "nonbank stablecoin issuance carries severe economic risks",
+          "clinical_translation": "nonbank stablecoins pose potential financial stability concerns"
+        }
+      ],
+      "omission_label": "HIGH",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "CNBC",
+      "source_domain": "cnbc.com",
+      "omission_index": 0.0,
+      "framing_volatility_score": 0.1396,
+      "identifiable_omissions": [],
+      "linguistic_camouflage": [
+        {
+          "raw_expression": "key win",
+          "clinical_translation": "significant achievement for crypto industry"
+        }
+      ],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "Bloomberg.com",
+      "source_domain": "bloomberg.com",
+      "omission_index": 0.0,
+      "framing_volatility_score": 0.1923,
+      "identifiable_omissions": [],
+      "linguistic_camouflage": [
+        {
+          "raw_expression": "landmark US digital asset market structure bill",
+          "clinical_translation": "first comprehensive federal bill on digital asset regulation"
+        }
+      ],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "Direxion",
+      "source_domain": "direxion.com",
+      "omission_index": 0.0,
+      "framing_volatility_score": 0.231,
+      "identifiable_omissions": [],
+      "linguistic_camouflage": [],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "Dechert",
+      "source_domain": "dechert.com",
+      "omission_index": 1.0,
+      "framing_volatility_score": 0.2682,
+      "identifiable_omissions": [
+        "Clarity Act"
+      ],
+      "linguistic_camouflage": [
+        {
+          "raw_expression": "the most consequential dollar-denominated product in crypto isn't actually a stablecoin",
+          "clinical_translation": "USDe is a synthetic dollar, not a stablecoin"
+        }
+      ],
+      "omission_label": "HIGH",
+      "framing_volatility_label": "MED"
+    },
+    {
+      "outlet_name": "CoinDesk",
+      "source_domain": "coindesk.com",
+      "omission_index": 0.0,
+      "framing_volatility_score": 0.1859,
+      "identifiable_omissions": [],
+      "linguistic_camouflage": [
+        {
+          "raw_expression": "Crypto's value is from being outside regulatory apparatus",
+          "clinical_translation": "Bitcoin's value stems from its independence from government regulation"
+        }
+      ],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    }
+  ],
+  "outlier_signals": [
+    {
+      "signal_id": "sig_001",
+      "origin_outlet": "The New York Times",
+      "origin_domain": "nytimes.com",
+      "extracted_claim": "White House to create a national Bitcoin stockpile",
+      "timestamp_first_seen": "2026-05-15T00:00:00Z",
+      "outlier_origin_provenance": {
+        "classification": "UNVERIFIED",
+        "historical_origin_validation_rate": 0.0,
+        "scatter_shot_anomaly_factor": 0.0,
+        "reputation_warning_triggered": false,
+        "echo_chamber_mimics": [],
+        "scatter_shot_label": "LOW"
+      },
+      "validation_tracking": {
+        "current_state": "UNVERIFIED",
+        "last_checked_timestamp": "2026-05-15T00:00:00Z",
+        "consensus_absorption_status": "NOT_ABSORBED",
+        "evaluation_window_days": 7
+      }
+    },
+    {
+      "signal_id": "sig_002",
+      "origin_outlet": "The New York Times",
+      "origin_domain": "nytimes.com",
+      "extracted_claim": "Trump family became a major player in the crypto sector",
+      "timestamp_first_seen": "2026-05-15T00:00:00Z",
+      "outlier_origin_provenance": {
+        "classification": "UNVERIFIED",
+        "historical_origin_validation_rate": 0.0,
+        "scatter_shot_anomaly_factor": 0.0,
+        "reputation_warning_triggered": false,
+        "echo_chamber_mimics": [],
+        "scatter_shot_label": "LOW"
+      },
+      "validation_tracking": {
+        "current_state": "UNVERIFIED",
+        "last_checked_timestamp": "2026-05-15T00:00:00Z",
+        "consensus_absorption_status": "NOT_ABSORBED",
+        "evaluation_window_days": 7
+      }
+    }
+  ],
+  "reputation_warnings": [
+    {
+      "outlet_name": "The New York Times",
+      "source_domain": "nytimes.com",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": "No historical data available for this outlet."
+    },
+    {
+      "outlet_name": "Reuters",
+      "source_domain": "reuters.com",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": "No historical data available for this outlet."
+    },
+    {
+      "outlet_name": "The Regulatory Review",
+      "source_domain": "theregreview.org",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": "No historical data available for this outlet."
+    },
+    {
+      "outlet_name": "CNBC",
+      "source_domain": "cnbc.com",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": "No historical data available for this outlet."
+    },
+    {
+      "outlet_name": "Bloomberg.com",
+      "source_domain": "bloomberg.com",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": "No historical data available for this outlet."
+    },
+    {
+      "outlet_name": "Direxion",
+      "source_domain": "direxion.com",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": "No historical data available for this outlet."
+    },
+    {
+      "outlet_name": "Dechert",
+      "source_domain": "dechert.com",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": "No historical data available for this outlet."
+    },
+    {
+      "outlet_name": "CoinDesk",
+      "source_domain": "coindesk.com",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": "No historical data available for this outlet."
+    }
+  ],
+  "reality_divergence_zones": [
+    {
+      "topic": "Clarity Act Impact on Enforcement Powers",
+      "consensus_stability_score": 0.4,
+      "institutional_convergence": "Divided: Some outlets frame as reducing enforcement, others as providing clarity.",
+      "observed_narrative_structures": [
+        "Bill guts enforcement powers and benefits crypto firms at expense of consumer protection.",
+        "Bill clarifies regulatory jurisdiction, reducing enforcement overreach.",
+        "Bill creates balanced framework but may weaken anti-money laundering measures."
+      ],
+      "supporting_outlets": {
+        "Bill guts enforcement powers": [
+          "nytimes.com",
+          "cnbc.com"
+        ],
+        "Bill clarifies regulatory jurisdiction": [
+          "reuters.com",
+          "bloomberg.com"
+        ],
+        "Bill creates balanced framework but may weaken AML": [
+          "reuters.com"
+        ]
+      },
+      "consensus_stability": "MED"
+    }
+  ],
+  "reality_fractures": [
+    {
+      "fracture_id": "frac_001",
+      "topic": "Enforcement Powers vs. Regulatory Clarity",
+      "claim_a": {
+        "statement": "Clarity Act guts enforcement powers over the crypto sector",
+        "supporting_outlets": [
+          "nytimes.com"
+        ]
+      },
+      "claim_b": {
+        "statement": "Clarity Act clarifies regulators jurisdiction over the crypto sector",
+        "supporting_outlets": [
+          "reuters.com"
+        ]
+      },
+      "relationship": "contradictory",
+      "resolution_status": "UNRESOLVED",
+      "classification_method": "LLM_ASSISTED"
+    },
+    {
+      "fracture_id": "frac_002",
+      "topic": "Crypto Industry Influence on Bill Content",
+      "claim_a": {
+        "statement": "Crypto industry shaped the bill to its interests",
+        "supporting_outlets": [
+          "nytimes.com"
+        ]
+      },
+      "claim_b": {
+        "statement": "The bill provides much-needed legal clarity without taking sides",
+        "supporting_outlets": [
+          "reuters.com"
+        ]
+      },
+      "relationship": "contradictory",
+      "resolution_status": "UNRESOLVED",
+      "classification_method": "LLM_ASSISTED"
+    }
+  ],
+  "narrative_regime_shifts": []
+}

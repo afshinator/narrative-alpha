@@ -1,3 +1,10 @@
+> **⚠️ ORCHESTRATION LAYER DIVERGENCE**
+> This spec was written for Modal Serverless deployment. The actual implementation uses
+> **local FastAPI + uvicorn** (`narrative/server.py`) with synchronous pipeline orchestration
+> in `narrative/pipeline.py`. SQLite and JSON reports live on the local filesystem under
+> `NARRATIVE_ALPHA_ROOT`, not on a Modal Volume. The frontend is a **React/Vite SPA** with
+> SSE streaming, not static HTML. See `docs/desc.md` for the current architecture.
+
 # NARRATIVE ALPHA — FORENSIC TRACKER
 ## Implementation Specification v1.5
 **Hackathon:** Bright Data Web Data UNLOCKED | May 25–30, 2026  

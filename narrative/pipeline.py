@@ -54,7 +54,7 @@ def _run_pipeline(
     unlocker_zone: str,
     serp_zone: str,
     db_path: str,
-    progress_cb: Optional[Callable[[str, str], None]] = None,
+    progress_cb: Optional[Callable[..., None]] = None,
 ) -> dict:
     """Execute the full forensic pipeline synchronously."""
     from narrative.backtest import execute_historical_backtest
@@ -67,6 +67,11 @@ def _run_pipeline(
     if progress_cb: progress_cb("discovering", "Searching for articles...")
     logger.info("STEP 1/7: Discovering articles via SERP API")
     serp_data = discover_articles(keyword, serp_zone, api_key, time_range="m")
+    organic = serp_data.get("news", serp_data.get("organic", []))
+    if progress_cb:
+        progress_cb("discovering", f"Found {len(organic)} articles", {
+            "status": "complete", "count": len(organic),
+        })
     logger.info("STEP 1/7 done — %.1fs", time.time() - _t)
 
     _t = time.time()
@@ -80,16 +85,26 @@ def _run_pipeline(
     )
 
     if "validation_tracking" in manifest:
+        if progress_cb:
+            progress_cb("ingesting", "Insufficient corpus", {
+                "status": "complete", "validated": 0, "attempted": len(organic),
+            })
         db_conn.close()
         logger.info("Corpus floor gate — %.1fs", time.time() - _t)
         return manifest
 
+    validated_count = manifest.get("corpus_count", 0)
+    if progress_cb:
+        progress_cb("ingesting", f"{validated_count} articles validated", {
+            "status": "complete", "validated": validated_count, "attempted": len(organic),
+        })
     logger.info("STEP 2/7 done — %.1fs", time.time() - _t)
 
     documents = manifest["documents"]
     corp_count = manifest["corpus_count"]
     reputation_records = {}
     unrated_domains: list[str] = []
+    if progress_cb: progress_cb("analyzing", "Registering outlets...")
     logger.info("STEP 3/7: Registering outlets + running backtests ...")
     for doc in documents:
         status = handle_outlet_registration(
@@ -98,13 +113,50 @@ def _run_pipeline(
         )
         rep = read_outlet_reputation(doc["source_domain"], vertical, db_conn)
         reputation_records[doc["source_domain"]] = rep or {"rating_status": "UNRATED"}
+        if progress_cb:
+            progress_cb("analyzing", f"Outlet registered — {doc.get('source_name', doc['source_domain'])}")
         if status == "UNRATED":
             unrated_domains.append(doc["source_domain"])
 
-    # Run backtests synchronously for new outlets so reputation data is
-    # available before the LLM synthesis step.
-    for domain in unrated_domains:
-        execute_historical_backtest(domain, vertical)
+    # Run backtests in parallel for new outlets so reputation data is
+    # available before the LLM synthesis step. Parallel + timeout prevents
+    # slow backtests from blocking the pipeline for 30+ minutes.
+    if unrated_domains:
+        from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
+        if progress_cb:
+            progress_cb("analyzing", f"Running backtests ({len(unrated_domains)} unrated, parallel)...")
+        BACKTEST_TIMEOUT = 120  # max seconds per backtest
+        done_count = 0
+        domain_of: dict = {}
+        with ThreadPoolExecutor(max_workers=4) as btex:
+            fut_map: dict = {btex.submit(execute_historical_backtest, d, vertical): d for d in unrated_domains}
+            pending = set(fut_map.keys())
+            while pending:
+                done_set, pending = wait(pending, timeout=BACKTEST_TIMEOUT, return_when=FIRST_COMPLETED)
+                for fut in done_set:
+                    d = fut_map.get(fut, "unknown")
+                    try:
+                        fut.result(timeout=5)
+                        done_count += 1
+                        if progress_cb:
+                            progress_cb("analyzing", f"Backtest done ({done_count}/{len(unrated_domains)}) — {d}")
+                    except TimeoutError:
+                        logger.warning("Backtest %s/%s timed out", d, vertical)
+                        if progress_cb:
+                            progress_cb("analyzing", f"Backtest timed out — {d}")
+                    except Exception:
+                        logger.warning("Backtest %s/%s failed", d, vertical, exc_info=True)
+                        if progress_cb:
+                            progress_cb("analyzing", f"Backtest failed — {d}")
+                if not pending:
+                    break
+                # If wait timed out, cancel remaining
+                for f in list(pending):
+                    f.cancel()
+                logger.info("Backtests timed out — %d/%d done", done_count, len(unrated_domains))
+                if progress_cb:
+                    progress_cb("analyzing", f"Backtests timed out — {done_count}/{len(unrated_domains)} done")
+                break
 
     # Re-read reputation now that backtests have populated the DB.
     for domain in unrated_domains:
@@ -116,18 +168,22 @@ def _run_pipeline(
     logger.info("STEP 3/7 done — %.1fs", time.time() - _t)
 
     _t = time.time()
-    if progress_cb: progress_cb("analyzing", "Running entity and graph analysis...")
+    if progress_cb: progress_cb("analyzing", "Normalizing entities (LLM 1/4)...")
     logger.info("STEP 4/7: Entity normalization (LLM call 1/4)")
     canonical_map = run_entity_normalization(documents, serp_data, llm_config)
+    if progress_cb: progress_cb("analyzing", "Entity normalization complete")
     logger.info("STEP 4/7 done — %.1fs", time.time() - _t)
 
     _t = time.time()
+    if progress_cb: progress_cb("analyzing", "Neutralizing linguistic bias (LLM 2/4)...")
     logger.info("STEP 5/7: Linguistic neutralization (LLM call 2/4)")
     neutralized = run_linguistic_neutralization(documents, llm_config)
+    if progress_cb: progress_cb("analyzing", "Linguistic neutralization complete")
     logger.info("STEP 5/7 done — %.1fs", time.time() - _t)
 
     _t = time.time()
     raw_texts = [d["raw_text_content"] for d in documents]
+    if progress_cb: progress_cb("analyzing", "Extracting entity graphs (LLM 3/4)...")
     logger.info("STEP 6/7: Graph extraction (LLM call 3/4, parallel)")
     all_graphs = extract_all_graphs(documents, neutralized, canonical_map, llm_config,
                                     progress_cb=progress_cb)

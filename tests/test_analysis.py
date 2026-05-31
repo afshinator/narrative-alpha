@@ -405,7 +405,7 @@ class TestExtractAllGraphs:
         calls = []
         extract_all_graphs(
             docs, ["text a", "text b"], {}, {"call_3_graph_extraction": {}},
-            progress_cb=lambda step, msg: calls.append((step, msg)),
+            progress_cb=lambda step, msg, _detail=None: calls.append((step, msg)),
         )
         assert len(calls) == 2
         assert all(step == "analyzing" for step, _ in calls)
@@ -421,7 +421,7 @@ class TestExtractAllGraphs:
         calls = []
         extract_all_graphs(
             docs, ["text"], {}, {"call_3_graph_extraction": {}},
-            progress_cb=lambda step, msg: calls.append((step, msg)),
+            progress_cb=lambda step, msg, _detail=None: calls.append((step, msg)),
         )
         assert len(calls) == 1
         assert calls[0][0] == "analyzing"

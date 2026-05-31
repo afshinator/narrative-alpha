@@ -1,3 +1,8 @@
+> **⚠️ PRE-IMPLEMENTATION DESIGN DOC — SIGNIFICANT DIVERGENCE**
+> This document describes an early architectural vision (Modal serverless, Cognee graph DB, Obsidian vault, Claude 3.5 Sonnet).
+> **The actual implementation differs:** Local FastAPI + uvicorn, no Cognee, no Obsidian, DeepSeek V4 (Flash + Pro/thinking),
+> SQLite + JSON files for storage, React/Vite SPA dashboard. See `docs/desc.md` and `docs/task-summary.md` for current reality.
+
 # TECHNICAL SPECIFICATION: NARRATIVE ALPHA FORENSIC TRACKER
 
 ## Section 1: Pre-Implementation Sanity Check & Financial Feasibility

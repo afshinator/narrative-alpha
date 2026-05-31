@@ -1,0 +1,642 @@
+{
+  "version": 1,
+  "projectRoot": "/project/narrative-alpha",
+  "generatedAt": "2026-05-31T20:19:46.007Z",
+  "seq": 11,
+  "files": {
+    "/project/narrative-alpha/dashboard/src/api.test.ts": {
+      "path": "/project/narrative-alpha/dashboard/src/api.test.ts",
+      "mtimeMs": 1780177669100.9954,
+      "size": 5434,
+      "imports": [],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/api.ts": {
+      "path": "/project/narrative-alpha/dashboard/src/api.ts",
+      "mtimeMs": 1780257207401.3975,
+      "size": 2344,
+      "imports": [
+        "/project/narrative-alpha/dashboard/src/types.ts"
+      ],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/components/App.tsx": {
+      "path": "/project/narrative-alpha/dashboard/src/components/App.tsx",
+      "mtimeMs": 1780156035773.8037,
+      "size": 1177,
+      "imports": [
+        "/project/narrative-alpha/dashboard/src/components/EventPage.tsx",
+        "/project/narrative-alpha/dashboard/src/components/FontSizeControl.tsx",
+        "/project/narrative-alpha/dashboard/src/components/HomePage.tsx",
+        "/project/narrative-alpha/dashboard/src/components/SettingsPage.tsx"
+      ],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/components/Badge.test.tsx": {
+      "path": "/project/narrative-alpha/dashboard/src/components/Badge.test.tsx",
+      "mtimeMs": 1780156035773.8037,
+      "size": 957,
+      "imports": [
+        "/project/narrative-alpha/dashboard/src/components/Badge.tsx"
+      ],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/components/Badge.tsx": {
+      "path": "/project/narrative-alpha/dashboard/src/components/Badge.tsx",
+      "mtimeMs": 1780156035773.8037,
+      "size": 294,
+      "imports": [],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/components/EnvHealthPanel.test.tsx": {
+      "path": "/project/narrative-alpha/dashboard/src/components/EnvHealthPanel.test.tsx",
+      "mtimeMs": 1780177602560.746,
+      "size": 3656,
+      "imports": [
+        "/project/narrative-alpha/dashboard/src/api.ts",
+        "/project/narrative-alpha/dashboard/src/components/EnvHealthPanel.tsx"
+      ],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/components/EnvHealthPanel.tsx": {
+      "path": "/project/narrative-alpha/dashboard/src/components/EnvHealthPanel.tsx",
+      "mtimeMs": 1780177590101.8403,
+      "size": 1898,
+      "imports": [
+        "/project/narrative-alpha/dashboard/src/api.ts",
+        "/project/narrative-alpha/dashboard/src/types.ts"
+      ],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/components/EventPage.test.tsx": {
+      "path": "/project/narrative-alpha/dashboard/src/components/EventPage.test.tsx",
+      "mtimeMs": 1780257207405.397,
+      "size": 1984,
+      "imports": [
+        "/project/narrative-alpha/dashboard/src/components/EventPage.tsx"
+      ],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/components/EventPage.tsx": {
+      "path": "/project/narrative-alpha/dashboard/src/components/EventPage.tsx",
+      "mtimeMs": 1780156035773.8037,
+      "size": 1367,
+      "imports": [
+        "/project/narrative-alpha/dashboard/src/api.ts",
+        "/project/narrative-alpha/dashboard/src/components/Zone1.tsx",
+        "/project/narrative-alpha/dashboard/src/components/Zone2.tsx",
+        "/project/narrative-alpha/dashboard/src/components/Zone3.tsx",
+        "/project/narrative-alpha/dashboard/src/types.ts"
+      ],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/components/FontSizeControl.test.tsx": {
+      "path": "/project/narrative-alpha/dashboard/src/components/FontSizeControl.test.tsx",
+      "mtimeMs": 1780156035773.8037,
+      "size": 1487,
+      "imports": [
+        "/project/narrative-alpha/dashboard/src/components/FontSizeControl.tsx"
+      ],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/components/FontSizeControl.tsx": {
+      "path": "/project/narrative-alpha/dashboard/src/components/FontSizeControl.tsx",
+      "mtimeMs": 1780156035773.8037,
+      "size": 818,
+      "imports": [],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/components/HomePage.test.tsx": {
+      "path": "/project/narrative-alpha/dashboard/src/components/HomePage.test.tsx",
+      "mtimeMs": 1780257207408.3965,
+      "size": 1766,
+      "imports": [
+        "/project/narrative-alpha/dashboard/src/components/HomePage.tsx"
+      ],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/components/HomePage.tsx": {
+      "path": "/project/narrative-alpha/dashboard/src/components/HomePage.tsx",
+      "mtimeMs": 1780254085902.8777,
+      "size": 2122,
+      "imports": [
+        "/project/narrative-alpha/dashboard/src/api.ts",
+        "/project/narrative-alpha/dashboard/src/components/PipelineRunner.tsx",
+        "/project/narrative-alpha/dashboard/src/types.ts"
+      ],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/components/Pill.test.tsx": {
+      "path": "/project/narrative-alpha/dashboard/src/components/Pill.test.tsx",
+      "mtimeMs": 1780156035774.8037,
+      "size": 451,
+      "imports": [
+        "/project/narrative-alpha/dashboard/src/components/Pill.tsx"
+      ],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/components/Pill.tsx": {
+      "path": "/project/narrative-alpha/dashboard/src/components/Pill.tsx",
+      "mtimeMs": 1780156035774.8037,
+      "size": 195,
+      "imports": [],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/components/PipelineRunner.test.tsx": {
+      "path": "/project/narrative-alpha/dashboard/src/components/PipelineRunner.test.tsx",
+      "mtimeMs": 1780253611011.7832,
+      "size": 7675,
+      "imports": [
+        "/project/narrative-alpha/dashboard/src/api.ts",
+        "/project/narrative-alpha/dashboard/src/components/PipelineRunner.tsx"
+      ],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/components/PipelineRunner.tsx": {
+      "path": "/project/narrative-alpha/dashboard/src/components/PipelineRunner.tsx",
+      "mtimeMs": 1780254052341.5078,
+      "size": 10852,
+      "imports": [
+        "/project/narrative-alpha/dashboard/src/api.ts",
+        "/project/narrative-alpha/dashboard/src/types.ts"
+      ],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/components/SettingsPage.test.tsx": {
+      "path": "/project/narrative-alpha/dashboard/src/components/SettingsPage.test.tsx",
+      "mtimeMs": 1780177967916.5498,
+      "size": 3711,
+      "imports": [
+        "/project/narrative-alpha/dashboard/src/api.ts",
+        "/project/narrative-alpha/dashboard/src/components/SettingsPage.tsx"
+      ],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/components/SettingsPage.tsx": {
+      "path": "/project/narrative-alpha/dashboard/src/components/SettingsPage.tsx",
+      "mtimeMs": 1780177618103.6287,
+      "size": 3062,
+      "imports": [
+        "/project/narrative-alpha/dashboard/src/api.ts",
+        "/project/narrative-alpha/dashboard/src/components/EnvHealthPanel.tsx",
+        "/project/narrative-alpha/dashboard/src/components/SettingsRow.tsx",
+        "/project/narrative-alpha/dashboard/src/types.ts"
+      ],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/components/SettingsRow.test.tsx": {
+      "path": "/project/narrative-alpha/dashboard/src/components/SettingsRow.test.tsx",
+      "mtimeMs": 1780177579081.9238,
+      "size": 1638,
+      "imports": [
+        "/project/narrative-alpha/dashboard/src/components/SettingsRow.tsx"
+      ],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/components/SettingsRow.tsx": {
+      "path": "/project/narrative-alpha/dashboard/src/components/SettingsRow.tsx",
+      "mtimeMs": 1780177573601.9653,
+      "size": 590,
+      "imports": [],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/components/Zone1.test.tsx": {
+      "path": "/project/narrative-alpha/dashboard/src/components/Zone1.test.tsx",
+      "mtimeMs": 1780156035774.8037,
+      "size": 2024,
+      "imports": [
+        "/project/narrative-alpha/dashboard/src/components/Zone1.tsx",
+        "/project/narrative-alpha/dashboard/src/types.ts"
+      ],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/components/Zone1.tsx": {
+      "path": "/project/narrative-alpha/dashboard/src/components/Zone1.tsx",
+      "mtimeMs": 1780156035774.8037,
+      "size": 1403,
+      "imports": [
+        "/project/narrative-alpha/dashboard/src/components/Pill.tsx",
+        "/project/narrative-alpha/dashboard/src/types.ts"
+      ],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/components/Zone2.test.tsx": {
+      "path": "/project/narrative-alpha/dashboard/src/components/Zone2.test.tsx",
+      "mtimeMs": 1780156035774.8037,
+      "size": 3027,
+      "imports": [
+        "/project/narrative-alpha/dashboard/src/components/Zone2.tsx",
+        "/project/narrative-alpha/dashboard/src/types.ts"
+      ],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/components/Zone2.tsx": {
+      "path": "/project/narrative-alpha/dashboard/src/components/Zone2.tsx",
+      "mtimeMs": 1780156035775.8037,
+      "size": 3427,
+      "imports": [
+        "/project/narrative-alpha/dashboard/src/components/Badge.tsx",
+        "/project/narrative-alpha/dashboard/src/types.ts"
+      ],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/components/Zone3.test.tsx": {
+      "path": "/project/narrative-alpha/dashboard/src/components/Zone3.test.tsx",
+      "mtimeMs": 1780243182958.2727,
+      "size": 4745,
+      "imports": [
+        "/project/narrative-alpha/dashboard/src/components/Zone3.tsx",
+        "/project/narrative-alpha/dashboard/src/types.ts"
+      ],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/components/Zone3.tsx": {
+      "path": "/project/narrative-alpha/dashboard/src/components/Zone3.tsx",
+      "mtimeMs": 1780178911827.461,
+      "size": 6939,
+      "imports": [
+        "/project/narrative-alpha/dashboard/src/components/Badge.tsx",
+        "/project/narrative-alpha/dashboard/src/types.ts"
+      ],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/index.css": {
+      "path": "/project/narrative-alpha/dashboard/src/index.css",
+      "mtimeMs": 1780251274098.9746,
+      "size": 20559,
+      "imports": [],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/main.tsx": {
+      "path": "/project/narrative-alpha/dashboard/src/main.tsx",
+      "mtimeMs": 1780156035775.8037,
+      "size": 246,
+      "imports": [
+        "/project/narrative-alpha/dashboard/src/components/App.tsx",
+        "/project/narrative-alpha/dashboard/src/index.css"
+      ],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/smoke.test.ts": {
+      "path": "/project/narrative-alpha/dashboard/src/smoke.test.ts",
+      "mtimeMs": 1780156035775.8037,
+      "size": 149,
+      "imports": [],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/test-setup.ts": {
+      "path": "/project/narrative-alpha/dashboard/src/test-setup.ts",
+      "mtimeMs": 1780156035775.8037,
+      "size": 36,
+      "imports": [],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/types.ts": {
+      "path": "/project/narrative-alpha/dashboard/src/types.ts",
+      "mtimeMs": 1780251199083.508,
+      "size": 4168,
+      "imports": [],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/utils/labels.test.ts": {
+      "path": "/project/narrative-alpha/dashboard/src/utils/labels.test.ts",
+      "mtimeMs": 1780156035776.8037,
+      "size": 4691,
+      "imports": [
+        "/project/narrative-alpha/dashboard/src/utils/labels.ts"
+      ],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/src/utils/labels.ts": {
+      "path": "/project/narrative-alpha/dashboard/src/utils/labels.ts",
+      "mtimeMs": 1780156035776.8037,
+      "size": 1782,
+      "imports": [],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/dashboard/vite.config.ts": {
+      "path": "/project/narrative-alpha/dashboard/vite.config.ts",
+      "mtimeMs": 1780178221883.57,
+      "size": 462,
+      "imports": [],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/narrative/__init__.py": {
+      "path": "/project/narrative-alpha/narrative/__init__.py",
+      "mtimeMs": 1780156035787.8042,
+      "size": 136,
+      "imports": [],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/narrative/analysis.py": {
+      "path": "/project/narrative-alpha/narrative/analysis.py",
+      "mtimeMs": 1780243182959.2727,
+      "size": 16516,
+      "imports": [],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/narrative/backtest.py": {
+      "path": "/project/narrative-alpha/narrative/backtest.py",
+      "mtimeMs": 1780177679524.3914,
+      "size": 7391,
+      "imports": [],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/narrative/contracts.py": {
+      "path": "/project/narrative-alpha/narrative/contracts.py",
+      "mtimeMs": 1780156035787.8042,
+      "size": 6843,
+      "imports": [],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/narrative/ingestion.py": {
+      "path": "/project/narrative-alpha/narrative/ingestion.py",
+      "mtimeMs": 1780250888117.5425,
+      "size": 12866,
+      "imports": [],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/narrative/llm_client.py": {
+      "path": "/project/narrative-alpha/narrative/llm_client.py",
+      "mtimeMs": 1780156035787.8042,
+      "size": 8400,
+      "imports": [],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/narrative/pipeline.py": {
+      "path": "/project/narrative-alpha/narrative/pipeline.py",
+      "mtimeMs": 1780257610699.2551,
+      "size": 10623,
+      "imports": [],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/narrative/processing.py": {
+      "path": "/project/narrative-alpha/narrative/processing.py",
+      "mtimeMs": 1780169303424.4978,
+      "size": 5127,
+      "imports": [],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/narrative/reputation.py": {
+      "path": "/project/narrative-alpha/narrative/reputation.py",
+      "mtimeMs": 1780156035788.8044,
+      "size": 5542,
+      "imports": [],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/narrative/server.py": {
+      "path": "/project/narrative-alpha/narrative/server.py",
+      "mtimeMs": 1780252215675.4463,
+      "size": 12366,
+      "imports": [],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/tests/__init__.py": {
+      "path": "/project/narrative-alpha/tests/__init__.py",
+      "mtimeMs": 1780156035788.8044,
+      "size": 0,
+      "imports": [],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/tests/test_analysis.py": {
+      "path": "/project/narrative-alpha/tests/test_analysis.py",
+      "mtimeMs": 1780249961795.8005,
+      "size": 30836,
+      "imports": [],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/tests/test_backtest.py": {
+      "path": "/project/narrative-alpha/tests/test_backtest.py",
+      "mtimeMs": 1780177697375.05,
+      "size": 17046,
+      "imports": [],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/tests/test_contracts.py": {
+      "path": "/project/narrative-alpha/tests/test_contracts.py",
+      "mtimeMs": 1780156035789.8044,
+      "size": 15180,
+      "imports": [],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/tests/test_ingestion.py": {
+      "path": "/project/narrative-alpha/tests/test_ingestion.py",
+      "mtimeMs": 1780251320156.1907,
+      "size": 32084,
+      "imports": [],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/tests/test_llm_client.py": {
+      "path": "/project/narrative-alpha/tests/test_llm_client.py",
+      "mtimeMs": 1780156035789.8044,
+      "size": 24684,
+      "imports": [],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/tests/test_processing.py": {
+      "path": "/project/narrative-alpha/tests/test_processing.py",
+      "mtimeMs": 1780156035790.8044,
+      "size": 13904,
+      "imports": [],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/tests/test_reputation.py": {
+      "path": "/project/narrative-alpha/tests/test_reputation.py",
+      "mtimeMs": 1780156035790.8044,
+      "size": 9085,
+      "imports": [],
+      "lastSeq": 0
+    },
+    "/project/narrative-alpha/tests/test_server.py": {
+      "path": "/project/narrative-alpha/tests/test_server.py",
+      "mtimeMs": 1780253550185.266,
+      "size": 36576,
+      "imports": [],
+      "lastSeq": 0
+    }
+  },
+  "symbols": {},
+  "reverseDeps": {
+    "/project/narrative-alpha/dashboard/src/api.test.ts": [],
+    "/project/narrative-alpha/dashboard/src/api.ts": [
+      "/project/narrative-alpha/dashboard/src/components/EnvHealthPanel.test.tsx",
+      "/project/narrative-alpha/dashboard/src/components/EnvHealthPanel.tsx",
+      "/project/narrative-alpha/dashboard/src/components/EventPage.tsx",
+      "/project/narrative-alpha/dashboard/src/components/HomePage.tsx",
+      "/project/narrative-alpha/dashboard/src/components/PipelineRunner.test.tsx",
+      "/project/narrative-alpha/dashboard/src/components/PipelineRunner.tsx",
+      "/project/narrative-alpha/dashboard/src/components/SettingsPage.test.tsx",
+      "/project/narrative-alpha/dashboard/src/components/SettingsPage.tsx"
+    ],
+    "/project/narrative-alpha/dashboard/src/components/App.tsx": [
+      "/project/narrative-alpha/dashboard/src/main.tsx"
+    ],
+    "/project/narrative-alpha/dashboard/src/components/Badge.test.tsx": [],
+    "/project/narrative-alpha/dashboard/src/components/Badge.tsx": [
+      "/project/narrative-alpha/dashboard/src/components/Badge.test.tsx",
+      "/project/narrative-alpha/dashboard/src/components/Zone2.tsx",
+      "/project/narrative-alpha/dashboard/src/components/Zone3.tsx"
+    ],
+    "/project/narrative-alpha/dashboard/src/components/EnvHealthPanel.test.tsx": [],
+    "/project/narrative-alpha/dashboard/src/components/EnvHealthPanel.tsx": [
+      "/project/narrative-alpha/dashboard/src/components/EnvHealthPanel.test.tsx",
+      "/project/narrative-alpha/dashboard/src/components/SettingsPage.tsx"
+    ],
+    "/project/narrative-alpha/dashboard/src/components/EventPage.test.tsx": [],
+    "/project/narrative-alpha/dashboard/src/components/EventPage.tsx": [
+      "/project/narrative-alpha/dashboard/src/components/App.tsx",
+      "/project/narrative-alpha/dashboard/src/components/EventPage.test.tsx"
+    ],
+    "/project/narrative-alpha/dashboard/src/components/FontSizeControl.test.tsx": [],
+    "/project/narrative-alpha/dashboard/src/components/FontSizeControl.tsx": [
+      "/project/narrative-alpha/dashboard/src/components/App.tsx",
+      "/project/narrative-alpha/dashboard/src/components/FontSizeControl.test.tsx"
+    ],
+    "/project/narrative-alpha/dashboard/src/components/HomePage.test.tsx": [],
+    "/project/narrative-alpha/dashboard/src/components/HomePage.tsx": [
+      "/project/narrative-alpha/dashboard/src/components/App.tsx",
+      "/project/narrative-alpha/dashboard/src/components/HomePage.test.tsx"
+    ],
+    "/project/narrative-alpha/dashboard/src/components/Pill.test.tsx": [],
+    "/project/narrative-alpha/dashboard/src/components/Pill.tsx": [
+      "/project/narrative-alpha/dashboard/src/components/Pill.test.tsx",
+      "/project/narrative-alpha/dashboard/src/components/Zone1.tsx"
+    ],
+    "/project/narrative-alpha/dashboard/src/components/PipelineRunner.test.tsx": [],
+    "/project/narrative-alpha/dashboard/src/components/PipelineRunner.tsx": [
+      "/project/narrative-alpha/dashboard/src/components/HomePage.tsx",
+      "/project/narrative-alpha/dashboard/src/components/PipelineRunner.test.tsx"
+    ],
+    "/project/narrative-alpha/dashboard/src/components/SettingsPage.test.tsx": [],
+    "/project/narrative-alpha/dashboard/src/components/SettingsPage.tsx": [
+      "/project/narrative-alpha/dashboard/src/components/App.tsx",
+      "/project/narrative-alpha/dashboard/src/components/SettingsPage.test.tsx"
+    ],
+    "/project/narrative-alpha/dashboard/src/components/SettingsRow.test.tsx": [],
+    "/project/narrative-alpha/dashboard/src/components/SettingsRow.tsx": [
+      "/project/narrative-alpha/dashboard/src/components/SettingsPage.tsx",
+      "/project/narrative-alpha/dashboard/src/components/SettingsRow.test.tsx"
+    ],
+    "/project/narrative-alpha/dashboard/src/components/Zone1.test.tsx": [],
+    "/project/narrative-alpha/dashboard/src/components/Zone1.tsx": [
+      "/project/narrative-alpha/dashboard/src/components/EventPage.tsx",
+      "/project/narrative-alpha/dashboard/src/components/Zone1.test.tsx"
+    ],
+    "/project/narrative-alpha/dashboard/src/components/Zone2.test.tsx": [],
+    "/project/narrative-alpha/dashboard/src/components/Zone2.tsx": [
+      "/project/narrative-alpha/dashboard/src/components/EventPage.tsx",
+      "/project/narrative-alpha/dashboard/src/components/Zone2.test.tsx"
+    ],
+    "/project/narrative-alpha/dashboard/src/components/Zone3.test.tsx": [],
+    "/project/narrative-alpha/dashboard/src/components/Zone3.tsx": [
+      "/project/narrative-alpha/dashboard/src/components/EventPage.tsx",
+      "/project/narrative-alpha/dashboard/src/components/Zone3.test.tsx"
+    ],
+    "/project/narrative-alpha/dashboard/src/index.css": [
+      "/project/narrative-alpha/dashboard/src/main.tsx"
+    ],
+    "/project/narrative-alpha/dashboard/src/main.tsx": [],
+    "/project/narrative-alpha/dashboard/src/smoke.test.ts": [],
+    "/project/narrative-alpha/dashboard/src/test-setup.ts": [],
+    "/project/narrative-alpha/dashboard/src/types.ts": [
+      "/project/narrative-alpha/dashboard/src/api.ts",
+      "/project/narrative-alpha/dashboard/src/components/EnvHealthPanel.tsx",
+      "/project/narrative-alpha/dashboard/src/components/EventPage.tsx",
+      "/project/narrative-alpha/dashboard/src/components/HomePage.tsx",
+      "/project/narrative-alpha/dashboard/src/components/PipelineRunner.tsx",
+      "/project/narrative-alpha/dashboard/src/components/SettingsPage.tsx",
+      "/project/narrative-alpha/dashboard/src/components/Zone1.test.tsx",
+      "/project/narrative-alpha/dashboard/src/components/Zone1.tsx",
+      "/project/narrative-alpha/dashboard/src/components/Zone2.test.tsx",
+      "/project/narrative-alpha/dashboard/src/components/Zone2.tsx",
+      "/project/narrative-alpha/dashboard/src/components/Zone3.test.tsx",
+      "/project/narrative-alpha/dashboard/src/components/Zone3.tsx"
+    ],
+    "/project/narrative-alpha/dashboard/src/utils/labels.test.ts": [],
+    "/project/narrative-alpha/dashboard/src/utils/labels.ts": [
+      "/project/narrative-alpha/dashboard/src/utils/labels.test.ts"
+    ],
+    "/project/narrative-alpha/dashboard/vite.config.ts": [],
+    "/project/narrative-alpha/narrative/__init__.py": [],
+    "/project/narrative-alpha/narrative/analysis.py": [],
+    "/project/narrative-alpha/narrative/backtest.py": [],
+    "/project/narrative-alpha/narrative/contracts.py": [],
+    "/project/narrative-alpha/narrative/ingestion.py": [],
+    "/project/narrative-alpha/narrative/llm_client.py": [],
+    "/project/narrative-alpha/narrative/pipeline.py": [],
+    "/project/narrative-alpha/narrative/processing.py": [],
+    "/project/narrative-alpha/narrative/reputation.py": [],
+    "/project/narrative-alpha/narrative/server.py": [],
+    "/project/narrative-alpha/tests/__init__.py": [],
+    "/project/narrative-alpha/tests/test_analysis.py": [],
+    "/project/narrative-alpha/tests/test_backtest.py": [],
+    "/project/narrative-alpha/tests/test_contracts.py": [],
+    "/project/narrative-alpha/tests/test_ingestion.py": [],
+    "/project/narrative-alpha/tests/test_llm_client.py": [],
+    "/project/narrative-alpha/tests/test_processing.py": [],
+    "/project/narrative-alpha/tests/test_reputation.py": [],
+    "/project/narrative-alpha/tests/test_server.py": []
+  },
+  "cachedExports": [],
+  "projectRulesScan": {
+    "rules": [],
+    "hasCustomRules": false
+  },
+  "startupScan": {
+    "cwd": "/project/narrative-alpha",
+    "scanRoot": "/project/narrative-alpha",
+    "projectRoot": "/project/narrative-alpha",
+    "canWarmCaches": true,
+    "sourceFileCount": 55
+  },
+  "languageProfile": {
+    "present": {
+      "jsts": true,
+      "python": true,
+      "go": false,
+      "rust": false,
+      "cxx": false,
+      "cmake": false,
+      "fish": false,
+      "shell": false,
+      "json": false,
+      "markdown": false,
+      "css": false,
+      "yaml": false,
+      "sql": false,
+      "ruby": false,
+      "html": false,
+      "docker": false,
+      "php": false,
+      "powershell": false,
+      "prisma": false,
+      "csharp": false,
+      "fsharp": false,
+      "java": false,
+      "kotlin": false,
+      "swift": false,
+      "dart": false,
+      "lua": false,
+      "zig": false,
+      "haskell": false,
+      "elixir": false,
+      "gleam": false,
+      "ocaml": false,
+      "clojure": false,
+      "terraform": false,
+      "nix": false,
+      "toml": false
+    },
+    "configured": {
+      "python": true
+    },
+    "counts": {
+      "jsts": 34,
+      "python": 19
+    },
+    "detectedKinds": [
+      "jsts",
+      "python"
+    ]
+  }
+}

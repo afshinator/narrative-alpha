@@ -1,6 +1,6 @@
 {
-  "signature": "dashboard/src/components/Zone3.test.tsx::ℹ️ Advisory — no action required this turn:\nCode-quality warnings introduced/touched this turn: 1 across 1 file(s).\nTop rules: high-fan-out×1\nDetails written to .pi-lens/cache/code-quality-warnings.json\nNo action required unless you are already refactoring these areas.",
-  "sessionId": "lens-mptxvvfz-4eb0c138",
-  "projectSeqStart": 6,
-  "projectSeqEnd": 7
+  "signature": "narrative/pipeline.py::ℹ️ Advisory — no action required this turn:\nCode-quality warnings introduced/touched this turn: 1 across 1 file(s).\nTop rules: unreachable-except×1\nDetails written to .pi-lens/cache/code-quality-warnings.json\nNo action required unless you are already refactoring these areas.",
+  "sessionId": "lens-mpu6wtvl-bb33ca22",
+  "projectSeqStart": 26,
+  "projectSeqEnd": 27
 }

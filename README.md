@@ -81,15 +81,18 @@ cd dashboard && npm install && cd ..
 cp .env.example .env
 # Edit .env — fill in BRIGHTDATA_API_KEY, DEEPSEEK_API_KEY, OPENAI_API_KEY
 
-# Start both backend (port 3001) and dashboard (port 5173)
+# Start both backend (port 3001) and dashboard (port 3019)
 ./start-demo.sh
 ```
 
-Open [http://localhost:5173](http://localhost:5173) in your browser.
+> **Note:** If port 3019 is already in use, Vite auto-increments to the next available port. Check the terminal output for the actual URL.
+
+Open [http://localhost:3019](http://localhost:3019) in your browser.
 
 The backend API is at [http://localhost:3001](http://localhost:3001). To run the backend alone:
 
 ```bash
+source .venv/bin/activate
 source .env
 uvicorn narrative.server:app --host 0.0.0.0 --port 3001
 ```

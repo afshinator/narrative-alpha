@@ -1,5 +1,9 @@
 # Adversarial Review — Task 8 (Orchestration)
 
+> **Note:** Task 8 was originally planned for Modal (`narrative/app.py`). During implementation the
+> orchestration layer was refactored to local FastAPI + uvicorn (`narrative/server.py` + `narrative/pipeline.py`).
+> The function signatures verified below remain correct — they were preserved across the migration.
+
 **Date:** 2026-05-30 — verified against live code, not assumptions.
 **Review scope:** Plan Task 8 (`narrative/app.py` + settings endpoint) cross-referenced against actual function signatures in `ingestion.py`, `processing.py`, `analysis.py`, `reputation.py`, `llm_client.py`, `contracts.py`, `backtest.py`.
 

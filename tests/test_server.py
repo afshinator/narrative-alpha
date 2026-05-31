@@ -536,7 +536,7 @@ def test_run_pipeline_forwards_progress_cb_to_ingestion():
         cb_received = []
         mod._run_pipeline(
             "test", "TECHNOLOGY", "key", "zone", "serp", "/tmp/test.db",
-            progress_cb=lambda step, msg: cb_received.append((step, msg)),
+            progress_cb=lambda step, msg, _detail=None: cb_received.append((step, msg)),
         )
 
     assert any(step == "ingesting" for step, _ in cb_received)
@@ -585,10 +585,135 @@ def test_run_pipeline_forwards_progress_cb_to_analysis():
         cb_received = []
         mod._run_pipeline(
             "test", "TECHNOLOGY", "key", "zone", "serp", "/tmp/test.db",
-            progress_cb=lambda step, msg: cb_received.append((step, msg)),
+            progress_cb=lambda step, msg, _detail=None: cb_received.append((step, msg)),
         )
 
     assert any(step == "analyzing" for step, _ in cb_received)
+
+
+def test_run_pipeline_emits_discovery_complete_event():
+    """_run_pipeline emits discovering:complete event after SERP phase."""
+    import narrative.pipeline as mod
+
+    fake_serp_data = {
+        "news": [
+            {"title": "A", "link": "http://a.com", "source": "A News"},
+            {"title": "B", "link": "http://b.com", "source": "B Post"},
+        ],
+    }
+    fake_manifest = {
+        "cluster_id": "EVT-TEST", "search_query": "test",
+        "industry_vertical": "TECHNOLOGY", "timestamp_utc": "now",
+        "corpus_count": 2, "corpus_capped": False,
+        "documents": [
+            {"source_domain": "a.com", "source_name": "A News", "raw_text_content": "x"},
+            {"source_domain": "b.com", "source_name": "B Post", "raw_text_content": "y"},
+        ],
+    }
+    fake_report = {"distortion_matrix": [], "event_meta": {}}
+
+    cb_calls = []
+
+    with patch.object(mod, 'get_hardened_db_connection') as mock_db, \
+         patch.object(mod, 'discover_articles', return_value=fake_serp_data), \
+         patch.object(mod, 'build_ingestion_manifest', return_value=fake_manifest), \
+         patch.object(mod, 'handle_outlet_registration', return_value="RATED_GOOD"), \
+         patch.object(mod, 'read_outlet_reputation', return_value={}), \
+         patch.object(mod, 'run_entity_normalization', return_value={}), \
+         patch.object(mod, 'run_linguistic_neutralization', return_value=["n", "m"]), \
+         patch.object(mod, 'extract_all_graphs', return_value=[
+             {"_source_domain": "a.com", "_source_name": "A News", "nodes": [], "edges": []},
+             {"_source_domain": "b.com", "_source_name": "B Post", "nodes": [], "edges": []},
+         ]), \
+         patch.object(mod, 'compute_framing_volatility', return_value=([0.0, 0.0], ["LOW", "LOW"])), \
+         patch.object(mod, 'compute_pre_synthesis_context', return_value={
+             "narrative_clusters": {}, "fracture_candidates": [], "term_shifts": []
+         }), \
+         patch.object(mod, 'synthesize_forensic_report', return_value=fake_report), \
+         patch.object(mod, 'inject_labels', return_value=fake_report), \
+         patch.object(mod, 'write_outlier_signal'):
+        mock_db.return_value = MagicMock()
+        mod._run_pipeline(
+            "test", "TECHNOLOGY", "key", "zone", "serp", "/tmp/test.db",
+            progress_cb=lambda step, msg, detail=None: cb_calls.append((step, msg, detail)),
+        )
+
+    discovery_events = [c for c in cb_calls if c[0] == "discovering"]
+    assert any(
+        isinstance(c[2], dict) and c[2].get("status") == "complete"
+        for c in discovery_events
+    ), f"No discovering:complete event in {discovery_events}"
+
+    ingest_events = [c for c in cb_calls if c[0] == "ingesting"]
+    assert any(
+        isinstance(c[2], dict) and c[2].get("status") == "complete"
+        for c in ingest_events
+    ), f"No ingesting:complete event in {ingest_events}"
+
+
+def test_run_pipeline_emits_step3_5_progress_events():
+    """_run_pipeline emits progress events for outlet reg, entity norm, ling neut."""
+    import narrative.pipeline as mod
+
+    fake_serp_data = {
+        "news": [
+            {"title": "A", "link": "http://a.com", "source": "A News"},
+            {"title": "B", "link": "http://b.com", "source": "B Post"},
+        ],
+    }
+    fake_manifest = {
+        "cluster_id": "EVT-TEST", "search_query": "test",
+        "industry_vertical": "TECHNOLOGY", "timestamp_utc": "now",
+        "corpus_count": 2, "corpus_capped": False,
+        "documents": [
+            {"source_domain": "a.com", "source_name": "A News", "raw_text_content": "x"},
+            {"source_domain": "b.com", "source_name": "B Post", "raw_text_content": "y"},
+        ],
+    }
+    fake_report = {"distortion_matrix": [], "event_meta": {}}
+
+    cb_calls = []
+
+    with patch.object(mod, 'get_hardened_db_connection') as mock_db, \
+         patch.object(mod, 'discover_articles', return_value=fake_serp_data), \
+         patch.object(mod, 'build_ingestion_manifest', return_value=fake_manifest), \
+         patch.object(mod, 'handle_outlet_registration', return_value="RATED_GOOD"), \
+         patch.object(mod, 'read_outlet_reputation', return_value={}), \
+         patch.object(mod, 'run_entity_normalization', return_value={}), \
+         patch.object(mod, 'run_linguistic_neutralization', return_value=["n", "m"]), \
+         patch.object(mod, 'extract_all_graphs', return_value=[
+             {"_source_domain": "a.com", "_source_name": "A News", "nodes": [], "edges": []},
+             {"_source_domain": "b.com", "_source_name": "B Post", "nodes": [], "edges": []},
+         ]), \
+         patch.object(mod, 'compute_framing_volatility', return_value=([0.0, 0.0], ["LOW", "LOW"])), \
+         patch.object(mod, 'compute_pre_synthesis_context', return_value={
+             "narrative_clusters": {}, "fracture_candidates": [], "term_shifts": []
+         }), \
+         patch.object(mod, 'synthesize_forensic_report', return_value=fake_report), \
+         patch.object(mod, 'inject_labels', return_value=fake_report), \
+         patch.object(mod, 'write_outlier_signal'):
+        mock_db.return_value = MagicMock()
+        mod._run_pipeline(
+            "test", "TECHNOLOGY", "key", "zone", "serp", "/tmp/test.db",
+            progress_cb=lambda step, msg, detail=None: cb_calls.append((step, msg, detail)),
+        )
+
+    # Step 3: outlet registration message
+    outlet_msgs = [msg for s, msg, _ in cb_calls if s == "analyzing" and "outlet" in msg.lower()]
+    assert any("registering" in msg.lower() for msg in outlet_msgs), \
+        f"No outlet registration msg in {outlet_msgs}"
+
+    # Step 4: entity normalization messages
+    norm_msgs = [msg for s, msg, _ in cb_calls if s == "analyzing" and "normaliz" in msg.lower()]
+    assert norm_msgs, f"No entity normalization msg in {cb_calls}"
+
+    # Step 5: linguistic neutralization messages
+    neut_msgs = [msg for s, msg, _ in cb_calls if s == "analyzing" and "neutraliz" in msg.lower()]
+    assert neut_msgs, f"No linguistic neutralization msg in {cb_calls}"
+
+    # Step 6: graph extraction message
+    graph_msgs = [msg for s, msg, _ in cb_calls if s == "analyzing" and "extract" in msg.lower()]
+    assert graph_msgs, f"No graph extraction msg in {cb_calls}"
 
 
 # ── SSE streaming endpoint tests ──
@@ -647,6 +772,53 @@ def test_stream_pipeline_yields_progress_and_complete(tmp_path):
                 body = resp.read().decode()
         for expected in ("discovering", "ingesting", "analyzing", "synthesizing", "complete", "EVT-SSE-001"):
             assert expected in body, f"Expected '{expected}' in SSE body"
+    finally:
+        srv._run_pipeline = original
+
+
+def test_stream_pipeline_forwards_detail_dict(tmp_path):
+    """GET /api/pipeline/stream includes detail field when progress_cb receives 3rd arg."""
+    import narrative.server as srv
+
+    fake_report = {
+        "event_meta": {
+            "cluster_id": "EVT-DETAIL-001", "search_query": "test",
+            "industry_vertical": "TECHNOLOGY", "timestamp_utc": "now",
+            "corpus_count": 3, "corpus_capped": False,
+        },
+        "distortion_matrix": [], "outlier_signals": [],
+        "consensus_reality_graph": {"consensus_summary": "", "verified_anchor_nodes": [], "primary_verifications": []},
+        "reputation_warnings": [], "reality_divergence_zones": [],
+        "reality_fractures": [], "narrative_regime_shifts": [],
+    }
+
+    def detail_pipeline(keyword, vertical, api_key, unlocker_zone, serp_zone, db_path, progress_cb=None):
+        if progress_cb:
+            progress_cb("discovering", "Found 10 articles from 7 sources", {"status": "complete", "count": 10, "sources": 7})
+            progress_cb("ingesting", "Reuters", {"source_name": "Reuters", "domain": "reuters.com", "status": "ok"})
+            progress_cb("ingesting", "Guardian", {"source_name": "The Guardian", "domain": "theguardian.com", "status": "rejected"})
+        return fake_report
+
+    env = {
+        "NARRATIVE_ALPHA_ROOT": str(tmp_path),
+        "BRIGHTDATA_API_KEY": "key",
+        "BRIGHTDATA_UNLOCKER_ZONE": "zone",
+        "BRIGHTDATA_SERP_ZONE": "serp",
+    }
+    original = srv._run_pipeline
+    srv._run_pipeline = detail_pipeline
+    try:
+        with patch.dict(os.environ, env, clear=True):
+            from narrative.server import app
+            tc = TestClient(app)
+            with tc.stream("GET", "/api/pipeline/stream?keyword=test&vertical=TECHNOLOGY") as resp:
+                assert resp.status_code == 200
+                body = resp.read().decode()
+        assert '"detail": {"status": "complete"' in body, \
+            f"Expected detail with status complete in SSE body. Got: {body[:500]}"
+        assert '"source_name": "Reuters"' in body, \
+            f"Expected Reuters in SSE body. Got: {body[:500]}"
+        assert '"source_name": "The Guardian"' in body
     finally:
         srv._run_pipeline = original
 

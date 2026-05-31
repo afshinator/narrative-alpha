@@ -1,3 +1,8 @@
+> **Historical design document.** The architecture decisions discussed here were resolved during
+> implementation: the dashboard became a React/Vite SPA fetching from local FastAPI REST endpoints
+> (`GET /api/reports`, `GET /api/reports/{cluster_id}`). Reports are stored as JSON files under
+> `~/.narrative_alpha/data/reports/` and served via the FastAPI server.
+
 # Task 9 — Dashboard Gap Analysis
 
 **Date:** 2026-05-30
@@ -7,8 +12,10 @@
 ### 1. How does the dashboard get its JSON data?
 
 The spec says data should be "stored as static `.json` files in a `/data/{cluster_id}.json` path."
-But nothing in the plan creates or serves these files, and the Modal endpoint writes reports
-to a volume, not a served directory.
+But nothing in the plan creates or serves these files, and the original Modal endpoint writes
+reports to a volume, not a served directory.
+
+*Resolution: FastAPI serves reports via `/api/reports` and `/api/reports/{cluster_id}` REST endpoints.*
 
 **Options:**
 - **A.** Fetch from Modal endpoint URL directly (needs CORS + hardcoded URL)
