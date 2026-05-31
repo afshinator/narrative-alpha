@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "files": {
+    "dashboard/src/components/Zone3.test.tsx": {
+      "latest": {
+        "commit": "2430f60",
+        "timestamp": "2026-05-31T15:48:42.601Z",
+        "mi": 31.3,
+        "cognitive": 0,
+        "nesting": 2,
+        "lines": 128,
+        "maxCyclomatic": 1,
+        "entropy": 5.26
+      },
+      "history": [
+        {
+          "commit": "2430f60",
+          "timestamp": "2026-05-31T15:48:42.601Z",
+          "mi": 31.3,
+          "cognitive": 0,
+          "nesting": 2,
+          "lines": 128,
+          "maxCyclomatic": 1,
+          "entropy": 5.26
+        }
+      ],
+      "trend": "stable"
+    }
+  },
+  "capturedAt": "2026-05-31T15:48:47.601Z"
+}

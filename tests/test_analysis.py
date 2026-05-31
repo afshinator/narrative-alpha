@@ -222,6 +222,32 @@ class TestComputeConsensusBaseline:
         result = compute_consensus_baseline(graphs, {})
         assert result == {"x"}  # x in 5/6, threshold is 5
 
+    # ── consensus_ratio parameter tests ──
+
+    def test_custom_ratio_lower_threshold(self):
+        """With ratio=0.50, threshold = int(0.50*5)+1 = 3. Node in 3/5 qualifies."""
+        graphs = [_graph(["x"], f"s{i}.com") for i in range(3)]
+        graphs.append(_graph([], "s3.com"))
+        graphs.append(_graph([], "s4.com"))
+        result = compute_consensus_baseline(graphs, {}, consensus_ratio=0.50)
+        assert result == {"x"}
+
+    def test_custom_ratio_higher_threshold_blocks(self):
+        """With ratio=0.90, threshold = int(0.90*5)+1 = 5. Node in 4/5 fails."""
+        graphs = [_graph(["x"], f"s{i}.com") for i in range(4)]
+        graphs.append(_graph([], "s4.com"))
+        result = compute_consensus_baseline(graphs, {}, consensus_ratio=0.90)
+        assert result == set()
+
+    def test_ratio_zero_includes_all(self):
+        """With ratio=0.0, threshold = 1. Any node in any source qualifies."""
+        graphs = [_graph(["x"], "s0.com"), _graph(["y"], "s1.com")]
+        # Need at least 5 sources for the floor gate
+        for i in range(3):
+            graphs.append(_graph([], f"extra-{i}.com"))
+        result = compute_consensus_baseline(graphs, {}, consensus_ratio=0.0)
+        assert result == {"x", "y"}
+
 
 class TestComputeSaForOutlet:
     def test_zero_total_returns_zero_low(self):

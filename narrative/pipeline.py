@@ -1,7 +1,6 @@
 """Core forensic pipeline — no Modal dependencies, fully testable."""
 
 import os
-import threading
 import time
 import logging
 from typing import Callable, Optional
@@ -67,7 +66,7 @@ def _run_pipeline(
     db_conn = get_hardened_db_connection(db_path)
     if progress_cb: progress_cb("discovering", "Searching for articles...")
     logger.info("STEP 1/7: Discovering articles via SERP API")
-    serp_data = discover_articles(keyword, serp_zone, api_key)
+    serp_data = discover_articles(keyword, serp_zone, api_key, time_range="m")
     logger.info("STEP 1/7 done — %.1fs", time.time() - _t)
 
     _t = time.time()
@@ -90,7 +89,8 @@ def _run_pipeline(
     documents = manifest["documents"]
     corp_count = manifest["corpus_count"]
     reputation_records = {}
-    logger.info("STEP 3/7: Registering outlets + spawning backtest threads ...")
+    unrated_domains: list[str] = []
+    logger.info("STEP 3/7: Registering outlets + running backtests ...")
     for doc in documents:
         status = handle_outlet_registration(
             doc["source_domain"], vertical, db_conn,
@@ -99,11 +99,19 @@ def _run_pipeline(
         rep = read_outlet_reputation(doc["source_domain"], vertical, db_conn)
         reputation_records[doc["source_domain"]] = rep or {"rating_status": "UNRATED"}
         if status == "UNRATED":
-            threading.Thread(
-                target=execute_historical_backtest,
-                args=(doc["source_domain"], vertical),
-                daemon=True,
-            ).start()
+            unrated_domains.append(doc["source_domain"])
+
+    # Run backtests synchronously for new outlets so reputation data is
+    # available before the LLM synthesis step.
+    for domain in unrated_domains:
+        execute_historical_backtest(domain, vertical)
+
+    # Re-read reputation now that backtests have populated the DB.
+    for domain in unrated_domains:
+        rep = read_outlet_reputation(domain, vertical, db_conn)
+        if rep:
+            reputation_records[domain] = rep
+
     db_conn.close()
     logger.info("STEP 3/7 done — %.1fs", time.time() - _t)
 

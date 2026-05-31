@@ -353,12 +353,13 @@ def compute_sa_for_outlet(
 def compute_consensus_baseline(
     all_graphs: list[dict],
     canonical_map: dict[str, str],
+    consensus_ratio: float = 0.60,
 ) -> set[str]:
     n = sum(1 for g in all_graphs if not g.get("_parse_error"))
     if n < 5:
         return set()
 
-    threshold = int(0.75 * n) + 1
+    threshold = int(consensus_ratio * n) + 1
 
     node_source_counts: dict[str, set[str]] = {}
     for graph in all_graphs:
