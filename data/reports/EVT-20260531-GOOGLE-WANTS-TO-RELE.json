@@ -1,0 +1,423 @@
+{
+  "event_meta": {
+    "cluster_id": "EVT-20260531-GOOGLE-WANTS-TO-RELE",
+    "search_query": "Google wants to release up to 32 million \u2018good\u2019 mosquitoes in California and Florida",
+    "industry_vertical": "UNKNOWN",
+    "timestamp_utc": "2026-05-31T20:53:19.922718+00:00",
+    "corpus_count": 10,
+    "corpus_capped": false
+  },
+  "consensus_reality_graph": {
+    "consensus_summary": "Multiple outlets report that Google, through its Debug initiative, seeks federal approval to release up to 32 million male mosquitoes infected with Wolbachia bacteria in California and Florida over two years to suppress disease-carrying mosquito populations. The releases are not expected to increase biting mosquitoes as only males are released.",
+    "verified_anchor_nodes": [
+      "California",
+      "Florida",
+      "Google"
+    ],
+    "primary_verifications": [
+      {
+        "authority": "Environmental Protection Agency",
+        "reference_id": "EPA-HQ-OPP-2025-3951",
+        "status": "under review"
+      },
+      {
+        "authority": "Centers for Disease Control and Prevention",
+        "reference_id": "CDC statement on mosquito-borne diseases",
+        "status": "acknowledged"
+      },
+      {
+        "authority": "Google Debug Initiative",
+        "reference_id": "debug.com",
+        "status": "project documentation"
+      }
+    ]
+  },
+  "distortion_matrix": [
+    {
+      "outlet_name": "KTLA",
+      "source_domain": "ktla.com",
+      "omission_index": 0.0,
+      "framing_volatility_score": 0.0552,
+      "identifiable_omissions": [],
+      "linguistic_camouflage": [
+        {
+          "raw_expression": "good bugs",
+          "clinical_translation": "sterile male mosquitoes infected with Wolbachia bacteria"
+        },
+        {
+          "raw_expression": "bad bugs",
+          "clinical_translation": "disease-carrying mosquitoes"
+        }
+      ],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "The Palm Beach Post",
+      "source_domain": "palmbeachpost.com",
+      "omission_index": 0.3333,
+      "framing_volatility_score": 0.1487,
+      "identifiable_omissions": [
+        "California"
+      ],
+      "linguistic_camouflage": [
+        {
+          "raw_expression": "weird mosquitoes",
+          "clinical_translation": "bacteria-infected mosquitoes"
+        }
+      ],
+      "omission_label": "MED",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "Yahoo",
+      "source_domain": "yahoo.com",
+      "omission_index": 0.3333,
+      "framing_volatility_score": 0.043,
+      "identifiable_omissions": [
+        "Google"
+      ],
+      "linguistic_camouflage": [],
+      "omission_label": "MED",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "wtsp.com",
+      "source_domain": "wtsp.com",
+      "omission_index": 0.0,
+      "framing_volatility_score": 0.0787,
+      "identifiable_omissions": [],
+      "linguistic_camouflage": [
+        {
+          "raw_expression": "specially treated mosquitoes",
+          "clinical_translation": "Wolbachia-infected male mosquitoes"
+        }
+      ],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "New York Post",
+      "source_domain": "nypost.com",
+      "omission_index": 0.0,
+      "framing_volatility_score": 0.1276,
+      "identifiable_omissions": [],
+      "linguistic_camouflage": [
+        {
+          "raw_expression": "specially treated mosquitoes",
+          "clinical_translation": "Wolbachia-infected male mosquitoes"
+        }
+      ],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "Deccan Herald",
+      "source_domain": "deccanherald.com",
+      "omission_index": 0.0,
+      "framing_volatility_score": 0.2155,
+      "identifiable_omissions": [],
+      "linguistic_camouflage": [
+        {
+          "raw_expression": "specially treated mosquitoes",
+          "clinical_translation": "Wolbachia-infected male mosquitoes"
+        }
+      ],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "Wide Open Country",
+      "source_domain": "wideopencountry.com",
+      "omission_index": 1.0,
+      "framing_volatility_score": 0.1354,
+      "identifiable_omissions": [
+        "California",
+        "Florida",
+        "Google"
+      ],
+      "linguistic_camouflage": [
+        {
+          "raw_expression": "pre-infected male mosquitoes",
+          "clinical_translation": "Wolbachia-infected male mosquitoes"
+        }
+      ],
+      "omission_label": "HIGH",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "India Today",
+      "source_domain": "indiatoday.in",
+      "omission_index": 0.0,
+      "framing_volatility_score": 0.1532,
+      "identifiable_omissions": [],
+      "linguistic_camouflage": [
+        {
+          "raw_expression": "specially treated mosquitoes",
+          "clinical_translation": "Wolbachia-infected male mosquitoes"
+        }
+      ],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "Gulte",
+      "source_domain": "gulte.com",
+      "omission_index": 0.0,
+      "framing_volatility_score": 0.1543,
+      "identifiable_omissions": [],
+      "linguistic_camouflage": [
+        {
+          "raw_expression": "specially treated male mosquitoes",
+          "clinical_translation": "Wolbachia-infected male mosquitoes"
+        }
+      ],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "The Sunday Guardian",
+      "source_domain": "sundayguardianlive.com",
+      "omission_index": 1.0,
+      "framing_volatility_score": 0.1044,
+      "identifiable_omissions": [
+        "California",
+        "Florida",
+        "Google"
+      ],
+      "linguistic_camouflage": [
+        {
+          "raw_expression": "engineered or biologically treated",
+          "clinical_translation": "likely referring to Wolbachia-infected mosquitoes, but imprecise"
+        }
+      ],
+      "omission_label": "HIGH",
+      "framing_volatility_label": "LOW"
+    }
+  ],
+  "outlier_signals": [
+    {
+      "signal_id": "deccanherald-claim-001",
+      "origin_outlet": "Deccan Herald",
+      "origin_domain": "deccanherald.com",
+      "extracted_claim": "Google has not sought federal clearance",
+      "timestamp_first_seen": "2026-05-31 20:53:33",
+      "outlier_origin_provenance": {
+        "classification": "UNVERIFIED",
+        "historical_origin_validation_rate": 0.0,
+        "scatter_shot_anomaly_factor": 0.0,
+        "reputation_warning_triggered": false,
+        "echo_chamber_mimics": [],
+        "scatter_shot_label": "LOW"
+      },
+      "validation_tracking": {
+        "current_state": "unverified",
+        "last_checked_timestamp": "2026-05-31 20:53:33",
+        "consensus_absorption_status": "not absorbed",
+        "evaluation_window_days": 7
+      }
+    }
+  ],
+  "reputation_warnings": [
+    {
+      "outlet_name": "KTLA",
+      "source_domain": "ktla.com",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": "No rating data available."
+    },
+    {
+      "outlet_name": "The Palm Beach Post",
+      "source_domain": "palmbeachpost.com",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": "No rating data available."
+    },
+    {
+      "outlet_name": "Yahoo",
+      "source_domain": "yahoo.com",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": "No rating data available."
+    },
+    {
+      "outlet_name": "wtsp.com",
+      "source_domain": "wtsp.com",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": "No rating data available."
+    },
+    {
+      "outlet_name": "New York Post",
+      "source_domain": "nypost.com",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": "No rating data available."
+    },
+    {
+      "outlet_name": "Deccan Herald",
+      "source_domain": "deccanherald.com",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": "No rating data available."
+    },
+    {
+      "outlet_name": "Wide Open Country",
+      "source_domain": "wideopencountry.com",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": "No rating data available."
+    },
+    {
+      "outlet_name": "India Today",
+      "source_domain": "indiatoday.in",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": "No rating data available."
+    },
+    {
+      "outlet_name": "Gulte",
+      "source_domain": "gulte.com",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": "No rating data available."
+    },
+    {
+      "outlet_name": "The Sunday Guardian",
+      "source_domain": "sundayguardianlive.com",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": "No rating data available."
+    }
+  ],
+  "reality_divergence_zones": [
+    {
+      "topic": "Google seeking federal approval",
+      "consensus_stability_score": 0.6,
+      "institutional_convergence": "debated",
+      "observed_narrative_structures": [
+        "seeks approval",
+        "has not sought clearance"
+      ],
+      "supporting_outlets": {
+        "seeks approval": [
+          "ktla.com",
+          "palmbeachpost.com",
+          "yahoo.com",
+          "wtsp.com",
+          "nypost.com",
+          "wideopencountry.com",
+          "indiatoday.in",
+          "gulte.com",
+          "sundayguardianlive.com"
+        ],
+        "has not sought clearance": [
+          "deccanherald.com"
+        ]
+      },
+      "consensus_stability": "MED"
+    },
+    {
+      "topic": "Population control technique framing",
+      "consensus_stability_score": 0.9,
+      "institutional_convergence": "strong",
+      "observed_narrative_structures": [
+        "sterile insect technique (Wolbachia)",
+        "good bugs / bad bugs"
+      ],
+      "supporting_outlets": {
+        "sterile insect technique (Wolbachia)": [
+          "ktla.com",
+          "palmbeachpost.com",
+          "yahoo.com",
+          "wtsp.com",
+          "nypost.com",
+          "deccanherald.com",
+          "indiatoday.in",
+          "gulte.com"
+        ],
+        "good bugs / bad bugs": [
+          "ktla.com",
+          "deccanherald.com",
+          "wideopencountry.com"
+        ]
+      },
+      "consensus_stability": "HIGH"
+    }
+  ],
+  "reality_fractures": [
+    {
+      "fracture_id": "9809d87f-1f59-41e9-9399-134f4ff42fd9",
+      "topic": "Google",
+      "claim_a": {
+        "statement": "Google seeks approval from United States government",
+        "supporting_outlets": [
+          "ktla.com"
+        ]
+      },
+      "claim_b": {
+        "statement": "Google seeks approval from Environmental Protection Agency",
+        "supporting_outlets": [
+          "ktla.com"
+        ]
+      },
+      "relationship": "STRUCTURALLY_CONTRADICTORY",
+      "resolution_status": "UNRESOLVED",
+      "classification_method": "LLM_ASSISTED"
+    },
+    {
+      "fracture_id": "b02f78f8-8a9d-444d-87a1-f7c2e1e3e0a1",
+      "topic": "Google",
+      "claim_a": {
+        "statement": "Google seeks approval from Environmental Protection Agency",
+        "supporting_outlets": [
+          "ktla.com"
+        ]
+      },
+      "claim_b": {
+        "statement": "Google filed an experimental use permit",
+        "supporting_outlets": [
+          "palmbeachpost.com"
+        ]
+      },
+      "relationship": "STRUCTURALLY_CONTRADICTORY",
+      "resolution_status": "UNRESOLVED",
+      "classification_method": "LLM_ASSISTED"
+    }
+  ],
+  "narrative_regime_shifts": [
+    {
+      "shift_id": "shift-001",
+      "topic": "mosquito control technique",
+      "detected_shift": {
+        "previous_term": "sterile insect technique",
+        "replacement_term": "good bugs"
+      },
+      "observed_across": 3,
+      "total_sources": 10,
+      "synchronization_score": 0.3,
+      "interpretive_note": "Some outlets adopt the popularized term 'good bugs' to frame the technique as beneficial and harmless.",
+      "synchronization_label": "LOW"
+    }
+  ]
+}
