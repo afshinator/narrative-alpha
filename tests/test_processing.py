@@ -250,6 +250,54 @@ class TestRunEntityNormalization:
         assert captured["json_mode"] is True
 
 
+    def test_accepts_entities_format(self, monkeypatch):
+        """LLM may return {entities: [{canonical, surface_forms}]} — parser must accept it."""
+        from narrative.processing import run_entity_normalization
+        response = json.dumps({
+            "entities": [
+                {"canonical": "Fab 7", "surface_forms": ["Tainan Hub", "The Fab", "Fab 7"]},
+                {"canonical": "EU AI Act", "surface_forms": ["AI Act", "EU regulation"]},
+            ]
+        })
+        monkeypatch.setattr("narrative.llm_client.call_llm", lambda *a, **kw: response)
+        docs = [_doc(raw_text_content="Tainan Hub and EU AI Act.")]
+        result = run_entity_normalization(docs, _serp_data(), _llm_config())
+        assert result["tainan hub"] == "Fab 7"
+        assert result["the fab"] == "Fab 7"
+        assert result["fab 7"] == "Fab 7"
+        assert result["ai act"] == "EU AI Act"
+        assert result["eu regulation"] == "EU AI Act"
+        assert len(result) == 5
+
+    def test_accepts_entities_missing_canonical(self, monkeypatch):
+        """entities entry without canonical is skipped gracefully."""
+        from narrative.processing import run_entity_normalization
+        response = json.dumps({
+            "entities": [
+                {"canonical": "Fab 7", "surface_forms": ["Tainan Hub"]},
+                {"surface_forms": ["orphan"]},  # missing canonical
+                {"canonical": "AI Act"},  # missing surface_forms
+            ]
+        })
+        monkeypatch.setattr("narrative.llm_client.call_llm", lambda *a, **kw: response)
+        docs = [_doc(raw_text_content="Tainan Hub.")]
+        result = run_entity_normalization(docs, _serp_data(), _llm_config())
+        assert result["tainan hub"] == "Fab 7"
+        assert len(result) == 1
+
+    def test_accepts_flat_list_format(self, monkeypatch):
+        """LLM may return a flat list instead of wrapped object."""
+        from narrative.processing import run_entity_normalization
+        response = json.dumps([
+            {"surface_form_variant": "Tainan Hub", "canonical_reference_identity": "Fab 7"},
+        ])
+        monkeypatch.setattr("narrative.llm_client.call_llm", lambda *a, **kw: response)
+        docs = [_doc(raw_text_content="Tainan Hub.")]
+        result = run_entity_normalization(docs, _serp_data(), _llm_config())
+        assert result["tainan hub"] == "Fab 7"
+        assert len(result) == 1
+
+
 class TestRunLinguisticNeutralization:
     """run_linguistic_neutralization(documents, llm_config) — parallel LLM calls."""
 

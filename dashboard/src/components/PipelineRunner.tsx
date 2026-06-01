@@ -353,8 +353,11 @@ export function PipelineRunner({
 									<div
 										key={`${a.domain}-${i}`}
 										className={`ingest-item ${badge.cls}`}
+										aria-label={`${a.source_name || a.domain}: ${a.status}`}
 									>
-										<span className="ingest-badge">{badge.label}</span>
+										<span className="ingest-badge" aria-hidden="true">
+											{badge.label}
+										</span>
 										<span className="ingest-source">
 											{a.source_name || a.domain}
 										</span>

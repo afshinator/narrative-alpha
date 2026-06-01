@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import type { ClusterSummary } from "../types";
-import { fetchReports } from "../api";
+import { fetchReports, deleteReport } from "../api";
 import { PipelineRunner } from "./PipelineRunner";
 
 type PipelineState = "idle" | "running" | "complete" | "error";
@@ -21,6 +21,17 @@ export function HomePage() {
 			.catch((e: Error) => setError(e.message))
 			.finally(() => setLoading(false));
 	}, []);
+
+	const handleDelete = useCallback(
+		(e: React.MouseEvent, clusterId: string, query: string) => {
+			e.preventDefault();
+			e.stopPropagation();
+			if (window.confirm(`Delete "${query}" report?`)) {
+				deleteReport(clusterId).then(loadReports);
+			}
+		},
+		[loadReports],
+	);
 
 	const handleStateChange = useCallback(
 		(state: PipelineState, stored?: boolean) => {
@@ -65,11 +76,20 @@ export function HomePage() {
 								to={`/event/${r.cluster_id}`}
 								className="report-card"
 							>
-								<h2>{r.search_query}</h2>
-								<p className="report-meta">
-									{r.industry_vertical} · {r.corpus_count} articles ·{" "}
-									{r.timestamp_utc}
-								</p>
+								<div className="report-card-body">
+									<h2>{r.search_query}</h2>
+									<p className="report-meta">
+										{r.industry_vertical} · {r.corpus_count} articles ·{" "}
+										{r.timestamp_utc}
+									</p>
+								</div>
+								<button
+									className="delete-btn"
+									aria-label={`Delete ${r.search_query} report`}
+									onClick={(e) => handleDelete(e, r.cluster_id, r.search_query)}
+								>
+									×
+								</button>
 							</Link>
 						))}
 					</div>

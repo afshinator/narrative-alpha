@@ -1,15 +1,38 @@
 {
-  "generatedAt": "2026-05-31T20:19:51.256Z",
+  "generatedAt": "2026-06-01T19:52:43.492Z",
   "scope": "turn_delta",
-  "sessionId": "lens-mpu6wtvl-bb33ca22",
-  "turnIndex": 127,
-  "projectSeqStart": 28,
-  "projectSeqEnd": 29,
+  "sessionId": "lens-mpvh5ocs-5d3fb951",
+  "turnIndex": 472,
+  "projectSeqStart": 110,
+  "projectSeqEnd": 111,
   "deltaOnly": true,
-  "files": [],
+  "files": [
+    {
+      "filePath": "/project/narrative-alpha/docs/backtest-fix-plan.md",
+      "displayPath": "docs/backtest-fix-plan.md",
+      "fileSeq": 1,
+      "warnings": [
+        {
+          "id": "cq:5ed23cf399",
+          "filePath": "/project/narrative-alpha/docs/backtest-fix-plan.md",
+          "displayPath": "docs/backtest-fix-plan.md",
+          "severity": "warning",
+          "tool": "pi-lens",
+          "message": "Pi-lens analysis unavailable. Tools for markdown not installed.",
+          "category": "other",
+          "origin": "dispatch"
+        }
+      ]
+    }
+  ],
   "summary": {
-    "warnings": 0,
-    "files": 0,
-    "topRules": []
+    "warnings": 1,
+    "files": 1,
+    "topRules": [
+      {
+        "rule": "pi-lens",
+        "count": 1
+      }
+    ]
   }
 }

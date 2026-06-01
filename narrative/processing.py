@@ -47,7 +47,8 @@ ENTITY_NORMALIZATION_SYSTEM_PROMPT = (
     "You are an entity normalization engine. Given a set of raw article text fragments, "
     "identify all named entities and map every surface-form variant to a single canonical "
     "reference identity. Output only valid JSON matching the schema provided. "
-    "Do not include preamble, explanation, or markdown fences."
+    "Do not include preamble, explanation, or markdown fences.\n\n"
+    'Schema: {"normalized_mappings": [{"surface_form_variant": "...", "canonical_reference_identity": "..."}]}'
 )
 
 
@@ -94,7 +95,22 @@ def run_entity_normalization(
     if isinstance(data, list):
         mappings = data
     else:
-        mappings = data.get("normalized_mappings", [])
+        if "normalized_mappings" in data:
+            mappings = data["normalized_mappings"]
+        elif "entities" in data:
+            # LLM sometimes returns {entities: [{canonical, surface_forms}]}
+            # Expand grouped format into flat mapping
+            mappings = []
+            for ent in data["entities"]:
+                canon = ent.get("canonical", "")
+                for sf in ent.get("surface_forms", []):
+                    if canon and sf:
+                        mappings.append({
+                            "surface_form_variant": sf,
+                            "canonical_reference_identity": canon,
+                        })
+        else:
+            mappings = []
     if not isinstance(mappings, list):
         return {}
 

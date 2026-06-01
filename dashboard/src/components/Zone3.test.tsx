@@ -144,9 +144,36 @@ describe("Zone3", () => {
 		expect(screen.getByText(/LLM_ASSISTED/)).toBeInTheDocument();
 	});
 
-	it("hides fracture section when empty", () => {
+	it("shows placeholder when fracture section is empty", () => {
 		const noFractures = { ...baseReport, reality_fractures: [] };
 		render(<Zone3 report={noFractures} />);
-		expect(screen.queryByText(/fracture/i)).not.toBeInTheDocument();
+		expect(screen.getByText("Reality fractures")).toBeInTheDocument();
+		expect(screen.getByText("None detected.")).toBeInTheDocument();
+		expect(screen.queryByText("RF-001")).not.toBeInTheDocument();
+	});
+
+	it("shows placeholder when no reputation warnings triggered", () => {
+		const noWarnings = {
+			...baseReport,
+			reputation_warnings: [
+				{ ...baseReport.reputation_warnings[0], warning_triggered: false },
+			],
+		};
+		render(<Zone3 report={noWarnings} />);
+		expect(
+			screen.getByText("No reputation warnings flagged"),
+		).toBeInTheDocument();
+	});
+
+	it("shows placeholder when no reality fractures", () => {
+		const noFractures = { ...baseReport, reality_fractures: [] };
+		render(<Zone3 report={noFractures} />);
+		expect(screen.getByText("None detected.")).toBeInTheDocument();
+	});
+
+	it("shows placeholder when no reality divergence zones", () => {
+		const noZones = { ...baseReport, reality_divergence_zones: [] };
+		render(<Zone3 report={noZones} />);
+		expect(screen.getByText("None detected.")).toBeInTheDocument();
 	});
 });

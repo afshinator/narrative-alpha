@@ -6,7 +6,7 @@
 
 **Forensic narrative analysis for news intelligence.**
 
-Built for [Web Data UNLOCKED](https://luma.com/k9vgqtfp) — Bright Data's two-day enterprise AI hackathon in San Francisco, May 30–31, 2026.
+Built for [Web Data UNLOCKED](https://luma.com/k9vgqtfp) — [Bright Data](https://brightdata.com/)'s two-day enterprise AI hackathon in San Francisco, May 30–31, 2026.
 
 ---
 
@@ -43,10 +43,10 @@ Articles → Knowledge Graphs → Consensus Baseline → Distortion Matrix → D
 
 | Metric | What It Measures |
 |--------|-----------------|
-| **Omission Index** (Oᵢ) | What facts did this outlet leave out? |
-| **Framing Volatility** (V<sub>f</sub>) | How much spin did they layer on? |
-| **Scatter-Shot Anomaly** (S<sub>a</sub>) | Does this outlet pump out noise? |
-| **Consensus Baseline** (G<sub>c</sub>) | What does everyone agree on? |
+| **[Omission Index](docs/core-metrics.md#2-omission-index-oi)** (Oᵢ) | What facts did this outlet leave out? |
+| **[Framing Volatility](docs/core-metrics.md#3-framing-volatility-vf)** (V<sub>f</sub>) | How much spin did they layer on? |
+| **[Scatter-Shot Anomaly](docs/core-metrics.md#4-scatter-shot-anomaly-sa)** (S<sub>a</sub>) | Does this outlet pump out noise? |
+| **[Consensus Baseline](docs/core-metrics.md#1-consensus-baseline-gc)** (G<sub>c</sub>) | What does everyone agree on? |
 
 ## Stack
 

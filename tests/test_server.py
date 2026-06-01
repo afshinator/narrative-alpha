@@ -455,6 +455,65 @@ def test_get_report_rejects_path_traversal(client):
     assert "Invalid cluster_id" in resp.json()["detail"]
 
 
+# ── Delete report tests ──
+
+
+def test_delete_report_removes_file_and_returns_ok(tmp_path):
+    """DELETE /api/reports/{cluster_id} deletes the file and returns status ok."""
+    reports_dir = os.path.join(str(tmp_path), "data", "reports")
+    os.makedirs(reports_dir)
+    report_path = os.path.join(reports_dir, "EVT-DEL-001.json")
+    with open(report_path, "w") as f:
+        json.dump({"event_meta": {"cluster_id": "EVT-DEL-001"}}, f)
+
+    assert os.path.exists(report_path)
+
+    with patch.dict(os.environ, {"NARRATIVE_ALPHA_ROOT": str(tmp_path)}, clear=True):
+        from narrative.server import app
+        tc = TestClient(app)
+        resp = tc.delete("/api/reports/EVT-DEL-001")
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "ok"
+    assert data["cluster_id"] == "EVT-DEL-001"
+    assert not os.path.exists(report_path)
+
+
+def test_delete_report_missing_returns_404(client):
+    """DELETE /api/reports/nonexistent returns 404."""
+    resp = client.delete("/api/reports/NONEXISTENT")
+    assert resp.status_code == 404
+    data = resp.json()
+    assert "error" in data["detail"]
+
+
+def test_delete_report_rejects_path_traversal(client):
+    """DELETE /api/reports with .. in cluster_id returns 400."""
+    resp = client.delete("/api/reports/%252e%252e")
+    assert resp.status_code == 400
+    assert "Invalid cluster_id" in resp.json()["detail"]
+
+
+def test_delete_report_only_targets_json_file(tmp_path):
+    """DELETE /api/reports/{cluster_id} only removes that one file."""
+    reports_dir = os.path.join(str(tmp_path), "data", "reports")
+    os.makedirs(reports_dir)
+    with open(os.path.join(reports_dir, "EVT-DEL-001.json"), "w") as f:
+        json.dump({"event_meta": {"cluster_id": "EVT-DEL-001"}}, f)
+    with open(os.path.join(reports_dir, "EVT-DEL-002.json"), "w") as f:
+        json.dump({"event_meta": {"cluster_id": "EVT-DEL-002"}}, f)
+
+    with patch.dict(os.environ, {"NARRATIVE_ALPHA_ROOT": str(tmp_path)}, clear=True):
+        from narrative.server import app
+        tc = TestClient(app)
+        resp = tc.delete("/api/reports/EVT-DEL-001")
+
+    assert resp.status_code == 200
+    assert not os.path.exists(os.path.join(reports_dir, "EVT-DEL-001.json"))
+    assert os.path.exists(os.path.join(reports_dir, "EVT-DEL-002.json"))
+
+
 def test_pipeline_rejects_missing_env_vars(client):
     """POST /api/pipeline returns 503 when env vars are missing."""
     from narrative.server import app as _

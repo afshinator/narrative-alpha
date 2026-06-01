@@ -1,8 +1,8 @@
 {
   "version": 1,
   "projectRoot": "/project/narrative-alpha",
-  "generatedAt": "2026-05-31T20:19:46.007Z",
-  "seq": 11,
+  "generatedAt": "2026-06-01T19:40:21.132Z",
+  "seq": 29,
   "files": {
     "/project/narrative-alpha/dashboard/src/api.test.ts": {
       "path": "/project/narrative-alpha/dashboard/src/api.test.ts",
@@ -255,7 +255,6 @@
       "mtimeMs": 1780178911827.461,
       "size": 6939,
       "imports": [
-        "/project/narrative-alpha/dashboard/src/components/Badge.tsx",
         "/project/narrative-alpha/dashboard/src/types.ts"
       ],
       "lastSeq": 0
@@ -474,8 +473,7 @@
     "/project/narrative-alpha/dashboard/src/components/Badge.test.tsx": [],
     "/project/narrative-alpha/dashboard/src/components/Badge.tsx": [
       "/project/narrative-alpha/dashboard/src/components/Badge.test.tsx",
-      "/project/narrative-alpha/dashboard/src/components/Zone2.tsx",
-      "/project/narrative-alpha/dashboard/src/components/Zone3.tsx"
+      "/project/narrative-alpha/dashboard/src/components/Zone2.tsx"
     ],
     "/project/narrative-alpha/dashboard/src/components/EnvHealthPanel.test.tsx": [],
     "/project/narrative-alpha/dashboard/src/components/EnvHealthPanel.tsx": [

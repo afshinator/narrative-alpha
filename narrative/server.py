@@ -85,14 +85,32 @@ def execute_pipeline(payload: PipelinePayload) -> dict:
             payload.keyword, payload.vertical, api_key, unlocker_zone, serp_zone, db_path,
             timeout=timeout,
         )
-    except TimeoutError as e:
+    except TimeoutError:
         logger.error("Pipeline timed out")
-        return JSONResponse(status_code=504, content={"error": "Pipeline execution timed out", "detail": str(e)})
+        return JSONResponse(
+            status_code=504,
+            content={
+                "error": "Pipeline took too long and timed out.",
+                "detail": "The pipeline timed out while processing. This can happen when many outlets need reputations checked for the first time. Try again \u2014 subsequent runs are faster once outlet data is cached.",
+            },
+        )
     except Exception:
         logger.exception("Pipeline execution failed")
         return JSONResponse(
             status_code=500,
             content={"error": "Pipeline execution failed. Check server logs for details."}
+        )
+
+    # Floor gate detection — don't save as a report
+    if "validation_tracking" in report:
+        count = report.get("validation_tracking", {}).get("current_count", 0)
+        err_msg = f"Not enough unique news sources — only got {count}, need at least 5. Try a broader keyword."
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "error": err_msg,
+                "floor_gate": report,
+            },
         )
 
     cluster_id = report.get("event_meta", {}).get("cluster_id", "unknown")
@@ -175,10 +193,18 @@ async def stream_pipeline(keyword: str, vertical: str = "TECHNOLOGY"):
         exc = pipeline_future.exception()
         if exc:
             logger.exception("Pipeline stream failed", exc_info=exc)
-            yield f"data: {json.dumps({'step': 'error', 'message': 'Pipeline failed', 'detail': str(exc)})}\n\n"
+            yield f"data: {json.dumps({'step': 'error', 'message': 'Pipeline failed during processing.', 'detail': f'Something went wrong while analyzing articles. The server logs have more details. Error: {exc}'})}\n\n"
             return
 
         report = pipeline_future.result()
+
+        # Floor gate detection — don't save as a report
+        if "validation_tracking" in report:
+            count = report.get("validation_tracking", {}).get("current_count", 0)
+            err_msg = f"Not enough unique news sources — only got {count}, need at least 5. Try a broader keyword."
+            yield f"data: {json.dumps({'step': 'error', 'message': err_msg, 'detail': report})}\n\n"
+            return
+
         cluster_id = report.get("event_meta", {}).get("cluster_id", "unknown")
         os.makedirs(_reports_dir(), exist_ok=True)
         with open(os.path.join(_reports_dir(), f"{cluster_id}.json"), "w") as f:
@@ -225,6 +251,17 @@ def get_report(cluster_id: str) -> dict:
         raise HTTPException(status_code=404, detail={"error": f"Report {cluster_id} not found"})
     with open(report_path) as f:
         return json.load(f)
+
+
+@app.delete("/api/reports/{cluster_id}")
+def delete_report(cluster_id: str) -> dict:
+    if "/" in cluster_id or ".." in cluster_id or "\\" in cluster_id:
+        raise HTTPException(status_code=400, detail="Invalid cluster_id")
+    report_path = os.path.join(_reports_dir(), f"{cluster_id}.json")
+    if not os.path.isfile(report_path):
+        raise HTTPException(status_code=404, detail={"error": f"Report {cluster_id} not found"})
+    os.unlink(report_path)
+    return {"status": "ok", "cluster_id": cluster_id}
 
 
 _REQUIRED_ENV_VARS = [

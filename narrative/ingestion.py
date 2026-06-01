@@ -357,6 +357,8 @@ def build_ingestion_manifest(
     if corpus_count < 5:
         return {
             "status": "INSUFFICIENT_CORPUS_FLOOR",
+            "cluster_id": cluster_id,
+            "search_query": keyword,
             "validation_tracking": {
                 "current_state": "INSUFFICIENT_CORPUS_FLOOR",
                 "minimum_required": 5,

@@ -23,7 +23,8 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
 		let detail = res.statusText;
 		try {
 			const body = await res.json();
-			detail = body.detail ?? JSON.stringify(body);
+			const raw = body.detail ?? body;
+			detail = typeof raw === "string" ? raw : JSON.stringify(raw);
 		} catch {
 			// response body wasn't JSON, keep statusText
 		}
@@ -59,6 +60,14 @@ export function saveConfig(
 
 export function fetchEnvHealth(): Promise<EnvHealth> {
 	return fetchJson<EnvHealth>(`${BASE}/health/env`);
+}
+
+export function deleteReport(
+	clusterId: string,
+): Promise<{ status: string; cluster_id: string }> {
+	return fetchJson(`${BASE}/reports/${encodeURIComponent(clusterId)}`, {
+		method: "DELETE",
+	});
 }
 
 export function submitPipeline(
