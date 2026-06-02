@@ -251,7 +251,7 @@ class TestDiscoverArticles:
             posted["timeout"] = timeout
 
             class FakeResp:
-                def raise_for_status(self): pass
+                ok = True
                 def json(self): return {"body": _json.dumps({"news": []})}
 
             return FakeResp()
@@ -276,7 +276,7 @@ class TestDiscoverArticles:
 
         def fake_post(url, json, headers, timeout):
             class FakeResp:
-                def raise_for_status(self): pass
+                ok = True
                 def json(self): return {"body": "{}"}
             return FakeResp()
 
@@ -289,13 +289,13 @@ class TestDiscoverArticles:
 
         def fake_post(*a, **kw):
             class FakeResp:
-                def raise_for_status(self):
-                    raise Exception("HTTP 403")
-                def json(self): return {}
+                ok = False
+                status_code = 403
+                text = ""
             return FakeResp()
 
         monkeypatch.setattr("requests.post", fake_post)
-        with pytest.raises(Exception, match="HTTP 403"):
+        with pytest.raises(Exception, match="Bright Data SERP 403"):
             discover_articles("q", "serp_api1", "key")
 
     def test_appends_time_range_when_set(self, monkeypatch):
@@ -309,7 +309,7 @@ class TestDiscoverArticles:
             posted["json"] = json
 
             class FakeResp:
-                def raise_for_status(self): pass
+                ok = True
                 def json(self): return {"body": _json.dumps({"news": []})}
 
             return FakeResp()
@@ -330,7 +330,7 @@ class TestDiscoverArticles:
             posted["json"] = json
 
             class FakeResp:
-                def raise_for_status(self): pass
+                ok = True
                 def json(self): return {"body": _json.dumps({"news": []})}
 
             return FakeResp()
@@ -361,7 +361,7 @@ class TestFetchArticleBody:
             posted["timeout"] = timeout
 
             class FakeResp:
-                def raise_for_status(self): pass
+                ok = True
                 text = "<html><body><p>Article body.</p></body></html>"
 
             return FakeResp()
@@ -382,12 +382,13 @@ class TestFetchArticleBody:
 
         def fake_post(*a, **kw):
             class FakeResp:
-                def raise_for_status(self):
-                    raise Exception("HTTP 500")
+                ok = False
+                status_code = 500
+                text = ""
             return FakeResp()
 
         monkeypatch.setattr("requests.post", fake_post)
-        with pytest.raises(Exception, match="HTTP 500"):
+        with pytest.raises(Exception, match="Bright Data Unlocker 500"):
             fetch_article_body("https://x.com", "z", "k")
 
 
