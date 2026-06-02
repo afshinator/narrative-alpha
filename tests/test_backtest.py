@@ -160,16 +160,16 @@ class TestExecuteHistoricalBacktest:
         monkeypatch.setattr("narrative.backtest.run_entity_normalization",
                             lambda *a, **kw: {f"node_{i}": f"Node{i}" for i in range(100)})
 
-        graph_index = [0]
+        def fake_extract_all_graphs(documents, neutralized_texts, canonical_map, llm_config, progress_cb=None):
+            graphs = []
+            for idx in range(len(documents)):
+                if idx < len(documents) // 2:
+                    graphs.append({"nodes": ["entity_a", "entity_b"], "edges": []})
+                else:
+                    graphs.append({"nodes": [f"node_{idx}"], "edges": []})
+            return graphs
 
-        def fake_extract_graph(text, entity_dict, llm_config):
-            idx = graph_index[0]
-            graph_index[0] += 1
-            if idx < 10:
-                return {"nodes": ["entity_a", "entity_b"], "edges": []}
-            return {"nodes": [f"node_{idx}"], "edges": []}
-
-        monkeypatch.setattr("narrative.backtest.extract_graph", fake_extract_graph)
+        monkeypatch.setattr("narrative.backtest.extract_all_graphs", fake_extract_all_graphs)
         mock_conn = MagicMock()
         monkeypatch.setattr("narrative.backtest.get_hardened_db_connection", lambda *a: mock_conn)
         monkeypatch.setattr("narrative.backtest.load_llm_config", lambda: {})
@@ -190,14 +190,10 @@ class TestExecuteHistoricalBacktest:
         monkeypatch.setattr("narrative.backtest.run_entity_normalization",
                             lambda *a, **kw: {"entity_a": "EntityA"})
 
-        graph_list = []
+        def fake_extract_all_graphs(documents, neutralized_texts, canonical_map, llm_config, progress_cb=None):
+            return [{"nodes": [], "edges": []} for _ in documents]
 
-        def fake_extract_graph(text, entity_dict, llm_config):
-            g = {"nodes": [], "edges": []}
-            graph_list.append(g)
-            return g
-
-        monkeypatch.setattr("narrative.backtest.extract_graph", fake_extract_graph)
+        monkeypatch.setattr("narrative.backtest.extract_all_graphs", fake_extract_all_graphs)
         mock_conn = MagicMock()
         monkeypatch.setattr("narrative.backtest.get_hardened_db_connection", lambda *a: mock_conn)
         monkeypatch.setattr("narrative.backtest.load_llm_config", lambda: {})
@@ -220,16 +216,16 @@ class TestExecuteHistoricalBacktest:
         monkeypatch.setattr("narrative.backtest.run_entity_normalization",
                             lambda *a, **kw: {"entity_a": "EntityA", "entity_b": "EntityB"})
 
-        graph_index = [0]
+        def fake_extract_all_graphs(documents, neutralized_texts, canonical_map, llm_config, progress_cb=None):
+            graphs = []
+            for idx in range(len(documents)):
+                if idx < len(documents) // 2:
+                    graphs.append({"nodes": ["entity_a", "entity_b"], "edges": []})
+                else:
+                    graphs.append({"nodes": ["entity_a"], "edges": []})
+            return graphs
 
-        def fake_extract_graph(text, entity_dict, llm_config):
-            idx = graph_index[0]
-            graph_index[0] += 1
-            if idx < 10:
-                return {"nodes": ["entity_a", "entity_b"], "edges": []}
-            return {"nodes": ["entity_a"], "edges": []}
-
-        monkeypatch.setattr("narrative.backtest.extract_graph", fake_extract_graph)
+        monkeypatch.setattr("narrative.backtest.extract_all_graphs", fake_extract_all_graphs)
         mock_conn = MagicMock()
         monkeypatch.setattr("narrative.backtest.get_hardened_db_connection", lambda *a: mock_conn)
         monkeypatch.setattr("narrative.backtest.load_llm_config", lambda: {})
@@ -261,16 +257,16 @@ class TestExecuteHistoricalBacktest:
         monkeypatch.setattr("narrative.backtest.run_entity_normalization",
                             lambda *a, **kw: {"entity_a": "EntityA", "entity_b": "EntityB"})
 
-        graph_index = [0]
+        def fake_extract_all_graphs(documents, neutralized_texts, canonical_map, llm_config, progress_cb=None):
+            graphs = []
+            for idx in range(len(documents)):
+                if idx < len(documents) // 2:
+                    graphs.append({"nodes": ["entity_b"], "edges": []})
+                else:
+                    graphs.append({"nodes": ["entity_a"], "edges": []})
+            return graphs
 
-        def fake_extract_graph(text, entity_dict, llm_config):
-            idx = graph_index[0]
-            graph_index[0] += 1
-            if idx < 10:
-                return {"nodes": ["entity_b"], "edges": []}
-            return {"nodes": ["entity_a"], "edges": []}
-
-        monkeypatch.setattr("narrative.backtest.extract_graph", fake_extract_graph)
+        monkeypatch.setattr("narrative.backtest.extract_all_graphs", fake_extract_all_graphs)
         mock_conn = MagicMock()
         monkeypatch.setattr("narrative.backtest.get_hardened_db_connection", lambda *a: mock_conn)
         monkeypatch.setattr("narrative.backtest.load_llm_config", lambda: {})
@@ -297,14 +293,10 @@ class TestExecuteHistoricalBacktest:
         monkeypatch.setattr("narrative.backtest.run_entity_normalization",
                             lambda *a, **kw: {"entity_a": "EntityA"})
 
-        graph_index = [0]
+        def fake_extract_all_graphs(documents, neutralized_texts, canonical_map, llm_config, progress_cb=None):
+            return [{"nodes": ["entity_a"], "edges": []} for _ in documents]
 
-        def fake_extract_graph(text, entity_dict, llm_config):
-            idx = graph_index[0]
-            graph_index[0] += 1
-            return {"nodes": ["entity_a"], "edges": []}
-
-        monkeypatch.setattr("narrative.backtest.extract_graph", fake_extract_graph)
+        monkeypatch.setattr("narrative.backtest.extract_all_graphs", fake_extract_all_graphs)
         mock_conn = MagicMock()
         monkeypatch.setattr("narrative.backtest.get_hardened_db_connection", lambda *a: mock_conn)
         monkeypatch.setattr("narrative.backtest.load_llm_config", lambda: {})
@@ -346,16 +338,16 @@ class TestExecuteHistoricalBacktest:
         monkeypatch.setattr("narrative.backtest.run_entity_normalization",
                             lambda *a, **kw: {"entity_a": "EntityA", "entity_b": "EntityB"})
 
-        graph_index = [0]
+        def fake_extract_all_graphs(documents, neutralized_texts, canonical_map, llm_config, progress_cb=None):
+            graphs = []
+            for idx in range(len(documents)):
+                if idx < len(documents) // 2:
+                    graphs.append({"nodes": ["entity_a", "entity_b"], "edges": []})
+                else:
+                    graphs.append({"nodes": ["entity_a"], "edges": []})
+            return graphs
 
-        def fake_extract_graph(text, entity_dict, llm_config):
-            idx = graph_index[0]
-            graph_index[0] += 1
-            if idx < 10:
-                return {"nodes": ["entity_a", "entity_b"], "edges": []}
-            return {"nodes": ["entity_a"], "edges": []}
-
-        monkeypatch.setattr("narrative.backtest.extract_graph", fake_extract_graph)
+        monkeypatch.setattr("narrative.backtest.extract_all_graphs", fake_extract_all_graphs)
         monkeypatch.setattr("narrative.backtest.get_hardened_db_connection",
                             lambda *a: get_hardened_db_connection(db_path))
         monkeypatch.setattr("narrative.backtest.load_llm_config", lambda: {})

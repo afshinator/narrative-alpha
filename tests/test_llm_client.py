@@ -322,7 +322,7 @@ def test_load_llm_config_recovers_from_corrupt_json(tmp_path, monkeypatch):
 
     config = load_llm_config()
     assert config["call_1_entity_normalization"]["provider"] == "deepseek"
-    assert config["call_3_graph_extraction"]["thinking"] is True
+    assert config["call_3_graph_extraction"]["thinking"] is False
 
 
 def test_load_llm_config_recovers_from_unreadable_file(tmp_path, monkeypatch):
@@ -357,7 +357,7 @@ def test_load_llm_config_recovers_from_missing_slots(tmp_path, monkeypatch):
 
     config = load_llm_config()
     assert config["call_1_entity_normalization"]["provider"] == "deepseek"
-    assert config["call_3_graph_extraction"]["thinking"] is True
+    assert config["call_3_graph_extraction"]["thinking"] is False
 
 
 def test_load_llm_config_recovers_from_bad_temperature(tmp_path, monkeypatch):

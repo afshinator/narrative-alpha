@@ -358,8 +358,8 @@
     },
     "dashboard/vite.config.ts": {
       "latest": {
-        "commit": "8e0e967",
-        "timestamp": "2026-06-01T17:24:31.511Z",
+        "commit": "8f24206",
+        "timestamp": "2026-06-02T17:14:48.760Z",
         "mi": 57.9,
         "cognitive": 0,
         "nesting": 0,
@@ -381,6 +381,16 @@
         {
           "commit": "8e0e967",
           "timestamp": "2026-06-01T17:24:31.511Z",
+          "mi": 57.9,
+          "cognitive": 0,
+          "nesting": 0,
+          "lines": 22,
+          "maxCyclomatic": 1,
+          "entropy": 4
+        },
+        {
+          "commit": "8f24206",
+          "timestamp": "2026-06-02T17:14:48.760Z",
           "mi": 57.9,
           "cognitive": 0,
           "nesting": 0,
@@ -662,5 +672,5 @@
       "trend": "stable"
     }
   },
-  "capturedAt": "2026-06-01T19:12:33.444Z"
+  "capturedAt": "2026-06-02T17:14:53.763Z"
 }

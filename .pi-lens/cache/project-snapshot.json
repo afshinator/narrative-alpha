@@ -1,8 +1,8 @@
 {
   "version": 1,
   "projectRoot": "/project/narrative-alpha",
-  "generatedAt": "2026-06-01T19:40:21.132Z",
-  "seq": 29,
+  "generatedAt": "2026-06-02T17:30:09.571Z",
+  "seq": 111,
   "files": {
     "/project/narrative-alpha/dashboard/src/api.test.ts": {
       "path": "/project/narrative-alpha/dashboard/src/api.test.ts",

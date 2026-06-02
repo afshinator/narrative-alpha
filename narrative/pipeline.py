@@ -38,7 +38,7 @@ from narrative.llm_client import load_llm_config
 
 def _run_startup_init():
     db_path = os.path.join(
-        os.environ.get("NARRATIVE_ALPHA_ROOT", "/root/.narrative_alpha"),
+        os.environ.get("NARRATIVE_ALPHA_ROOT", os.path.expanduser("~/.narrative_alpha")),
         "outlet_reputation.db",
     )
     conn = get_hardened_db_connection(db_path)

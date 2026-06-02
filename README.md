@@ -39,6 +39,10 @@ Articles → Knowledge Graphs → Consensus Baseline → Distortion Matrix → D
 4. **Analyze** — Set math identifies omissions, embedding distance catches spin, provenance tracking flags outliers
 5. **Display** — Static dashboard renders the forensic report
 
+<div align="center">
+  <img src="./docs/flow-img-01.png" alt="Narrative Alpha architecture" width="600" />
+</div>
+
 ## Core Metrics
 
 | Metric | What It Measures |

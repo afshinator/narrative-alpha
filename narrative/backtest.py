@@ -10,7 +10,7 @@ import logging
 
 from narrative.ingestion import discover_articles, fetch_article_body, extract_text
 from narrative.processing import run_entity_normalization
-from narrative.analysis import extract_graph, compute_consensus_baseline, resolve_to_canonical
+from narrative.analysis import extract_all_graphs, compute_consensus_baseline, resolve_to_canonical
 from narrative.reputation import get_hardened_db_connection
 from narrative.llm_client import load_llm_config
 
@@ -28,8 +28,8 @@ def execute_historical_backtest(domain: str, vertical: str) -> None:
     behavior (that belongs to the online outlier_tracking system). Instead, it
     approximates outlet reliability through cross-source persistence.
 
-    1. SERP Query 1 (target): site:{domain} {vertical}, tbm=nws, num=15, tbs=qdr:y
-    2. SERP Query 2 (baseline): {vertical}, tbm=nws, num=15, tbs=qdr:y — no site filter
+    1. SERP Query 1 (target): site:{domain} {vertical}, tbm=nws, num=8, tbs=qdr:y
+    2. SERP Query 2 (baseline): {vertical}, tbm=nws, num=8, tbs=qdr:y — no site filter
     3. Web Unlocker: fetch article bodies from both queries
     4. Floor gate: if either query < 5 articles -> UNRATED, exit
     5. Call 1 + Call 3 on both article sets independently
@@ -60,11 +60,11 @@ def execute_historical_backtest(domain: str, vertical: str) -> None:
     try:
         target_serp = discover_articles(
             f"site:{domain} {vertical}", serp_zone, api_key,
-            num=15, time_range="y",
+            num=8, time_range="y",
         )
         baseline_serp = discover_articles(
             vertical, serp_zone, api_key,
-            num=15, time_range="y",
+            num=8, time_range="y",
         )
     except Exception:
         logger.warning("Backtest %s/%s: SERP failed", domain, vertical, exc_info=True)
@@ -100,13 +100,8 @@ def execute_historical_backtest(domain: str, vertical: str) -> None:
         logger.info("Backtest %s/%s: empty canonical map", domain, vertical)
         return
 
-    all_graphs = []
-    for doc in all_docs:
-        try:
-            graph = extract_graph(doc["raw_text_content"], canonical_map, llm_config)
-            all_graphs.append(graph)
-        except Exception:
-            all_graphs.append({"_parse_error": True, "nodes": [], "edges": []})
+    raw_texts = [d["raw_text_content"] for d in all_docs]
+    all_graphs = extract_all_graphs(all_docs, raw_texts, canonical_map, llm_config)
 
     target_graphs = all_graphs[:len(target_docs)]
     baseline_graphs = all_graphs[len(target_docs):]
