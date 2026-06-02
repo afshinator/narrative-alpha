@@ -1,12 +1,12 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { streamPipeline } from "../api";
 import type {
-	PipelineEvent,
-	PipelineStep,
 	ArticleProgress,
 	ArticleStatus,
+	PipelineEvent,
+	PipelineStep,
 } from "../types";
-import { streamPipeline } from "../api";
 
 const VERTICALS = [
 	"TECHNOLOGY",
@@ -252,29 +252,24 @@ export function PipelineRunner({
 
 			{/* Stored result banner (from sessionStorage) */}
 			{storedResult && runnerState === "idle" && (
-				<div
-					className={`stored-result-banner stored-result-banner--${storedResult.status}`}
-				>
-					{storedResult.status === "complete" ? (
-						<span>
-							Report ready —{" "}
-							<a
-								href={`/event/${storedResult.cluster_id}`}
-								onClick={(e) => {
-									e.preventDefault();
-									navigate(`/event/${storedResult.cluster_id}`);
-								}}
-							>
-								{storedResult.search_query}
-							</a>
-						</span>
-					) : (
-						<span>
-							Pipeline failed for "{storedResult.search_query}":{" "}
-							{storedResult.error_detail}
-						</span>
-					)}
-					<button className="stored-result-dismiss" onClick={clearStoredResult}>
+				<div className="stored-result-banner stored-result-banner--complete">
+					<span>
+						Report ready —{" "}
+						<a
+							href={`/event/${storedResult.cluster_id}`}
+							onClick={(e) => {
+								e.preventDefault();
+								navigate(`/event/${storedResult.cluster_id}`);
+							}}
+						>
+							{storedResult.search_query}
+						</a>
+					</span>
+					<button
+						type="button"
+						className="stored-result-dismiss"
+						onClick={clearStoredResult}
+					>
 						✕
 					</button>
 				</div>
@@ -316,13 +311,13 @@ export function PipelineRunner({
 								)}
 								{step === "analyzing" && !isComplete && (
 									<span className="step-message">
-										{phaseMessage["analyzing"] ||
+										{phaseMessage.analyzing ||
 											"Running entity and graph analysis..."}
 									</span>
 								)}
 								{step === "synthesizing" && !isComplete && (
 									<span className="step-message">
-										{phaseMessage["synthesizing"] ||
+										{phaseMessage.synthesizing ||
 											"Generating forensic report..."}
 									</span>
 								)}
