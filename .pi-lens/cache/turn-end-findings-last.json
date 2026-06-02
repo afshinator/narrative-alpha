@@ -1,6 +1,0 @@
-{
-  "signature": "tests/test_llm_client.py::Unresolved from this turn — tests/test_llm_client.py:\n🔴 STOP — 1 issue(s) must be fixed:\n  Import \"pytest\" could not be resolved",
-  "sessionId": "lens-mpwvmf2t-f7c65b48",
-  "projectSeqStart": 123,
-  "projectSeqEnd": 124
-}
