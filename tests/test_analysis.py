@@ -607,6 +607,31 @@ class TestComputePreSynthesisContext:
 
 
 class TestSynthesizeForensicReport:
+    def test_serialized_bundle_uses_compact_json(self, monkeypatch):
+        """The serialized context bundle should not contain indentation."""
+        captured = {}
+
+        def _capture(slot_cfg, messages, json_mode):
+            captured["content"] = messages[1]["content"]
+            return ('{"event_meta": {}, "consensus_reality_graph": {"consensus_summary":"",'
+                    '"verified_anchor_nodes":[],"primary_verifications":[]}, '
+                    '"distortion_matrix": [], "outlier_signals": [], '
+                    '"reputation_warnings": [], "reality_divergence_zones": [], '
+                    '"reality_fractures": [], "narrative_regime_shifts": []}')
+
+        monkeypatch.setattr("narrative.llm_client.call_llm", _capture)
+        synthesize_forensic_report(
+            {"key": "value"}, {"call_4_forensic_synthesis": {}}
+        )
+
+        content = captured["content"]
+
+        assert '\n ' not in content, \
+            "Serialized content should use compact JSON, not indented"
+
+        parsed = json.loads(content)
+        assert parsed["key"] == "value"
+
     def test_returns_parsed_json_from_llm(self, monkeypatch):
         fake_response = json.dumps({
             "event_meta": {"cluster_id": "cl-001", "search_query": "test", "industry_vertical": "TECH", "timestamp_utc": "2026-05-29T00:00:00Z", "corpus_count": 3, "corpus_capped": False},
