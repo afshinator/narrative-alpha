@@ -51,7 +51,7 @@ export function SettingsPage() {
     <div className="page settings-page">
       <h2 className="section-title">LLM Configuration</h2>
       <p className="section-subtitle">
-        Configure the model name for each pipeline call slot. Other parameters are managed via server config.
+        Configure the provider and model for each pipeline call slot.
       </p>
 
       <EnvHealthPanel />
@@ -59,6 +59,7 @@ export function SettingsPage() {
       <div className="settings-table">
         <div className="settings-header">
           <div>Call Slot</div>
+          <div>Provider</div>
           <div>Model</div>
         </div>
 
@@ -67,8 +68,10 @@ export function SettingsPage() {
             key={key}
             slotName={name}
             slotDescription={description}
+            provider={config[key].provider}
             model={config[key].model}
             onChange={(model) => handleUpdate(key, { model })}
+            onProviderChange={(provider) => handleUpdate(key, { provider })}
           />
         ))}
       </div>

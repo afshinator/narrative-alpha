@@ -57,8 +57,8 @@ Articles → Knowledge Graphs → Consensus Baseline → Distortion Matrix → D
 | Layer | Technology |
 |-------|-----------|
 | **Scraping** | Bright Data SERP API + Web Unlocker |
-| **LLM** | DeepSeek V4 (Flash + Pro w/ thinking mode) |
-| **Embeddings** | OpenAI `text-embedding-3-small` |
+| **LLM** | Configurable per pipeline step — DeepSeek, OpenAI, Google, Groq (any OpenAI-compatible endpoint) |
+| **Embeddings** | OpenAI `text-embedding-3-small` (hardcoded — see Known Limitations) |
 | **Backend** | FastAPI + uvicorn (Python 3.11) |
 | **Storage** | SQLite (WAL mode) |
 | **Frontend** | React + Vite |
@@ -88,6 +88,10 @@ The script installs Python and dashboard dependencies on first run. Open the URL
 ```bash
 BACKEND_PORT=9000 PORT=3005 ./start-demo.sh
 ```
+
+## Known Limitations
+
+**Embeddings require OpenAI.** Framing volatility scores are computed using embedding distance (`text-embedding-3-small`). This call is hardcoded to OpenAI — `OPENAI_API_KEY` is always required even if you configure every other pipeline step to use a different provider (DeepSeek, Groq, etc.). Making the embedding provider configurable is a planned improvement.
 
 ## License
 

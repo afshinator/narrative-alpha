@@ -82,3 +82,12 @@ it("hides save button when config failed to load", async () => {
   await screen.findByText(/Network error/);
   expect(screen.queryByText("Save Configuration")).toBeNull();
 });
+
+it("renders provider select with value from config", async () => {
+  render(<MemoryRouter><SettingsPage /></MemoryRouter>);
+  const selects = await screen.findAllByRole("combobox");
+  // 4 slots, each with a provider select
+  expect(selects.length).toBe(4);
+  // Default mock config has provider "deepseek" for all slots
+  expect((selects[0] as HTMLSelectElement).value).toBe("deepseek");
+});

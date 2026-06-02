@@ -18,7 +18,7 @@ from pydantic import BaseModel
 
 from narrative.pipeline import _run_pipeline, _run_startup_init
 from narrative.contracts import LLMConfig
-from narrative.llm_client import load_llm_config, call_llm, get_embedding
+from narrative.llm_client import load_llm_config, call_llm, get_embedding, PROVIDER_API_KEY_ENV
 
 logger = logging.getLogger(__name__)
 
@@ -264,23 +264,33 @@ def delete_report(cluster_id: str) -> dict:
     return {"status": "ok", "cluster_id": cluster_id}
 
 
-_REQUIRED_ENV_VARS = [
-    "DEEPSEEK_API_KEY",
-    "OPENAI_API_KEY",
+_INFRA_ENV_VARS = [
     "BRIGHTDATA_API_KEY",
     "BRIGHTDATA_SERP_ZONE",
     "BRIGHTDATA_UNLOCKER_ZONE",
 ]
 
 
+def _required_env_vars() -> list[str]:
+    """Return env vars required by the active llm_config + fixed infra vars."""
+    llm_config = load_llm_config()
+    providers_in_use: set[str] = {
+        slot["provider"]
+        for slot in llm_config.values()
+        if isinstance(slot, dict) and "provider" in slot
+    }
+    llm_keys = [
+        PROVIDER_API_KEY_ENV[p]
+        for p in providers_in_use
+        if p in PROVIDER_API_KEY_ENV
+    ]
+    return sorted(set(llm_keys + _INFRA_ENV_VARS))
+
+
 def _check_env() -> dict:
-    present_list = []
-    missing_list = []
-    for var in _REQUIRED_ENV_VARS:
-        if os.environ.get(var):
-            present_list.append(var)
-        else:
-            missing_list.append(var)
+    required = _required_env_vars()
+    present_list = [v for v in required if os.environ.get(v)]
+    missing_list = [v for v in required if not os.environ.get(v)]
     status = "ok" if not missing_list else "degraded"
     detail = "All required vars set" if not missing_list else f"Missing: {', '.join(missing_list)}"
     return {"status": status, "detail": detail, "present": present_list, "missing": missing_list}

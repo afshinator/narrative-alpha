@@ -338,6 +338,39 @@ def test_health_returns_ok(client):
     assert data["status"] == "ok"
 
 
+def test_health_env_only_requires_keys_for_configured_providers(tmp_path):
+    """GET /api/health/env only flags missing keys for providers in active llm_config."""
+    config = {
+        "call_1_entity_normalization": {"provider": "groq", "model": "llama3-70b", "thinking": False, "temperature": 0.1},
+        "call_2_linguistic_neutralization": {"provider": "groq", "model": "llama3-70b", "thinking": False, "temperature": 0.1},
+        "call_3_graph_extraction": {"provider": "groq", "model": "llama3-70b", "thinking": False, "temperature": 0.1},
+        "call_4_forensic_synthesis": {"provider": "groq", "model": "llama3-70b", "thinking": False, "temperature": 0.1},
+    }
+    config_path = os.path.join(str(tmp_path), "llm_config.json")
+    with open(config_path, "w") as f:
+        json.dump(config, f)
+
+    env = {
+        "NARRATIVE_ALPHA_ROOT": str(tmp_path),
+        "GROQ_API_KEY": "sk-test-groq",
+        "BRIGHTDATA_API_KEY": "bd-key",
+        "BRIGHTDATA_SERP_ZONE": "serp",
+        "BRIGHTDATA_UNLOCKER_ZONE": "unlocker",
+    }
+    with patch.dict(os.environ, env, clear=True):
+        from narrative.server import app
+        tc = TestClient(app)
+        resp = tc.get("/api/health/env")
+
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "ok", f"Expected ok, got: {data}"
+    assert "GROQ_API_KEY" in data["present"]
+    assert "DEEPSEEK_API_KEY" not in data["present"]
+    assert "DEEPSEEK_API_KEY" not in data["missing"]
+    assert "OPENAI_API_KEY" not in data["missing"]
+
+
 def test_health_env_lists_variables(client):
     """GET /api/health/env lists env var statuses without LLM calls."""
     resp = client.get("/api/health/env")
@@ -350,9 +383,9 @@ def test_health_env_lists_variables(client):
     assert data["status"] in ("ok", "degraded")
 
 
-_ENV_VARS = [
+# Default config uses deepseek for all 4 slots — only DEEPSEEK_API_KEY + infra required
+_DEFAULT_REQUIRED_VARS = [
     "DEEPSEEK_API_KEY",
-    "OPENAI_API_KEY",
     "BRIGHTDATA_API_KEY",
     "BRIGHTDATA_SERP_ZONE",
     "BRIGHTDATA_UNLOCKER_ZONE",
@@ -360,8 +393,8 @@ _ENV_VARS = [
 
 
 def test_health_env_shows_present_when_set():
-    """GET /api/health/env marks set vars as present."""
-    env = {v: f"test_{v}" for v in _ENV_VARS}
+    """GET /api/health/env marks set vars as present (default config = deepseek)."""
+    env = {v: f"test_{v}" for v in _DEFAULT_REQUIRED_VARS}
     env["NARRATIVE_ALPHA_ROOT"] = "/tmp/test_narrative"
     with patch.dict(os.environ, env, clear=True):
         from narrative.server import app
@@ -369,7 +402,7 @@ def test_health_env_shows_present_when_set():
         resp = tc.get("/api/health/env")
         assert resp.status_code == 200
         data = resp.json()
-        assert sorted(data["present"]) == sorted(_ENV_VARS)
+        assert sorted(data["present"]) == sorted(_DEFAULT_REQUIRED_VARS)
         assert data["missing"] == []
         assert data["status"] == "ok"
 
@@ -383,7 +416,7 @@ def test_health_env_shows_all_missing_when_unset():
         assert resp.status_code == 200
         data = resp.json()
         assert data["present"] == []
-        assert sorted(data["missing"]) == sorted(_ENV_VARS)
+        assert sorted(data["missing"]) == sorted(_DEFAULT_REQUIRED_VARS)
         assert data["status"] == "degraded"
 
 
