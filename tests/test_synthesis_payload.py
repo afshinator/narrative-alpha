@@ -180,7 +180,7 @@ def test_worst_case_payload_fits_within_token_limit():
     context_bundle = {
         "consensus_nodes": list(consensus_nodes),
         "corpus_count": MAX_ARTICLES,
-        "search_query": "bitcoin regulation test",
+        "search_query": "Clarity Act",
         "per_source": [
             {
                 "domain": g.get("_source_domain", ""),

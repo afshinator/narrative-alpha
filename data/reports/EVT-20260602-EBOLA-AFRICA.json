@@ -1,0 +1,510 @@
+{
+  "event_meta": {
+    "cluster_id": "EVT-20260602-EBOLA-AFRICA",
+    "search_query": "ebola africa",
+    "industry_vertical": "UNKNOWN",
+    "timestamp_utc": "2026-06-02T22:49:13.479510+00:00",
+    "corpus_count": 7,
+    "corpus_capped": false
+  },
+  "consensus_reality_graph": {
+    "consensus_summary": "An Ebola outbreak caused by the rare Bundibugyo virus is occurring in the Democratic Republic of the Congo and Uganda, with laboratory-confirmed cases in Kampala. The WHO declared a Public Health Emergency of International Concern (PHEIC) but noted it does not meet pandemic emergency criteria. No approved vaccines or treatments exist for Bundibugyo virus.",
+    "verified_anchor_nodes": [
+      "Bundibugyo virus",
+      "Democratic Republic of the Congo",
+      "Ebola disease",
+      "World Health Organization",
+      "Kampala",
+      "Uganda"
+    ],
+    "primary_verifications": [
+      {
+        "authority": "WHO",
+        "reference_id": "who-pheic-declaration",
+        "status": "confirmed"
+      },
+      {
+        "authority": "Africa CDC",
+        "reference_id": "africacdc-cases",
+        "status": "confirmed"
+      },
+      {
+        "authority": "INRB",
+        "reference_id": "inrb-strain-identification",
+        "status": "confirmed"
+      }
+    ]
+  },
+  "distortion_matrix": [
+    {
+      "outlet_name": "World Health Organization (WHO)",
+      "source_domain": "who.int",
+      "omission_index": 0.0,
+      "framing_volatility_score": 0.0663,
+      "identifiable_omissions": [],
+      "linguistic_camouflage": [],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "CNN",
+      "source_domain": "cnn.com",
+      "omission_index": 0.0,
+      "framing_volatility_score": 0.0513,
+      "identifiable_omissions": [],
+      "linguistic_camouflage": [],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "NPR",
+      "source_domain": "npr.org",
+      "omission_index": 0.0,
+      "framing_volatility_score": 0.1514,
+      "identifiable_omissions": [],
+      "linguistic_camouflage": [],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "Johns Hopkins Bloomberg School of Public Health",
+      "source_domain": "publichealth.jhu.edu",
+      "omission_index": 0.0,
+      "framing_volatility_score": 0.1571,
+      "identifiable_omissions": [],
+      "linguistic_camouflage": [],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "PBS",
+      "source_domain": "pbs.org",
+      "omission_index": 0.5,
+      "framing_volatility_score": 0.239,
+      "identifiable_omissions": [
+        "Bundibugyo virus",
+        "Uganda",
+        "World Health Organization"
+      ],
+      "linguistic_camouflage": [
+        {
+          "raw_expression": "deep mistrust of health authorities",
+          "clinical_translation": "public resistance to health measures"
+        }
+      ],
+      "omission_label": "HIGH",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "CIDRAP",
+      "source_domain": "cidrap.umn.edu",
+      "omission_index": 0.1667,
+      "framing_volatility_score": 0.0579,
+      "identifiable_omissions": [
+        "Kampala"
+      ],
+      "linguistic_camouflage": [],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "The New York Times",
+      "source_domain": "nytimes.com",
+      "omission_index": 0.3333,
+      "framing_volatility_score": 0.1213,
+      "identifiable_omissions": [
+        "Kampala",
+        "World Health Organization"
+      ],
+      "linguistic_camouflage": [],
+      "omission_label": "MED",
+      "framing_volatility_label": "LOW"
+    }
+  ],
+  "outlier_signals": [
+    {
+      "signal_id": "sig-001",
+      "origin_outlet": "CNN",
+      "origin_domain": "cnn.com",
+      "extracted_claim": "US CDC triggered Title 42 and implemented enhanced screenings for travelers from affected regions.",
+      "timestamp_first_seen": "2026-06-02 22:49:22",
+      "outlier_origin_provenance": {
+        "classification": "single-source claim",
+        "historical_origin_validation_rate": 0.0,
+        "scatter_shot_anomaly_factor": 0.2,
+        "reputation_warning_triggered": false,
+        "echo_chamber_mimics": [],
+        "scatter_shot_label": "LOW"
+      },
+      "validation_tracking": {
+        "current_state": "unvalidated",
+        "last_checked_timestamp": "2026-06-02 22:49:22",
+        "consensus_absorption_status": "not_absorbed",
+        "evaluation_window_days": 30
+      }
+    },
+    {
+      "signal_id": "sig-002",
+      "origin_outlet": "PBS",
+      "origin_domain": "pbs.org",
+      "extracted_claim": "University of Oxford researchers test next-generation Ebola vaccine using COVID pandemic technology.",
+      "timestamp_first_seen": "2026-06-02 22:49:22",
+      "outlier_origin_provenance": {
+        "classification": "single-source claim",
+        "historical_origin_validation_rate": 0.0,
+        "scatter_shot_anomaly_factor": 0.2,
+        "reputation_warning_triggered": false,
+        "echo_chamber_mimics": [],
+        "scatter_shot_label": "LOW"
+      },
+      "validation_tracking": {
+        "current_state": "unvalidated",
+        "last_checked_timestamp": "2026-06-02 22:49:22",
+        "consensus_absorption_status": "not_absorbed",
+        "evaluation_window_days": 30
+      }
+    },
+    {
+      "signal_id": "sig-003",
+      "origin_outlet": "CNN",
+      "origin_domain": "cnn.com",
+      "extracted_claim": "At least one American physician tested positive for Bundibugyo virus and was moved to Germany.",
+      "timestamp_first_seen": "2026-06-02 22:49:22",
+      "outlier_origin_provenance": {
+        "classification": "single-source claim",
+        "historical_origin_validation_rate": 0.0,
+        "scatter_shot_anomaly_factor": 0.2,
+        "reputation_warning_triggered": false,
+        "echo_chamber_mimics": [],
+        "scatter_shot_label": "LOW"
+      },
+      "validation_tracking": {
+        "current_state": "unvalidated",
+        "last_checked_timestamp": "2026-06-02 22:49:22",
+        "consensus_absorption_status": "not_absorbed",
+        "evaluation_window_days": 30
+      }
+    },
+    {
+      "signal_id": "sig-004",
+      "origin_outlet": "CNN",
+      "origin_domain": "cnn.com",
+      "extracted_claim": "AFC/M23 rebel coalition seized Goma last year and reported one Ebola case.",
+      "timestamp_first_seen": "2026-06-02 22:49:22",
+      "outlier_origin_provenance": {
+        "classification": "single-source claim",
+        "historical_origin_validation_rate": 0.0,
+        "scatter_shot_anomaly_factor": 0.2,
+        "reputation_warning_triggered": false,
+        "echo_chamber_mimics": [],
+        "scatter_shot_label": "LOW"
+      },
+      "validation_tracking": {
+        "current_state": "unvalidated",
+        "last_checked_timestamp": "2026-06-02 22:49:22",
+        "consensus_absorption_status": "not_absorbed",
+        "evaluation_window_days": 30
+      }
+    }
+  ],
+  "reputation_warnings": [
+    {
+      "outlet_name": "World Health Organization (WHO)",
+      "source_domain": "who.int",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": ""
+    },
+    {
+      "outlet_name": "CNN",
+      "source_domain": "cnn.com",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": ""
+    },
+    {
+      "outlet_name": "NPR",
+      "source_domain": "npr.org",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": ""
+    },
+    {
+      "outlet_name": "Johns Hopkins Bloomberg School of Public Health",
+      "source_domain": "publichealth.jhu.edu",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": ""
+    },
+    {
+      "outlet_name": "PBS",
+      "source_domain": "pbs.org",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": ""
+    },
+    {
+      "outlet_name": "CIDRAP",
+      "source_domain": "cidrap.umn.edu",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": ""
+    },
+    {
+      "outlet_name": "The New York Times",
+      "source_domain": "nytimes.com",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": ""
+    }
+  ],
+  "reality_divergence_zones": [
+    {
+      "topic": "Case and death counts",
+      "consensus_stability_score": 0.3,
+      "institutional_convergence": "low",
+      "observed_narrative_structures": [
+        "246 suspected cases and 65 deaths in Ituri (Africa CDC)",
+        "500 suspected cases and 131 deaths (CNN)",
+        "600 suspected cases and 139 deaths (NPR)",
+        "321 confirmed, 166 suspected, 49 confirmed deaths (NYT)",
+        "220 deaths, near 1,000 suspected (PBS)"
+      ],
+      "supporting_outlets": {
+        "246 suspected cases and 65 deaths in Ituri (Africa CDC)": [
+          "cidrap.umn.edu"
+        ],
+        "500 suspected cases and 131 deaths (CNN)": [
+          "cnn.com"
+        ],
+        "600 suspected cases and 139 deaths (NPR)": [
+          "npr.org"
+        ],
+        "321 confirmed, 166 suspected, 49 confirmed deaths (NYT)": [
+          "nytimes.com"
+        ],
+        "220 deaths, near 1,000 suspected (PBS)": [
+          "pbs.org"
+        ]
+      },
+      "consensus_stability": "LOW"
+    },
+    {
+      "topic": "Bundibugyo virus fatality rate",
+      "consensus_stability_score": 0.5,
+      "institutional_convergence": "medium",
+      "observed_narrative_structures": [
+        "25% to 40% fatality rate (MSF/Doctors Without Borders)",
+        "30% to 50% case fatality rate (NPR/CDC)"
+      ],
+      "supporting_outlets": {
+        "25% to 40% fatality rate (MSF/Doctors Without Borders)": [
+          "cnn.com",
+          "cidrap.umn.edu"
+        ],
+        "30% to 50% case fatality rate (NPR/CDC)": [
+          "npr.org"
+        ]
+      },
+      "consensus_stability": "MED"
+    },
+    {
+      "topic": "Timing of WHO declaration",
+      "consensus_stability_score": 0.4,
+      "institutional_convergence": "medium",
+      "observed_narrative_structures": [
+        "Declared on Sunday (CNN)",
+        "Declared on Saturday (NPR)"
+      ],
+      "supporting_outlets": {
+        "Declared on Sunday (CNN)": [
+          "cnn.com"
+        ],
+        "Declared on Saturday (NPR)": [
+          "npr.org"
+        ]
+      },
+      "consensus_stability": "MED"
+    }
+  ],
+  "reality_fractures": [
+    {
+      "fracture_id": "frac-001",
+      "topic": "Bundibugyo virus fatality rate",
+      "claim_a": {
+        "statement": "Fatality rate of Bundibugyo virus is 25% to 40%.",
+        "supporting_outlets": [
+          "cnn.com",
+          "cidrap.umn.edu"
+        ]
+      },
+      "claim_b": {
+        "statement": "Case fatality rate of Bundibugyo virus is 30% to 50%.",
+        "supporting_outlets": [
+          "npr.org"
+        ]
+      },
+      "relationship": "STRUCTURALLY_CONTRADICTORY",
+      "resolution_status": "UNRESOLVED",
+      "classification_method": "LLM_ASSISTED"
+    },
+    {
+      "fracture_id": "frac-002",
+      "topic": "Number of deaths",
+      "claim_a": {
+        "statement": "At least 49 people killed.",
+        "supporting_outlets": [
+          "nytimes.com"
+        ]
+      },
+      "claim_b": {
+        "statement": "More than 130 deaths linked to outbreak.",
+        "supporting_outlets": [
+          "cnn.com"
+        ]
+      },
+      "relationship": "STRUCTURALLY_CONTRADICTORY",
+      "resolution_status": "UNRESOLVED",
+      "classification_method": "LLM_ASSISTED"
+    },
+    {
+      "fracture_id": "frac-003",
+      "topic": "WHO PHEIC declaration day",
+      "claim_a": {
+        "statement": "WHO declared PHEIC on Sunday.",
+        "supporting_outlets": [
+          "cnn.com"
+        ]
+      },
+      "claim_b": {
+        "statement": "WHO declared public health emergency on Saturday.",
+        "supporting_outlets": [
+          "npr.org"
+        ]
+      },
+      "relationship": "STRUCTURALLY_CONTRADICTORY",
+      "resolution_status": "UNRESOLVED",
+      "classification_method": "LLM_ASSISTED"
+    }
+  ],
+  "narrative_regime_shifts": [
+    {
+      "shift_id": "shift-1",
+      "topic": "WHO terminology",
+      "detected_shift": {
+        "previous_term": "who",
+        "replacement_term": "world health organization"
+      },
+      "observed_across": 6,
+      "total_sources": 7,
+      "synchronization_score": 0.8571428571428571,
+      "interpretive_note": "Shift from acronym to full name for clarity.",
+      "synchronization_label": "HIGH"
+    },
+    {
+      "shift_id": "shift-2",
+      "topic": "Country naming",
+      "detected_shift": {
+        "previous_term": "democratic republic of the congo",
+        "replacement_term": "congo"
+      },
+      "observed_across": 7,
+      "total_sources": 7,
+      "synchronization_score": 1.0,
+      "interpretive_note": "Common shortening of country name.",
+      "synchronization_label": "HIGH"
+    },
+    {
+      "shift_id": "shift-3",
+      "topic": "Virus naming",
+      "detected_shift": {
+        "previous_term": "bundibugyo ebolavirus",
+        "replacement_term": "bundibugyo"
+      },
+      "observed_across": 6,
+      "total_sources": 7,
+      "synchronization_score": 0.8571428571428571,
+      "interpretive_note": "Dropping 'ebolavirus' for brevity.",
+      "synchronization_label": "HIGH"
+    },
+    {
+      "shift_id": "shift-4",
+      "topic": "Disease naming",
+      "detected_shift": {
+        "previous_term": "ebola virus disease",
+        "replacement_term": "ebola"
+      },
+      "observed_across": 7,
+      "total_sources": 7,
+      "synchronization_score": 1.0,
+      "interpretive_note": "Simplification of disease name.",
+      "synchronization_label": "HIGH"
+    },
+    {
+      "shift_id": "shift-5",
+      "topic": "Location naming",
+      "detected_shift": {
+        "previous_term": "ituri",
+        "replacement_term": "ituri province"
+      },
+      "observed_across": 3,
+      "total_sources": 7,
+      "synchronization_score": 0.42857142857142855,
+      "interpretive_note": "Specifying administrative division.",
+      "synchronization_label": "MED"
+    },
+    {
+      "shift_id": "shift-6",
+      "topic": "Country acronym",
+      "detected_shift": {
+        "previous_term": "u.s.",
+        "replacement_term": "us"
+      },
+      "observed_across": 7,
+      "total_sources": 7,
+      "synchronization_score": 1.0,
+      "interpretive_note": "Style variation in US abbreviation.",
+      "synchronization_label": "HIGH"
+    },
+    {
+      "shift_id": "shift-7",
+      "topic": "Agency naming",
+      "detected_shift": {
+        "previous_term": "u.s. cdc",
+        "replacement_term": "centers for disease control and prevention"
+      },
+      "observed_across": 3,
+      "total_sources": 7,
+      "synchronization_score": 0.42857142857142855,
+      "interpretive_note": "Expanding acronym for clarity.",
+      "synchronization_label": "MED"
+    },
+    {
+      "shift_id": "shift-8",
+      "topic": "Virus strain naming",
+      "detected_shift": {
+        "previous_term": "zaire ebolavirus",
+        "replacement_term": "zaire strain"
+      },
+      "observed_across": 4,
+      "total_sources": 7,
+      "synchronization_score": 0.5714285714285714,
+      "interpretive_note": "Using 'strain' instead of 'ebolavirus'.",
+      "synchronization_label": "MED"
+    }
+  ]
+}

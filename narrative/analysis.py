@@ -163,6 +163,7 @@ def synthesize_forensic_report(
                 "resolution_status": "UNRESOLVED",
             })
         context_bundle = {**context_bundle, "prepared_fractures": enriched_fractures}
+        context_bundle.pop("fracture_candidates")
 
     user_content = json.dumps(context_bundle, default=str)
     logger.info("Synthesis context bundle size: %d chars (~%d tokens at ~3cpt)",
