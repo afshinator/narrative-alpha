@@ -236,6 +236,8 @@ def compute_pre_synthesis_context(
                 topic_to_edges[canonical_source].setdefault(domain, [])
                 topic_to_edges[canonical_source][domain].append((target, verb, source))
 
+    MAX_FRACTURES_PER_TOPIC = 30
+
     for topic, domain_edges in topic_to_edges.items():
         claim_map: dict[str, list[str]] = {}
         for domain, edges in domain_edges.items():
@@ -248,8 +250,11 @@ def compute_pre_synthesis_context(
 
         unique_claims = list(claim_map.keys())
         if len(unique_claims) >= 2:
+            topic_pair_count = 0
             for i in range(len(unique_claims)):
                 for j in range(i + 1, len(unique_claims)):
+                    if topic_pair_count >= MAX_FRACTURES_PER_TOPIC:
+                        break
                     claim_a = unique_claims[i]
                     claim_b = unique_claims[j]
                     fracture_candidates.append((
@@ -259,6 +264,9 @@ def compute_pre_synthesis_context(
                         claim_b,
                         sorted(claim_map[claim_b]),
                     ))
+                    topic_pair_count += 1
+                if topic_pair_count >= MAX_FRACTURES_PER_TOPIC:
+                    break
 
     if raw_texts:
         total_sources = len(raw_texts)
