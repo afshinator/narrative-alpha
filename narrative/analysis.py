@@ -164,7 +164,9 @@ def synthesize_forensic_report(
             })
         context_bundle = {**context_bundle, "prepared_fractures": enriched_fractures}
 
-    user_content = json.dumps(context_bundle, indent=2, default=str)
+    user_content = json.dumps(context_bundle, default=str)
+    logger.info("Synthesis context bundle size: %d chars (~%d tokens at ~3.5cpt)",
+                len(user_content), len(user_content) // 3)
 
     messages = [
         {"role": "system", "content": FORENSIC_SYNTHESIS_SYSTEM_PROMPT},
