@@ -35,6 +35,13 @@ from narrative.analysis import (
 )
 from narrative.llm_client import load_llm_config
 
+# Synthesis context: truncate article texts before sending to LLM to prevent
+# context overflow on DeepSeek V4 Pro (1M token limit).
+# Each article gets:
+#   - raw_text trimmed to this limit (enough for camouflage detection)
+#   - neutralized_text trimmed to this limit (graph is already extracted)
+SYNTHESIS_TEXT_CHAR_LIMIT = 5000
+
 
 def _run_startup_init():
     db_path = os.path.join(
@@ -225,8 +232,8 @@ def _run_pipeline(
                 "missing_nodes": omission_results[i][1] if i < len(omission_results) else [],
                 "framing_volatility": vf_scores[i] if i < len(vf_scores) else 0.0,
                 "framing_volatility_label": vf_labels[i] if i < len(vf_labels) else "MED",
-                "raw_text": raw_texts[i] if i < len(raw_texts) else "",
-                "neutralized_text": neutralized[i] if i < len(neutralized) else "",
+                "raw_text": (raw_texts[i][:SYNTHESIS_TEXT_CHAR_LIMIT] if i < len(raw_texts) else ""),
+                "neutralized_text": (neutralized[i][:SYNTHESIS_TEXT_CHAR_LIMIT] if i < len(neutralized) else ""),
             }
             for i, g in enumerate(all_graphs)
         ],

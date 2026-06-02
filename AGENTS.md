@@ -1,29 +1,32 @@
 # Narrative Alpha — Agent Instructions
 
+## Stack
+
+- **Backend:** FastAPI (Python) — `narrative/server.py`
+- **Frontend:** React + Vite — `dashboard/`
+- **LLM:** DeepSeek (API keys in `.env`)
+- **Scraping:** Bright Data (API keys in `.env`)
+- **Storage:** SQLite outlet reputation DB + JSON report files under `NARRATIVE_ALPHA_ROOT`
+
 ## Startup
 
 ```bash
-cd /project/narrative-alpha
 source .venv/bin/activate
 source .env
-uvicorn narrative.server:app --host 0.0.0.0 --port 3001 &
+uvicorn narrative.server:app --host 0.0.0.0 &
 cd dashboard && npm run dev
 ```
 
-Backend API: `http://localhost:3001`
-Dashboard: `http://localhost:3019`
+Backend port is printed on startup; Vite picks dashboard port dynamically.
 
 ## NARRATIVE_ALPHA_ROOT
 
-This env var controls where reports, DB, and config are stored.
-- Code default: `~/.narrative_alpha`
-- This project's `.env` overrides it to `/project/narrative-alpha`
-- `.env.example` leaves it commented out — only set it to override the default
+Controls where reports, DB, and config are stored. Code default: `~/.narrative_alpha`. Set in `.env` to override. `.env.example` leaves it commented out — only set to override.
 
 If starting without `.env` sourced, data lives under `~/.narrative_alpha`.
 
 ## Known traps
 
-- `pipeline.py`'s default was `/root/.narrative_alpha` (fixed — now matches `server.py` using `~/.narrative_alpha`)
-- Starting the server without sourcing `.env` writes to a different data directory than previous runs — old reports won't appear
-- Kill the server with `kill %<job-id>` or `pkill -f uvicorn`
+- **Data directory mismatch:** Starting server without `.env` sourced writes to a different directory than previous runs — old reports won't appear. Always `source .env` first.
+- **Kill server:** `kill %<job-id>` or `pkill -f uvicorn`
+- **NARRATIVE_ALPHA_ROOT inconsistent:** All components must agree on the path. Check `backtest.py`, `pipeline.py`, and `server.py` if one reads a different directory.
