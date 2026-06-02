@@ -37,6 +37,94 @@ def test_fracture_candidates_capped_per_topic():
     assert len(fractures) <= 30, f"Expected ≤30 fractures, got {len(fractures)}"
 
 
+def test_fracture_candidates_multi_topic():
+    """Multiple topics should each be capped at 30 pairs independently."""
+    from narrative.analysis import compute_pre_synthesis_context
+
+    all_graphs = []
+    for outlet_idx in range(3):
+        edges = []
+        for t in range(2):
+            for c in range(50):
+                edges.append({"source": f"TOPIC_{t}", "target": f"claim_{t}_{c}", "relationship_verb": "rel"})
+        all_graphs.append({
+            "_source_domain": f"outlet{outlet_idx}.com",
+            "_source_name": "",
+            "nodes": [f"TOPIC_{t}" for t in range(2)] + [f"claim_{t}_{c}" for t in range(2) for c in range(50)],
+            "edges": edges,
+        })
+
+    canon_map = {}
+    for t in range(2):
+        canon_map[f"topic_{t}"] = f"TOPIC_{t}"
+        for c in range(50):
+            canon_map[f"claim_{t}_{c}".lower()] = f"claim_{t}_{c}"
+    consensus = {f"TOPIC_{t}" for t in range(2)}
+
+    result = compute_pre_synthesis_context(all_graphs, [], canon_map, consensus)
+    fractures = result["fracture_candidates"]
+
+    from collections import Counter
+    topic_counts = Counter(t for t, _, _, _, _ in fractures)
+
+    assert len(topic_counts) == 2, f"Expected 2 topics, got {len(topic_counts)}"
+    for topic, count in topic_counts.items():
+        assert count == 30, f"Topic '{topic}' has {count} pairs, expected 30"
+    assert len(fractures) == 60, f"Expected 60 total, got {len(fractures)}"
+
+
+def test_fracture_candidates_below_cap_pass_through():
+    """With fewer claims than the cap threshold, all pairs should pass through."""
+    from narrative.analysis import compute_pre_synthesis_context
+
+    all_graphs = []
+    for outlet_idx in range(3):
+        edges = [{"source": "TOPIC", "target": f"claim_{c}", "relationship_verb": "rel"} for c in range(5)]
+        all_graphs.append({
+            "_source_domain": f"outlet{outlet_idx}.com",
+            "_source_name": "",
+            "nodes": ["TOPIC"] + [f"claim_{c}" for c in range(5)],
+            "edges": edges,
+        })
+
+    canon_map = {}
+    for c in range(5):
+        canon_map[f"claim_{c}".lower()] = f"claim_{c}"
+    canon_map["topic"] = "TOPIC"
+    consensus = {"TOPIC"}
+
+    result = compute_pre_synthesis_context(all_graphs, [], canon_map, consensus)
+    fractures = result["fracture_candidates"]
+
+    assert len(fractures) == 10, f"Expected 10 pairs (C(5,2)), got {len(fractures)}"
+
+
+def test_fracture_candidates_edge_zero_and_one_claims():
+    """With 0 or 1 unique claims, no fracture candidates should be generated."""
+    from narrative.analysis import compute_pre_synthesis_context
+
+    for n in [0, 1]:
+        all_graphs = []
+        for outlet_idx in range(2):
+            edges = [{"source": "TOPIC", "target": f"claim_{c}", "relationship_verb": "rel"} for c in range(n)]
+            all_graphs.append({
+                "_source_domain": f"outlet{outlet_idx}.com",
+                "_source_name": "",
+                "nodes": ["TOPIC"] + [f"claim_{c}" for c in range(n)],
+                "edges": edges,
+            })
+
+        canon_map = {}
+        for c in range(n):
+            canon_map[f"claim_{c}".lower()] = f"claim_{c}"
+        canon_map["topic"] = "TOPIC"
+        consensus = {"TOPIC"}
+
+        result = compute_pre_synthesis_context(all_graphs, [], canon_map, consensus)
+        assert len(result["fracture_candidates"]) == 0, \
+            f"Expected 0 fractures for {n} claim(s), got {len(result['fracture_candidates'])}"
+
+
 def test_worst_case_payload_fits_within_token_limit():
     """Verify a realistic worst-case synthesis payload is under 80% of the token limit."""
     # DeepSeek V4 Pro context window (from API error: "maximum context length is 1048565 tokens")
