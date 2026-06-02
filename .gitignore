@@ -1,6 +1,7 @@
 .env
 .worktrees/
 .venv/
+node_modules/
 .env.production
 .modal.toml
 __pycache__/
@@ -17,5 +18,7 @@ __pycache__/
 outlet_reputation.db
 *.db-shm
 *.db-wal
+llm_config.json
+uv.lock
 
 graphify-out/
