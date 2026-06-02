@@ -39,8 +39,7 @@ const STORAGE_KEY = "narrative_alpha_pipeline_result";
 interface PipelineStorageEntry {
 	cluster_id: string;
 	search_query: string;
-	status: "complete" | "error";
-	error_detail?: string;
+	status: "complete";
 }
 
 export function PipelineRunner({
@@ -65,12 +64,18 @@ export function PipelineRunner({
 	const esRef = useRef<EventSource | null>(null);
 	const navigate = useNavigate();
 
-	// Read sessionStorage for prior run result
+	// Read sessionStorage for prior run result — only restore completed runs
 	const [storedResult, setStoredResult] = useState<PipelineStorageEntry | null>(
 		() => {
 			try {
 				const raw = sessionStorage.getItem(STORAGE_KEY);
-				return raw ? (JSON.parse(raw) as PipelineStorageEntry) : null;
+				if (!raw) return null;
+				const parsed = JSON.parse(raw);
+				if (parsed?.status !== "complete") {
+					sessionStorage.removeItem(STORAGE_KEY);
+					return null;
+				}
+				return parsed as PipelineStorageEntry;
 			} catch {
 				return null;
 			}
@@ -194,32 +199,13 @@ export function PipelineRunner({
 					const errMsg =
 						typeof event.detail === "string" ? event.detail : event.message;
 					setErrorDetail(errMsg);
-					sessionStorage.setItem(
-						STORAGE_KEY,
-						JSON.stringify({
-							cluster_id: "",
-							search_query: keyword.trim(),
-							status: "error",
-							error_detail: errMsg,
-						} as PipelineStorageEntry),
-					);
 				}
 			},
 			(_err: Event) => {
 				esRef.current?.close();
 				setRunnerState("error");
 				onStateChange?.("error");
-				const errMsg = "Connection to server lost.";
-				setErrorDetail(errMsg);
-				sessionStorage.setItem(
-					STORAGE_KEY,
-					JSON.stringify({
-						cluster_id: "",
-						search_query: keyword.trim(),
-						status: "error",
-						error_detail: errMsg,
-					} as PipelineStorageEntry),
-				);
+				setErrorDetail("Connection to server lost.");
 			},
 		);
 	};

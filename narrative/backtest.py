@@ -48,7 +48,7 @@ def execute_historical_backtest(domain: str, vertical: str) -> None:
     api_key = os.environ.get("BRIGHTDATA_API_KEY", "")
     unlocker_zone = os.environ.get("BRIGHTDATA_UNLOCKER_ZONE", "")
     serp_zone = os.environ.get("BRIGHTDATA_SERP_ZONE", unlocker_zone)
-    narrative_root = os.environ.get("NARRATIVE_ALPHA_ROOT", os.path.expanduser("~/.narrative_alpha"))
+    narrative_root = os.environ.get("NARRATIVE_ALPHA_ROOT", os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     db_path = os.path.join(narrative_root, "outlet_reputation.db")
 
     if not api_key or not unlocker_zone:

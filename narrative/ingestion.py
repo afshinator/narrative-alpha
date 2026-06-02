@@ -1,6 +1,7 @@
 """Layer 1: Ingestion — Bright Data SERP discovery + Web Unlocker extraction."""
 
 import json
+import logging
 import re
 from datetime import datetime, timezone
 from concurrent.futures import ThreadPoolExecutor
@@ -9,6 +10,8 @@ from urllib.parse import urlparse, quote
 
 import requests
 import trafilatura
+
+logger = logging.getLogger(__name__)
 
 
 SERP_ENDPOINT = "https://api.brightdata.com/request"
@@ -42,7 +45,10 @@ def discover_articles(keyword: str, zone: str, api_key: str, num: int = 15, time
         headers={"Authorization": f"Bearer {api_key}"},
         timeout=30,
     )
-    response.raise_for_status()
+    if not response.ok:
+        body = response.text[:500]
+        logger.error("Bright Data SERP error %s — zone=%r — body: %s", response.status_code, zone, body)
+        raise RuntimeError(f"Bright Data SERP {response.status_code}: {body}")
     data = response.json()
     return json.loads(data["body"])
 
@@ -64,7 +70,10 @@ def fetch_article_body(url: str, zone: str, api_key: str) -> str:
         },
         timeout=30,
     )
-    response.raise_for_status()
+    if not response.ok:
+        body = response.text[:500]
+        logger.error("Bright Data Unlocker error %s — zone=%r url=%r — body: %s", response.status_code, zone, url, body)
+        raise RuntimeError(f"Bright Data Unlocker {response.status_code}: {body}")
     return response.text
 
 

@@ -1,6 +1,7 @@
 {
   "communities": {
     "0": [
+      "narrative_contracts_llmconfig",
       "narrative_llm_client_build_llm_kwargs",
       "narrative_llm_client_call_llm",
       "narrative_llm_client_config_path",
@@ -16,6 +17,7 @@
       "narrative_llm_client_rationale_219",
       "narrative_llm_client_rationale_56",
       "narrative_llm_client_rationale_85",
+      "narrative_server_get_config",
       "tests_test_llm_client_clear_client_cache",
       "tests_test_llm_client_messages_payload",
       "tests_test_llm_client_mock_chat_response",
@@ -81,166 +83,38 @@
       "tests_test_llm_client_test_load_llm_config_returns_defaults_when_file_missing"
     ],
     "1": [
-      "narrative_ingestion_build_ingestion_manifest",
-      "narrative_ingestion_discover_articles",
-      "narrative_ingestion_extract_text",
-      "narrative_ingestion_fetch_article_body",
-      "narrative_ingestion_py",
-      "narrative_ingestion_rationale_1",
-      "narrative_ingestion_rationale_124",
-      "narrative_ingestion_rationale_197",
-      "narrative_ingestion_rationale_20",
-      "narrative_ingestion_rationale_48",
-      "narrative_ingestion_rationale_67",
-      "narrative_ingestion_validate_ingestion_payload",
-      "tests_test_ingestion_py",
-      "tests_test_ingestion_rationale_1",
-      "tests_test_ingestion_rationale_12",
-      "tests_test_ingestion_rationale_126",
-      "tests_test_ingestion_rationale_172",
-      "tests_test_ingestion_rationale_192",
-      "tests_test_ingestion_rationale_200",
-      "tests_test_ingestion_rationale_234",
-      "tests_test_ingestion_rationale_302",
-      "tests_test_ingestion_rationale_35",
-      "tests_test_ingestion_rationale_356",
-      "tests_test_ingestion_rationale_390",
-      "tests_test_ingestion_rationale_413",
-      "tests_test_ingestion_rationale_436",
-      "tests_test_ingestion_rationale_47",
-      "tests_test_ingestion_rationale_479",
-      "tests_test_ingestion_rationale_499",
-      "tests_test_ingestion_rationale_519",
-      "tests_test_ingestion_rationale_545",
-      "tests_test_ingestion_rationale_563",
-      "tests_test_ingestion_rationale_577",
-      "tests_test_ingestion_rationale_602",
-      "tests_test_ingestion_serp_data",
-      "tests_test_ingestion_serp_data_6",
-      "tests_test_ingestion_serp_item",
-      "tests_test_ingestion_test_rejects_paywall_patterns",
-      "tests_test_ingestion_testbuildingestionmanifest",
-      "tests_test_ingestion_testbuildingestionmanifest_test_dedup_by_domain",
-      "tests_test_ingestion_testbuildingestionmanifest_test_extraction_failure_logged",
-      "tests_test_ingestion_testbuildingestionmanifest_test_floor_gate_below_5",
-      "tests_test_ingestion_testbuildingestionmanifest_test_hard_cap_at_20",
-      "tests_test_ingestion_testbuildingestionmanifest_test_logger_func_called_when_wired",
-      "tests_test_ingestion_testbuildingestionmanifest_test_logger_func_skipped_when_no_logger",
-      "tests_test_ingestion_testbuildingestionmanifest_test_published_at_in_manifest",
-      "tests_test_ingestion_testbuildingestionmanifest_test_returns_manifest_with_5_sources",
-      "tests_test_ingestion_testbuildingestionmanifest_test_trafilatura_failure_logged",
-      "tests_test_ingestion_testdiscoverarticles",
-      "tests_test_ingestion_testdiscoverarticles_test_defaults_to_15_results",
-      "tests_test_ingestion_testdiscoverarticles_test_raises_on_http_error",
-      "tests_test_ingestion_testdiscoverarticles_test_sends_correct_payload",
-      "tests_test_ingestion_testextracttext",
-      "tests_test_ingestion_testextracttext_test_handles_none_from_trafilatura",
-      "tests_test_ingestion_testextracttext_test_import",
-      "tests_test_ingestion_testextracttext_test_strips_html",
-      "tests_test_ingestion_testfetcharticlebody",
-      "tests_test_ingestion_testparseserpresult_test_published_at_absent",
-      "tests_test_ingestion_testvalidateingestionpayload",
-      "tests_test_ingestion_testvalidateingestionpayload_make_doc",
-      "tests_test_ingestion_testvalidateingestionpayload_test_allows_nav_bloat_over_1500",
-      "tests_test_ingestion_testvalidateingestionpayload_test_domain_falls_back_to_source_name",
-      "tests_test_ingestion_testvalidateingestionpayload_test_normalises_www_domain",
-      "tests_test_ingestion_testvalidateingestionpayload_test_passes_50_words_and_300_chars",
-      "tests_test_ingestion_testvalidateingestionpayload_test_rejects_fewer_than_50_words",
-      "tests_test_ingestion_testvalidateingestionpayload_test_rejects_missing_source_url",
-      "tests_test_ingestion_testvalidateingestionpayload_test_rejects_missing_title",
-      "tests_test_ingestion_testvalidateingestionpayload_test_rejects_nav_bloat_under_1500",
-      "tests_test_ingestion_testvalidateingestionpayload_test_rejects_short_body_under_300_chars",
-      "tests_test_ingestion_testvalidateingestionpayload_test_returns_none_on_bad_url",
-      "tests_test_ingestion_testvalidateingestionpayload_test_valid_payload",
-      "tests_test_ingestion_valid_body"
-    ],
-    "2": [
-      "basemodel",
-      "narrative_contracts_consensusrealitygraph",
-      "narrative_contracts_corpus_count_matches_documents",
-      "narrative_contracts_detectedshift",
-      "narrative_contracts_distortionmatrixentry",
-      "narrative_contracts_eventmeta",
-      "narrative_contracts_floorgateresponse",
-      "narrative_contracts_floorgatetracking",
-      "narrative_contracts_forensicreport",
-      "narrative_contracts_ingestiondocument",
-      "narrative_contracts_ingestionmanifest",
-      "narrative_contracts_linguisticcamouflage",
-      "narrative_contracts_llmconfig",
-      "narrative_contracts_llmslotconfig",
-      "narrative_contracts_narrativeregimeshift",
-      "narrative_contracts_null_to_empty",
-      "narrative_contracts_outlierprovenance",
-      "narrative_contracts_outliersignal",
-      "narrative_contracts_outliervalidation",
-      "narrative_contracts_pipelineinput",
-      "narrative_contracts_primaryverification",
-      "narrative_contracts_py",
-      "narrative_contracts_rationale_1",
-      "narrative_contracts_realitydivergencezone",
-      "narrative_contracts_realityfracture",
-      "narrative_contracts_reputationwarning",
-      "narrative_contracts_strict",
-      "narrative_init_py",
-      "narrative_init_rationale_1",
-      "tests_test_contracts_distortion_matrix_entry_payload",
-      "tests_test_contracts_event_meta_payload",
-      "tests_test_contracts_ingestion_document_payload",
-      "tests_test_contracts_outlier_signal_payload",
-      "tests_test_contracts_outlier_validation_payload",
-      "tests_test_contracts_py",
-      "tests_test_contracts_rationale_1",
-      "tests_test_contracts_rationale_12",
-      "tests_test_contracts_rationale_381",
-      "tests_test_contracts_rationale_413",
-      "tests_test_contracts_rationale_438",
-      "tests_test_contracts_test_corpus_count_must_match_documents",
-      "tests_test_contracts_test_detected_shift_rejects_wrong_keys",
-      "tests_test_contracts_test_distortion_matrix_framing_volatility_label_default",
-      "tests_test_contracts_test_distortion_matrix_omission_label_default",
-      "tests_test_contracts_test_event_meta_corpus_capped_default",
-      "tests_test_contracts_test_extra_fields_rejected",
-      "tests_test_contracts_test_floor_gate_rejects_arbitrary_dict",
-      "tests_test_contracts_test_floor_gate_response_instantiates",
-      "tests_test_contracts_test_floor_gate_response_round_trip",
-      "tests_test_contracts_test_forensic_report_instantiates",
-      "tests_test_contracts_test_import",
-      "tests_test_contracts_test_ingestion_document_author_default",
-      "tests_test_contracts_test_ingestion_document_instantiates",
-      "tests_test_contracts_test_ingestion_manifest_instantiates",
-      "tests_test_contracts_test_ingestion_manifest_round_trip",
-      "tests_test_contracts_test_llm_slot_config_temperature_default",
-      "tests_test_contracts_test_llm_slot_config_thinking_default",
-      "tests_test_contracts_test_null_list_coerced_to_empty",
-      "tests_test_contracts_test_omission_index_rejects_out_of_range",
-      "tests_test_contracts_test_outlier_provenance_reputation_warning_triggered_default",
-      "tests_test_contracts_test_outlier_provenance_scatter_shot_label_default",
-      "tests_test_contracts_test_outlier_validation_evaluation_window_days_default",
-      "tests_test_contracts_test_pipeline_input_instantiates",
-      "tests_test_contracts_test_reality_fracture_classification_method_default",
-      "tests_test_contracts_test_temperature_rejects_out_of_range"
-    ],
-    "3": [
-      "narrative_analysis_compute_framing_volatility",
+      "dashboard_src_utils_labels_test_ts",
+      "dashboard_src_utils_labels_ts",
+      "narrative_analysis_compute_omission_index",
+      "narrative_analysis_compute_pre_synthesis_context",
       "narrative_analysis_compute_sa_for_outlet",
-      "narrative_analysis_extract_all_graphs",
       "narrative_analysis_extract_graph",
       "narrative_analysis_framing_volatility_label",
       "narrative_analysis_inject_labels",
-      "narrative_analysis_omission_label",
       "narrative_analysis_py",
       "narrative_analysis_rationale_1",
-      "narrative_analysis_scatter_shot_label",
+      "narrative_analysis_rationale_277",
+      "narrative_analysis_resolve_to_canonical",
       "narrative_analysis_sync_label",
       "narrative_analysis_synthesize_forensic_report",
+      "tests_test_analysis_cluster_graph",
       "tests_test_analysis_py",
       "tests_test_analysis_rationale_1",
-      "tests_test_analysis_testcomputeframingvolatility",
-      "tests_test_analysis_testcomputeframingvolatility_test_identical_texts_produce_vf_zero",
-      "tests_test_analysis_testcomputeframingvolatility_test_labels_match_vf_ranges",
-      "tests_test_analysis_testcomputeframingvolatility_test_multiple_docs_return_parallel_lists",
-      "tests_test_analysis_testcomputeframingvolatility_test_orthogonal_vectors_produce_vf_one",
+      "tests_test_analysis_testcomputeomissionindex",
+      "tests_test_analysis_testcomputeomissionindex_test_all_missing",
+      "tests_test_analysis_testcomputeomissionindex_test_canonical_resolution_before_comparison",
+      "tests_test_analysis_testcomputeomissionindex_test_empty_consensus_returns_zero",
+      "tests_test_analysis_testcomputeomissionindex_test_no_missing_nodes",
+      "tests_test_analysis_testcomputeomissionindex_test_partial_omission",
+      "tests_test_analysis_testcomputeomissionindex_test_source_subset_with_canonical_overlap",
+      "tests_test_analysis_testcomputepresynthesiscontext",
+      "tests_test_analysis_testcomputepresynthesiscontext_test_canonical_resolution_for_topic_matching",
+      "tests_test_analysis_testcomputepresynthesiscontext_test_edge_not_in_consensus_excluded",
+      "tests_test_analysis_testcomputepresynthesiscontext_test_fracture_candidates_detected",
+      "tests_test_analysis_testcomputepresynthesiscontext_test_narrative_clusters_groups_edges_by_topic",
+      "tests_test_analysis_testcomputepresynthesiscontext_test_no_edges_empty_results",
+      "tests_test_analysis_testcomputepresynthesiscontext_test_no_fractures_when_all_agree",
+      "tests_test_analysis_testcomputepresynthesiscontext_test_term_shifts_scans_raw_texts",
       "tests_test_analysis_testcomputesaforoutlet",
       "tests_test_analysis_testcomputesaforoutlet_test_all_decayed",
       "tests_test_analysis_testcomputesaforoutlet_test_high_threshold",
@@ -249,11 +123,6 @@
       "tests_test_analysis_testcomputesaforoutlet_test_rounding_to_4_decimal_places",
       "tests_test_analysis_testcomputesaforoutlet_test_some_decayed",
       "tests_test_analysis_testcomputesaforoutlet_test_zero_total_returns_zero_low",
-      "tests_test_analysis_testextractallgraphs",
-      "tests_test_analysis_testextractallgraphs_test_mixed_success_and_failure",
-      "tests_test_analysis_testextractallgraphs_test_parse_error_gets_empty_graph",
-      "tests_test_analysis_testextractallgraphs_test_returns_graph_per_doc",
-      "tests_test_analysis_testextractallgraphs_test_uses_neutralized_text_not_raw",
       "tests_test_analysis_testextractgraph",
       "tests_test_analysis_testextractgraph_test_entity_dict_included_in_prompt",
       "tests_test_analysis_testextractgraph_test_returns_parsed_json_from_llm",
@@ -268,6 +137,14 @@
       "tests_test_analysis_testinjectlabels_test_empty_sections_no_errors",
       "tests_test_analysis_testinjectlabels_test_preserves_existing_classification_method",
       "tests_test_analysis_testomissionlabel",
+      "tests_test_analysis_testresolvetocanonical",
+      "tests_test_analysis_testresolvetocanonical_test_case_insensitive_match",
+      "tests_test_analysis_testresolvetocanonical_test_empty_map_returns_original",
+      "tests_test_analysis_testresolvetocanonical_test_empty_string_not_in_map",
+      "tests_test_analysis_testresolvetocanonical_test_maps_lowercased_surface_form",
+      "tests_test_analysis_testresolvetocanonical_test_mixed_case_surface_form",
+      "tests_test_analysis_testresolvetocanonical_test_returns_original_when_not_in_map",
+      "tests_test_analysis_testresolvetocanonical_test_whitespace_only_stripped",
       "tests_test_analysis_testscattershotlabel",
       "tests_test_analysis_testsynclabel",
       "tests_test_analysis_testsynclabel_test_high_at_65_and_above",
@@ -275,9 +152,17 @@
       "tests_test_analysis_testsynclabel_test_med_start_at_35",
       "tests_test_analysis_testsynthesizeforensicreport",
       "tests_test_analysis_testsynthesizeforensicreport_test_context_bundle_included_in_prompt",
-      "tests_test_analysis_testsynthesizeforensicreport_test_llm_failure_raises"
+      "tests_test_analysis_testsynthesizeforensicreport_test_llm_failure_raises",
+      "utils_labels_consensusstabilityclass",
+      "utils_labels_consensusstabilitylabel",
+      "utils_labels_convergencestatusclass",
+      "utils_labels_formattimestamp",
+      "utils_labels_omissionlabel",
+      "utils_labels_scattershotlabel",
+      "utils_labels_synchronizationclass",
+      "utils_labels_synchronizationlabel"
     ],
-    "4": [
+    "2": [
       "narrative_processing_build_search_context_table",
       "narrative_processing_py",
       "narrative_processing_rationale_1",
@@ -294,6 +179,8 @@
       "tests_test_processing_rationale_150",
       "tests_test_processing_rationale_211",
       "tests_test_processing_rationale_254",
+      "tests_test_processing_rationale_273",
+      "tests_test_processing_rationale_289",
       "tests_test_processing_rationale_78",
       "tests_test_processing_serp_data",
       "tests_test_processing_serp_item",
@@ -304,6 +191,9 @@
       "tests_test_processing_testbuildsearchcontexttable_test_replaces_pipe_chars",
       "tests_test_processing_testbuildsearchcontexttable_test_skips_organic_without_title_or_snippet",
       "tests_test_processing_testrunentitynormalization",
+      "tests_test_processing_testrunentitynormalization_test_accepts_entities_format",
+      "tests_test_processing_testrunentitynormalization_test_accepts_entities_missing_canonical",
+      "tests_test_processing_testrunentitynormalization_test_accepts_flat_list_format",
       "tests_test_processing_testrunentitynormalization_test_calls_llm_with_json_mode_true",
       "tests_test_processing_testrunentitynormalization_test_handles_empty_normalized_mappings",
       "tests_test_processing_testrunentitynormalization_test_import",
@@ -321,7 +211,13 @@
       "tests_test_processing_testrunlinguisticneutralization_test_strips_whitespace",
       "tests_test_processing_testrunlinguisticneutralization_test_uses_call_2_slot_config"
     ],
-    "5": [
+    "3": [
+      "narrative_analysis_compute_framing_volatility",
+      "narrative_analysis_extract_all_graphs",
+      "narrative_pipeline_py",
+      "narrative_pipeline_rationale_1",
+      "narrative_pipeline_rationale_66",
+      "narrative_pipeline_run_pipeline",
       "narrative_reputation_db_path",
       "narrative_reputation_get_hardened_db_connection",
       "narrative_reputation_handle_outlet_registration",
@@ -332,41 +228,112 @@
       "narrative_reputation_write_ingestion_log",
       "narrative_reputation_write_outlier_signal",
       "narrative_reputation_write_with_retry",
+      "tests_test_analysis_rationale_396",
+      "tests_test_analysis_rationale_417",
+      "tests_test_analysis_rationale_430",
+      "tests_test_analysis_testcomputeframingvolatility",
+      "tests_test_analysis_testcomputeframingvolatility_test_identical_texts_produce_vf_zero",
+      "tests_test_analysis_testcomputeframingvolatility_test_labels_match_vf_ranges",
+      "tests_test_analysis_testcomputeframingvolatility_test_multiple_docs_return_parallel_lists",
+      "tests_test_analysis_testcomputeframingvolatility_test_orthogonal_vectors_produce_vf_one",
+      "tests_test_analysis_testextractallgraphs",
+      "tests_test_analysis_testextractallgraphs_test_mixed_success_and_failure",
+      "tests_test_analysis_testextractallgraphs_test_parse_error_gets_empty_graph",
+      "tests_test_analysis_testextractallgraphs_test_progress_cb_called_once_per_doc",
+      "tests_test_analysis_testextractallgraphs_test_progress_cb_defaults_to_none",
+      "tests_test_analysis_testextractallgraphs_test_progress_cb_fires_on_parse_error",
+      "tests_test_analysis_testextractallgraphs_test_returns_graph_per_doc",
+      "tests_test_analysis_testextractallgraphs_test_uses_neutralized_text_not_raw",
       "tests_test_reputation_py",
       "tests_test_reputation_rationale_1",
       "tests_test_reputation_testhandleoutletregistration",
-      "tests_test_reputation_testhandleoutletregistration_test_existing_outlet_returns_stored_status",
-      "tests_test_reputation_testhandleoutletregistration_test_new_outlet_returns_unrated",
-      "tests_test_reputation_testhandleoutletregistration_test_same_domain_different_vertical_is_new",
-      "tests_test_reputation_testhandleoutletregistration_test_stores_outlet_name",
       "tests_test_reputation_testinitdb",
-      "tests_test_reputation_testinitdb_test_creates_three_tables",
-      "tests_test_reputation_testinitdb_test_idempotent",
-      "tests_test_reputation_testinitdb_test_ingestion_log_has_composite_pk",
       "tests_test_reputation_testreadoutletreputation",
-      "tests_test_reputation_testreadoutletreputation_test_returns_full_row_for_known",
-      "tests_test_reputation_testreadoutletreputation_test_returns_none_for_unknown",
       "tests_test_reputation_testwriteingestionlog",
-      "tests_test_reputation_testwriteingestionlog_make_doc",
-      "tests_test_reputation_testwriteingestionlog_test_handles_missing_optional_fields",
-      "tests_test_reputation_testwriteingestionlog_test_inserts_multiple_docs",
-      "tests_test_reputation_testwriteingestionlog_test_same_url_different_query_id_both_persist",
-      "tests_test_reputation_testwriteingestionlog_test_same_url_same_query_id_replaces",
-      "tests_test_reputation_testwriteingestionlog_test_stores_body_length_correctly",
       "tests_test_reputation_testwriteoutliersignal",
-      "tests_test_reputation_testwriteoutliersignal_test_ignore_duplicate_signal",
-      "tests_test_reputation_testwriteoutliersignal_test_inserts_signal",
-      "tests_test_reputation_testwritewithretry",
-      "tests_test_reputation_testwritewithretry_test_calls_rollback_on_failure",
-      "tests_test_reputation_testwritewithretry_test_non_locked_error_does_not_retry",
-      "tests_test_reputation_testwritewithretry_test_raises_after_max_retries",
-      "tests_test_reputation_testwritewithretry_test_succeeds_after_retry"
+      "tests_test_reputation_testwritewithretry"
+    ],
+    "4": [
+      "narrative_backtest_execute_historical_backtest",
+      "narrative_backtest_rationale_11",
+      "tests_test_backtest_py",
+      "tests_test_backtest_rationale_1",
+      "tests_test_backtest_rationale_119",
+      "tests_test_backtest_rationale_152",
+      "tests_test_backtest_rationale_182",
+      "tests_test_backtest_rationale_208",
+      "tests_test_backtest_rationale_249",
+      "tests_test_backtest_rationale_285",
+      "tests_test_backtest_rationale_317",
+      "tests_test_backtest_rationale_377",
+      "tests_test_backtest_rationale_53",
+      "tests_test_backtest_rationale_72",
+      "tests_test_backtest_rationale_91",
+      "tests_test_backtest_serp_response",
+      "tests_test_backtest_serp_result",
+      "tests_test_backtest_testexecutehistoricalbacktest",
+      "tests_test_backtest_testexecutehistoricalbacktest_test_accepts_domain_and_vertical",
+      "tests_test_backtest_testexecutehistoricalbacktest_test_accepts_empty_strings",
+      "tests_test_backtest_testexecutehistoricalbacktest_test_baseline_fetch_floor_gate_skips_db_write",
+      "tests_test_backtest_testexecutehistoricalbacktest_test_baseline_floor_gate_skips_db_write",
+      "tests_test_backtest_testexecutehistoricalbacktest_test_cache_file_updated_on_success",
+      "tests_test_backtest_testexecutehistoricalbacktest_test_discover_articles_passes_time_range",
+      "tests_test_backtest_testexecutehistoricalbacktest_test_happy_path_all_isolated",
+      "tests_test_backtest_testexecutehistoricalbacktest_test_happy_path_all_supported",
+      "tests_test_backtest_testexecutehistoricalbacktest_test_happy_path_writes_correct_metrics",
+      "tests_test_backtest_testexecutehistoricalbacktest_test_has_docstring",
+      "tests_test_backtest_testexecutehistoricalbacktest_test_importable_and_callable",
+      "tests_test_backtest_testexecutehistoricalbacktest_test_no_consensus_skips_db_write",
+      "tests_test_backtest_testexecutehistoricalbacktest_test_target_fetch_floor_gate_skips_db_write",
+      "tests_test_backtest_testexecutehistoricalbacktest_test_target_floor_gate_skips_db_write",
+      "tests_test_backtest_testexecutehistoricalbacktest_test_zero_claims_skips_db_write",
+      "tests_test_backtest_valid_body"
+    ],
+    "5": [
+      "narrative_contracts_ingestionmanifest",
+      "narrative_ingestion_build_ingestion_manifest",
+      "narrative_ingestion_rationale_197",
+      "tests_test_ingestion_rationale_12",
+      "tests_test_ingestion_rationale_356",
+      "tests_test_ingestion_rationale_390",
+      "tests_test_ingestion_rationale_413",
+      "tests_test_ingestion_rationale_436",
+      "tests_test_ingestion_rationale_479",
+      "tests_test_ingestion_rationale_499",
+      "tests_test_ingestion_rationale_519",
+      "tests_test_ingestion_rationale_545",
+      "tests_test_ingestion_rationale_563",
+      "tests_test_ingestion_rationale_577",
+      "tests_test_ingestion_rationale_645",
+      "tests_test_ingestion_rationale_661",
+      "tests_test_ingestion_rationale_687",
+      "tests_test_ingestion_rationale_699",
+      "tests_test_ingestion_testbuildingestionmanifest",
+      "tests_test_ingestion_testbuildingestionmanifest_test_dedup_by_domain",
+      "tests_test_ingestion_testbuildingestionmanifest_test_extraction_failure_logged",
+      "tests_test_ingestion_testbuildingestionmanifest_test_floor_gate_below_5",
+      "tests_test_ingestion_testbuildingestionmanifest_test_hard_cap_at_20",
+      "tests_test_ingestion_testbuildingestionmanifest_test_logger_func_called_when_wired",
+      "tests_test_ingestion_testbuildingestionmanifest_test_logger_func_skipped_when_no_logger",
+      "tests_test_ingestion_testbuildingestionmanifest_test_progress_cb_called_once_per_article",
+      "tests_test_ingestion_testbuildingestionmanifest_test_progress_cb_defaults_to_none",
+      "tests_test_ingestion_testbuildingestionmanifest_test_progress_cb_detail_has_source_domain_and_status",
+      "tests_test_ingestion_testbuildingestionmanifest_test_progress_cb_message_includes_source_name",
+      "tests_test_ingestion_testbuildingestionmanifest_test_published_at_in_manifest",
+      "tests_test_ingestion_testbuildingestionmanifest_test_returns_manifest_with_5_sources",
+      "tests_test_ingestion_testbuildingestionmanifest_test_trafilatura_failure_logged",
+      "tests_test_ingestion_valid_body"
     ],
     "6": [
       "narrative_analysis_compute_consensus_baseline",
       "tests_test_analysis_graph",
+      "tests_test_analysis_rationale_228",
+      "tests_test_analysis_rationale_236",
+      "tests_test_analysis_rationale_243",
       "tests_test_analysis_testcomputeconsensusbaseline",
       "tests_test_analysis_testcomputeconsensusbaseline_test_canonical_resolution_applied",
+      "tests_test_analysis_testcomputeconsensusbaseline_test_custom_ratio_higher_threshold_blocks",
+      "tests_test_analysis_testcomputeconsensusbaseline_test_custom_ratio_lower_threshold",
       "tests_test_analysis_testcomputeconsensusbaseline_test_exactly_5_sources_all_agree",
       "tests_test_analysis_testcomputeconsensusbaseline_test_less_than_5_sources_returns_empty",
       "tests_test_analysis_testcomputeconsensusbaseline_test_multiple_nodes_different_frequencies",
@@ -374,6 +341,7 @@
       "tests_test_analysis_testcomputeconsensusbaseline_test_node_in_3_of_5_sources_below_threshold",
       "tests_test_analysis_testcomputeconsensusbaseline_test_node_in_4_of_5_sources",
       "tests_test_analysis_testcomputeconsensusbaseline_test_parse_errors_excluded_from_n",
+      "tests_test_analysis_testcomputeconsensusbaseline_test_ratio_zero_includes_all",
       "tests_test_analysis_testcomputeconsensusbaseline_test_threshold_is_ceiling_not_floor",
       "tests_test_analysis_testcomputeconsensusbaseline_test_threshold_with_6_sources",
       "tests_test_analysis_testcomputeconsensusstability_test_many_structures_low_stability",
@@ -387,31 +355,255 @@
       "tests_test_analysis_testcomputeconsensusstability_test_zero_total_sources_returns_zero"
     ],
     "7": [
-      "narrative_analysis_compute_omission_index",
-      "narrative_analysis_rationale_277",
-      "narrative_analysis_resolve_to_canonical",
-      "tests_test_analysis_testcomputeomissionindex",
-      "tests_test_analysis_testcomputeomissionindex_test_all_missing",
-      "tests_test_analysis_testcomputeomissionindex_test_canonical_resolution_before_comparison",
-      "tests_test_analysis_testcomputeomissionindex_test_empty_consensus_returns_zero",
-      "tests_test_analysis_testcomputeomissionindex_test_no_missing_nodes",
-      "tests_test_analysis_testcomputeomissionindex_test_partial_omission",
-      "tests_test_analysis_testcomputeomissionindex_test_source_subset_with_canonical_overlap",
-      "tests_test_analysis_testresolvetocanonical",
-      "tests_test_analysis_testresolvetocanonical_test_case_insensitive_match",
-      "tests_test_analysis_testresolvetocanonical_test_empty_map_returns_original",
-      "tests_test_analysis_testresolvetocanonical_test_empty_string_not_in_map",
-      "tests_test_analysis_testresolvetocanonical_test_maps_lowercased_surface_form",
-      "tests_test_analysis_testresolvetocanonical_test_mixed_case_surface_form",
-      "tests_test_analysis_testresolvetocanonical_test_returns_original_when_not_in_map",
-      "tests_test_analysis_testresolvetocanonical_test_whitespace_only_stripped"
+      "dashboard_package_dependencies",
+      "dashboard_package_dependencies_aejkatappaja_phantom_ui",
+      "dashboard_package_dependencies_react",
+      "dashboard_package_dependencies_react_dom",
+      "dashboard_package_dependencies_react_router_dom",
+      "dashboard_package_devdependencies",
+      "dashboard_package_devdependencies_jsdom",
+      "dashboard_package_devdependencies_testing_library_jest_dom",
+      "dashboard_package_devdependencies_testing_library_react",
+      "dashboard_package_devdependencies_testing_library_user_event",
+      "dashboard_package_devdependencies_types_react",
+      "dashboard_package_devdependencies_typescript",
+      "dashboard_package_devdependencies_vite",
+      "dashboard_package_devdependencies_vitejs_plugin_react",
+      "dashboard_package_devdependencies_vitest",
+      "dashboard_package_json",
+      "dashboard_package_name",
+      "dashboard_package_private",
+      "dashboard_package_scripts",
+      "dashboard_package_scripts_build",
+      "dashboard_package_scripts_dev",
+      "dashboard_package_scripts_preview",
+      "dashboard_package_scripts_test",
+      "dashboard_package_scripts_test_watch",
+      "dashboard_package_type",
+      "dashboard_package_version"
     ],
     "8": [
+      "narrative_contracts_llmslotconfig",
+      "narrative_contracts_outliervalidation",
+      "tests_test_contracts_distortion_matrix_entry_payload",
+      "tests_test_contracts_event_meta_payload",
+      "tests_test_contracts_ingestion_document_payload",
+      "tests_test_contracts_outlier_signal_payload",
+      "tests_test_contracts_outlier_validation_payload",
+      "tests_test_contracts_py",
+      "tests_test_contracts_rationale_1",
+      "tests_test_contracts_test_corpus_count_must_match_documents",
+      "tests_test_contracts_test_floor_gate_rejects_arbitrary_dict",
+      "tests_test_contracts_test_floor_gate_response_instantiates",
+      "tests_test_contracts_test_floor_gate_response_round_trip",
+      "tests_test_contracts_test_forensic_report_instantiates",
+      "tests_test_contracts_test_import",
+      "tests_test_contracts_test_ingestion_document_author_default",
+      "tests_test_contracts_test_ingestion_document_instantiates",
+      "tests_test_contracts_test_ingestion_manifest_instantiates",
+      "tests_test_contracts_test_ingestion_manifest_round_trip",
+      "tests_test_contracts_test_llm_slot_config_temperature_default",
+      "tests_test_contracts_test_llm_slot_config_thinking_default",
+      "tests_test_contracts_test_outlier_provenance_reputation_warning_triggered_default",
+      "tests_test_contracts_test_outlier_provenance_scatter_shot_label_default",
+      "tests_test_contracts_test_outlier_validation_evaluation_window_days_default",
+      "tests_test_contracts_test_pipeline_input_instantiates",
+      "tests_test_contracts_test_temperature_rejects_out_of_range"
+    ],
+    "9": [
+      "components_eventpage_eventpage",
+      "components_eventpage_test_fakereport",
+      "components_pill_pill",
+      "components_pill_pillprops",
+      "components_zone1_test_capped",
+      "components_zone1_zone1",
+      "components_zone1_zone1props",
+      "components_zone3_test_nofractures",
+      "components_zone3_test_nowarnings",
+      "components_zone3_test_nozones",
+      "components_zone3_test_pendingbadge",
+      "components_zone3_test_rates",
+      "components_zone3_test_unresolvedpill",
+      "components_zone3_zone3",
+      "components_zone3_zone3props",
+      "dashboard_src_components_eventpage_tsx",
+      "dashboard_src_components_pill_test_tsx",
+      "dashboard_src_components_pill_tsx",
+      "dashboard_src_components_zone1_test_tsx",
+      "dashboard_src_components_zone1_tsx",
+      "dashboard_src_components_zone3_tsx"
+    ],
+    "10": [
+      "narrative_ingestion_rationale_124",
+      "narrative_ingestion_validate_ingestion_payload",
+      "tests_test_ingestion_rationale_126",
+      "tests_test_ingestion_rationale_172",
+      "tests_test_ingestion_rationale_192",
+      "tests_test_ingestion_rationale_200",
+      "tests_test_ingestion_test_rejects_paywall_patterns",
+      "tests_test_ingestion_testvalidateingestionpayload",
+      "tests_test_ingestion_testvalidateingestionpayload_make_doc",
+      "tests_test_ingestion_testvalidateingestionpayload_test_allows_nav_bloat_over_1500",
+      "tests_test_ingestion_testvalidateingestionpayload_test_domain_falls_back_to_source_name",
+      "tests_test_ingestion_testvalidateingestionpayload_test_normalises_www_domain",
+      "tests_test_ingestion_testvalidateingestionpayload_test_passes_50_words_and_300_chars",
+      "tests_test_ingestion_testvalidateingestionpayload_test_rejects_fewer_than_50_words",
+      "tests_test_ingestion_testvalidateingestionpayload_test_rejects_missing_source_url",
+      "tests_test_ingestion_testvalidateingestionpayload_test_rejects_missing_title",
+      "tests_test_ingestion_testvalidateingestionpayload_test_rejects_nav_bloat_under_1500",
+      "tests_test_ingestion_testvalidateingestionpayload_test_rejects_short_body_under_300_chars",
+      "tests_test_ingestion_testvalidateingestionpayload_test_returns_none_on_bad_url",
+      "tests_test_ingestion_testvalidateingestionpayload_test_valid_payload"
+    ],
+    "11": [
+      "dashboard_tsconfig_compileroptions",
+      "dashboard_tsconfig_compileroptions_allowimportingtsextensions",
+      "dashboard_tsconfig_compileroptions_forceconsistentcasinginfilenames",
+      "dashboard_tsconfig_compileroptions_isolatedmodules",
+      "dashboard_tsconfig_compileroptions_jsx",
+      "dashboard_tsconfig_compileroptions_lib",
+      "dashboard_tsconfig_compileroptions_module",
+      "dashboard_tsconfig_compileroptions_moduledetection",
+      "dashboard_tsconfig_compileroptions_moduleresolution",
+      "dashboard_tsconfig_compileroptions_noemit",
+      "dashboard_tsconfig_compileroptions_nofallthroughcasesinswitch",
+      "dashboard_tsconfig_compileroptions_nouncheckedsideeffectimports",
+      "dashboard_tsconfig_compileroptions_nounusedlocals",
+      "dashboard_tsconfig_compileroptions_nounusedparameters",
+      "dashboard_tsconfig_compileroptions_skiplibcheck",
+      "dashboard_tsconfig_compileroptions_strict",
+      "dashboard_tsconfig_compileroptions_target",
+      "dashboard_tsconfig_include",
+      "dashboard_tsconfig_json"
+    ],
+    "12": [
+      "narrative_backtest_fetch_articles",
+      "narrative_backtest_py",
+      "narrative_backtest_rationale_1",
+      "narrative_backtest_rationale_167",
+      "narrative_ingestion_attempted_doc",
+      "narrative_ingestion_emit_article_progress",
+      "narrative_ingestion_extract_text",
+      "narrative_ingestion_process_one_result",
+      "narrative_ingestion_py",
+      "narrative_ingestion_rationale_1",
+      "narrative_ingestion_rationale_130",
+      "narrative_ingestion_rationale_149",
+      "narrative_ingestion_rationale_67",
+      "tests_test_ingestion_rationale_35",
+      "tests_test_ingestion_rationale_47",
+      "tests_test_ingestion_testextracttext",
+      "tests_test_ingestion_testextracttext_test_handles_none_from_trafilatura",
+      "tests_test_ingestion_testextracttext_test_import",
+      "tests_test_ingestion_testextracttext_test_strips_html"
+    ],
+    "13": [
+      "components_envhealthpanel_envhealthpanel",
+      "components_settingspage_slots",
+      "components_settingspage_test_cfg",
+      "components_settingspage_test_env",
+      "components_settingspage_test_fakeconfig",
+      "components_settingspage_test_fakeenvhealth",
+      "dashboard_src_api_ts",
+      "dashboard_src_components_settingspage_tsx",
+      "src_api_deletereport",
+      "src_api_fetchconfig",
+      "src_api_fetchenvhealth",
+      "src_api_fetchjson",
+      "src_api_fetchreport",
+      "src_api_saveconfig",
+      "src_api_submitpipeline",
+      "src_types_envhealth",
+      "src_types_llmconfig",
+      "src_types_llmslotconfig"
+    ],
+    "14": [
+      "data_reports_evt_20260531_mike_pence_on_trump_json",
+      "reports_evt_20260531_mike_pence_on_trump_consensus_reality_graph",
+      "reports_evt_20260531_mike_pence_on_trump_consensus_reality_graph_consensus_summary",
+      "reports_evt_20260531_mike_pence_on_trump_consensus_reality_graph_primary_verifications",
+      "reports_evt_20260531_mike_pence_on_trump_consensus_reality_graph_verified_anchor_nodes",
+      "reports_evt_20260531_mike_pence_on_trump_distortion_matrix",
+      "reports_evt_20260531_mike_pence_on_trump_event_meta",
+      "reports_evt_20260531_mike_pence_on_trump_event_meta_cluster_id",
+      "reports_evt_20260531_mike_pence_on_trump_event_meta_corpus_capped",
+      "reports_evt_20260531_mike_pence_on_trump_event_meta_corpus_count",
+      "reports_evt_20260531_mike_pence_on_trump_event_meta_industry_vertical",
+      "reports_evt_20260531_mike_pence_on_trump_event_meta_search_query",
+      "reports_evt_20260531_mike_pence_on_trump_event_meta_timestamp_utc",
+      "reports_evt_20260531_mike_pence_on_trump_narrative_regime_shifts",
+      "reports_evt_20260531_mike_pence_on_trump_outlier_signals",
+      "reports_evt_20260531_mike_pence_on_trump_reality_divergence_zones",
+      "reports_evt_20260531_mike_pence_on_trump_reality_fractures",
+      "reports_evt_20260531_mike_pence_on_trump_reputation_warnings"
+    ],
+    "15": [
+      "basemodel",
+      "narrative_server_check_env",
+      "narrative_server_config_path",
+      "narrative_server_execute_pipeline",
+      "narrative_server_get_report",
+      "narrative_server_health_check",
+      "narrative_server_health_deep",
+      "narrative_server_health_env",
+      "narrative_server_lifespan",
+      "narrative_server_list_reports",
+      "narrative_server_narrative_root",
+      "narrative_server_pipelinepayload",
+      "narrative_server_py",
+      "narrative_server_rationale_1",
+      "narrative_server_reports_dir",
+      "narrative_server_run_pipeline_with_timeout",
+      "narrative_server_update_config",
+      "src_api_streampipeline"
+    ],
+    "16": [
+      "data_reports_evt_20260531_bitcoin_regulation_json",
+      "reports_evt_20260531_bitcoin_regulation_consensus_reality_graph",
+      "reports_evt_20260531_bitcoin_regulation_consensus_reality_graph_consensus_summary",
+      "reports_evt_20260531_bitcoin_regulation_consensus_reality_graph_primary_verifications",
+      "reports_evt_20260531_bitcoin_regulation_consensus_reality_graph_verified_anchor_nodes",
+      "reports_evt_20260531_bitcoin_regulation_distortion_matrix",
+      "reports_evt_20260531_bitcoin_regulation_event_meta",
+      "reports_evt_20260531_bitcoin_regulation_event_meta_cluster_id",
+      "reports_evt_20260531_bitcoin_regulation_event_meta_corpus_capped",
+      "reports_evt_20260531_bitcoin_regulation_event_meta_corpus_count",
+      "reports_evt_20260531_bitcoin_regulation_event_meta_industry_vertical",
+      "reports_evt_20260531_bitcoin_regulation_event_meta_search_query",
+      "reports_evt_20260531_bitcoin_regulation_event_meta_timestamp_utc",
+      "reports_evt_20260531_bitcoin_regulation_narrative_regime_shifts",
+      "reports_evt_20260531_bitcoin_regulation_outlier_signals",
+      "reports_evt_20260531_bitcoin_regulation_reality_divergence_zones",
+      "reports_evt_20260531_bitcoin_regulation_reality_fractures",
+      "reports_evt_20260531_bitcoin_regulation_reputation_warnings"
+    ],
+    "17": [
+      "agents_backend",
+      "agents_scraping_brightdata",
+      "agents_storage_sqlite",
+      "docs_desc_pipeline_step3",
+      "narrative_ingestion_discover_articles",
+      "narrative_ingestion_fetch_article_body",
+      "narrative_ingestion_rationale_20",
+      "narrative_ingestion_rationale_22",
+      "narrative_ingestion_rationale_48",
+      "tests_test_ingestion_rationale_234",
+      "tests_test_ingestion_rationale_302",
+      "tests_test_ingestion_testdiscoverarticles",
+      "tests_test_ingestion_testdiscoverarticles_test_appends_time_range_when_set",
+      "tests_test_ingestion_testdiscoverarticles_test_defaults_to_15_results",
+      "tests_test_ingestion_testdiscoverarticles_test_omits_time_range_by_default",
+      "tests_test_ingestion_testdiscoverarticles_test_raises_on_http_error",
+      "tests_test_ingestion_testdiscoverarticles_test_sends_correct_payload",
+      "tests_test_ingestion_testfetcharticlebody"
+    ],
+    "18": [
       "narrative_ingestion_parse_serp_result",
       "narrative_ingestion_rationale_75",
       "tests_test_ingestion_rationale_102",
       "tests_test_ingestion_rationale_108",
       "tests_test_ingestion_rationale_53",
+      "tests_test_ingestion_rationale_602",
       "tests_test_ingestion_rationale_77",
       "tests_test_ingestion_rationale_87",
       "tests_test_ingestion_rationale_96",
@@ -420,11 +612,66 @@
       "tests_test_ingestion_testparseserpresult_test_empty_input",
       "tests_test_ingestion_testparseserpresult_test_full_fields",
       "tests_test_ingestion_testparseserpresult_test_minimal",
+      "tests_test_ingestion_testparseserpresult_test_published_at_absent",
       "tests_test_ingestion_testparseserpresult_test_published_at_present",
       "tests_test_ingestion_testparseserpresult_test_source_falls_back_to_display_link",
       "tests_test_ingestion_testparseserpresult_test_www_domain_normalised"
     ],
-    "9": [
+    "19": [
+      "components_pipelinerunner_pipelinerunner",
+      "components_pipelinerunner_pipelinestorageentry",
+      "components_pipelinerunner_runnerstate",
+      "components_pipelinerunner_status_badge",
+      "components_pipelinerunner_step_labels",
+      "components_pipelinerunner_verticals",
+      "dashboard_src_types_ts",
+      "src_types_articleprogress",
+      "src_types_articlestatus",
+      "src_types_eventmeta",
+      "src_types_linguisticcamouflage",
+      "src_types_outlierprovenance",
+      "src_types_outliervalidation",
+      "src_types_phasecompletedetail",
+      "src_types_pipelineevent",
+      "src_types_pipelinestep",
+      "src_types_realityfractureclaim"
+    ],
+    "20": [
+      "narrative_contracts_corpus_count_matches_documents",
+      "narrative_contracts_detectedshift",
+      "narrative_contracts_floorgateresponse",
+      "narrative_contracts_floorgatetracking",
+      "narrative_contracts_ingestiondocument",
+      "narrative_contracts_linguisticcamouflage",
+      "narrative_contracts_null_to_empty",
+      "narrative_contracts_pipelineinput",
+      "narrative_contracts_py",
+      "narrative_contracts_rationale_1",
+      "narrative_contracts_strict",
+      "narrative_init_py",
+      "narrative_init_rationale_1",
+      "reports_evt_20260531_google_wants_to_rele_consensus_reality_graph_consensus_summary",
+      "reports_evt_20260531_google_wants_to_rele_consensus_reality_graph_verified_anchor_nodes",
+      "src_types_consensusrealitygraph",
+      "src_types_primaryverification"
+    ],
+    "21": [
+      "components_app_app",
+      "components_fontsizecontrol_fontsize",
+      "components_fontsizecontrol_fontsizecontrol",
+      "components_fontsizecontrol_sizes",
+      "components_fontsizecontrol_test_btn",
+      "components_homepage_homepage",
+      "components_homepage_pipelinestate",
+      "components_homepage_test_fake",
+      "components_settingspage_settingspage",
+      "dashboard_src_components_app_tsx",
+      "dashboard_src_components_homepage_test_tsx",
+      "dashboard_src_components_homepage_tsx",
+      "dashboard_src_main_tsx",
+      "src_types_clustersummary"
+    ],
+    "22": [
       "docs_adversarial_review_task6",
       "docs_adversarial_review_task8",
       "docs_brainstorm",
@@ -438,67 +685,478 @@
       "requirements_requests",
       "requirements_trafilatura"
     ],
-    "10": [
-      "narrative_backtest_execute_historical_backtest",
-      "narrative_backtest_py",
-      "narrative_backtest_rationale_1",
-      "narrative_backtest_rationale_11",
-      "tests_test_backtest_py",
-      "tests_test_backtest_rationale_1",
-      "tests_test_backtest_testexecutehistoricalbacktest",
-      "tests_test_backtest_testexecutehistoricalbacktest_test_accepts_domain_and_vertical",
-      "tests_test_backtest_testexecutehistoricalbacktest_test_accepts_empty_strings",
-      "tests_test_backtest_testexecutehistoricalbacktest_test_has_docstring",
-      "tests_test_backtest_testexecutehistoricalbacktest_test_importable_and_callable"
+    "23": [
+      "components_badge_badge",
+      "components_badge_badgeprops",
+      "components_badge_test_el",
+      "components_zone2_test_badges",
+      "components_zone2_test_noshifts",
+      "components_zone2_zone2",
+      "components_zone2_zone2props",
+      "dashboard_src_components_badge_test_tsx",
+      "dashboard_src_components_badge_tsx",
+      "dashboard_src_components_zone2_test_tsx",
+      "dashboard_src_components_zone2_tsx"
     ],
-    "11": [
-      "narrative_analysis_compute_pre_synthesis_context",
-      "tests_test_analysis_cluster_graph",
-      "tests_test_analysis_testcomputepresynthesiscontext",
-      "tests_test_analysis_testcomputepresynthesiscontext_test_canonical_resolution_for_topic_matching",
-      "tests_test_analysis_testcomputepresynthesiscontext_test_edge_not_in_consensus_excluded",
-      "tests_test_analysis_testcomputepresynthesiscontext_test_fracture_candidates_detected",
-      "tests_test_analysis_testcomputepresynthesiscontext_test_narrative_clusters_groups_edges_by_topic",
-      "tests_test_analysis_testcomputepresynthesiscontext_test_no_edges_empty_results",
-      "tests_test_analysis_testcomputepresynthesiscontext_test_no_fractures_when_all_agree",
-      "tests_test_analysis_testcomputepresynthesiscontext_test_term_shifts_scans_raw_texts"
+    "24": [
+      "tests_test_server_py",
+      "tests_test_server_rationale_1",
+      "tests_test_server_rationale_30",
+      "tests_test_server_rationale_654",
+      "tests_test_server_rationale_73",
+      "tests_test_server_rationale_96",
+      "tests_test_server_test_get_report_by_id",
+      "tests_test_server_test_get_reports_with_file",
+      "tests_test_server_test_post_config_saves_and_returns",
+      "tests_test_server_test_run_pipeline_emits_discovery_complete_event",
+      "tests_test_server_test_settings_accepts_valid_config"
     ],
-    "12": [
+    "25": [
+      "data_reports_evt_20260531_google_wants_to_rele_json",
+      "src_types_forensicreport",
+      "src_types_narrativeregimeshift",
+      "src_types_outliersignal",
+      "src_types_realitydivergencezone",
+      "src_types_realityfracture",
+      "src_types_reputationwarning",
+      "tests_test_contracts_test_detected_shift_rejects_wrong_keys",
+      "tests_test_contracts_test_reality_fracture_classification_method_default"
+    ],
+    "26": [
+      "llm_config_json",
+      "narrative_alpha_llm_config_call_1_entity_normalization",
+      "narrative_alpha_llm_config_call_2_linguistic_neutralization",
+      "narrative_alpha_llm_config_call_3_graph_extraction",
+      "narrative_alpha_llm_config_call_3_graph_extraction_model",
+      "narrative_alpha_llm_config_call_3_graph_extraction_provider",
+      "narrative_alpha_llm_config_call_3_graph_extraction_temperature",
+      "narrative_alpha_llm_config_call_3_graph_extraction_thinking",
+      "narrative_alpha_llm_config_call_4_forensic_synthesis"
+    ],
+    "27": [
+      "dashboard_src_api_test_ts",
+      "src_api_test_config",
+      "src_api_test_es",
+      "src_api_test_fake",
+      "src_api_test_fakees",
+      "src_api_test_mockes",
+      "src_api_test_onevent"
+    ],
+    "28": [
+      "reports_evt_20260531_google_wants_to_rele_event_meta",
+      "reports_evt_20260531_google_wants_to_rele_event_meta_cluster_id",
+      "reports_evt_20260531_google_wants_to_rele_event_meta_corpus_capped",
+      "reports_evt_20260531_google_wants_to_rele_event_meta_corpus_count",
+      "reports_evt_20260531_google_wants_to_rele_event_meta_industry_vertical",
+      "reports_evt_20260531_google_wants_to_rele_event_meta_search_query",
+      "reports_evt_20260531_google_wants_to_rele_event_meta_timestamp_utc"
+    ],
+    "29": [
+      "src_types_distortionmatrixentry",
+      "tests_test_contracts_test_distortion_matrix_framing_volatility_label_default",
+      "tests_test_contracts_test_distortion_matrix_omission_label_default",
+      "tests_test_contracts_test_extra_fields_rejected",
+      "tests_test_contracts_test_null_list_coerced_to_empty",
+      "tests_test_contracts_test_omission_index_rejects_out_of_range"
+    ],
+    "30": [
+      "agents_llm_deepseek",
+      "docs_desc_llm_entity_normalization",
+      "docs_desc_llm_forensic_synthesis",
+      "docs_desc_llm_graph_extraction",
+      "docs_desc_llm_linguistic_neutralization",
+      "docs_synthesis_context_overflow"
+    ],
+    "31": [
+      "tests_test_ingestion_py",
+      "tests_test_ingestion_rationale_1",
+      "tests_test_ingestion_serp_data",
+      "tests_test_ingestion_serp_data_6",
+      "tests_test_ingestion_serp_item"
+    ],
+    "32": [
+      "narrative_pipeline_run_startup_init",
+      "tests_test_server_rationale_133",
+      "tests_test_server_rationale_152",
+      "tests_test_server_test_startup_init_creates_db_and_config",
+      "tests_test_server_test_startup_init_idempotent"
+    ],
+    "33": [
+      "components_pipelinerunner_test_btn",
+      "components_pipelinerunner_test_ingestinglabels",
+      "components_pipelinerunner_test_renderrunner",
+      "dashboard_src_components_pipelinerunner_test_tsx"
+    ],
+    "34": [
+      "components_settingsrow_settingsrow",
+      "components_settingsrow_test_defaultprops",
+      "components_settingsrow_test_onchange",
+      "dashboard_src_components_settingsrow_test_tsx"
+    ],
+    "35": [
+      "docs_core_metrics_consensus_baseline",
+      "docs_core_metrics_framing_volatility",
+      "docs_core_metrics_omission_index",
+      "docs_core_metrics_scatter_shot_anomaly"
+    ],
+    "36": [
+      "narrative_alpha_start_demo_cleanup",
+      "narrative_alpha_start_demo_narrative_alpha_root",
+      "project_narrative_alpha_start_demo_sh__entry",
+      "start_demo_sh"
+    ],
+    "37": [
+      "tests_test_server_rationale_579",
+      "tests_test_server_rationale_605",
+      "tests_test_server_test_run_pipeline_forwards_progress_cb_to_analysis"
+    ],
+    "38": [
+      "dashboard_src_phantom_ui_d_ts",
+      "src_phantom_ui_d_intrinsicelements"
+    ],
+    "39": [
+      "narrative_contracts_eventmeta",
+      "tests_test_contracts_test_event_meta_corpus_capped_default"
+    ],
+    "40": [
+      "tests_test_server_rationale_363",
+      "tests_test_server_test_health_env_shows_present_when_set"
+    ],
+    "41": [
+      "tests_test_server_rationale_121",
+      "tests_test_server_test_get_report_missing_returns_404"
+    ],
+    "42": [
+      "tests_test_server_client",
+      "tests_test_server_rationale_13"
+    ],
+    "43": [
+      "tests_test_server_rationale_20",
+      "tests_test_server_test_get_config_returns_defaults"
+    ],
+    "44": [
+      "tests_test_server_rationale_239",
+      "tests_test_server_test_run_pipeline_sets_corpus_capped"
+    ],
+    "45": [
+      "tests_test_server_rationale_286",
+      "tests_test_server_test_settings_rejects_invalid_slot_structure"
+    ],
+    "46": [
+      "tests_test_server_rationale_318",
+      "tests_test_server_test_post_config_rejects_unknown_fields"
+    ],
+    "47": [
+      "tests_test_server_rationale_342",
+      "tests_test_server_test_health_env_lists_variables"
+    ],
+    "48": [
+      "tests_test_server_rationale_378",
+      "tests_test_server_test_health_env_shows_all_missing_when_unset"
+    ],
+    "49": [
+      "tests_test_server_rationale_433",
+      "tests_test_server_test_health_deep_reports_errors"
+    ],
+    "50": [
+      "tests_test_server_rationale_449",
+      "tests_test_server_test_get_report_rejects_path_traversal"
+    ],
+    "51": [
+      "tests_test_server_rationale_484",
+      "tests_test_server_test_delete_report_missing_returns_404"
+    ],
+    "52": [
+      "tests_test_server_rationale_499",
+      "tests_test_server_test_delete_report_only_targets_json_file"
+    ],
+    "53": [
+      "tests_test_server_rationale_518",
+      "tests_test_server_test_pipeline_rejects_missing_env_vars"
+    ],
+    "54": [
+      "tests_test_server_rationale_52",
+      "tests_test_server_test_post_config_rejects_missing_slot"
+    ],
+    "55": [
+      "tests_test_server_rationale_528",
+      "tests_test_server_test_pipeline_timeout_returns_504"
+    ],
+    "56": [
+      "tests_test_server_rationale_62",
+      "tests_test_server_test_get_reports_empty"
+    ],
+    "57": [
+      "tests_test_server_rationale_714",
+      "tests_test_server_test_run_pipeline_emits_step3_5_progress_events"
+    ],
+    "58": [
+      "tests_test_server_rationale_492",
+      "tests_test_server_test_delete_report_rejects_path_traversal"
+    ],
+    "59": [
+      "tests_test_server_rationale_462",
+      "tests_test_server_test_delete_report_removes_file_and_returns_ok"
+    ],
+    "60": [
+      "tests_test_server_rationale_417",
+      "tests_test_server_test_health_deep_per_probe_status"
+    ],
+    "61": [
+      "tests_test_server_rationale_401",
+      "tests_test_server_test_health_deep_returns_probe_results"
+    ],
+    "62": [
+      "tests_test_server_rationale_334",
+      "tests_test_server_test_health_returns_ok"
+    ],
+    "63": [
+      "tests_test_server_rationale_551",
+      "tests_test_server_test_pipeline_returns_500_on_crash"
+    ],
+    "64": [
+      "tests_test_server_rationale_182",
+      "tests_test_server_test_run_pipeline_builds_context_bundle"
+    ],
+    "65": [
+      "tests_test_server_rationale_163",
+      "tests_test_server_test_run_pipeline_corpus_floor_gate"
+    ],
+    "66": [
+      "tests_test_server_rationale_839",
+      "tests_test_server_test_stream_pipeline_forwards_detail_dict"
+    ],
+    "67": [
+      "tests_test_server_rationale_782",
+      "tests_test_server_test_stream_pipeline_missing_env_returns_error_event"
+    ],
+    "68": [
+      "tests_test_server_rationale_886",
+      "tests_test_server_test_stream_pipeline_yields_error_on_crash"
+    ],
+    "69": [
+      "tests_test_server_rationale_794",
+      "tests_test_server_test_stream_pipeline_yields_progress_and_complete"
+    ],
+    "70": [
       "tests_init_py"
     ],
-    "13": [
+    "71": [
+      "tests_test_contracts_rationale_12"
+    ],
+    "72": [
+      "tests_test_contracts_rationale_381"
+    ],
+    "73": [
+      "tests_test_contracts_rationale_413"
+    ],
+    "74": [
+      "tests_test_contracts_rationale_438"
+    ],
+    "75": [
+      "tests_test_reputation_testinitdb_test_creates_three_tables"
+    ],
+    "76": [
+      "tests_test_reputation_testinitdb_test_idempotent"
+    ],
+    "77": [
+      "tests_test_reputation_testinitdb_test_ingestion_log_has_composite_pk"
+    ],
+    "78": [
+      "tests_test_reputation_testhandleoutletregistration_test_new_outlet_returns_unrated"
+    ],
+    "79": [
+      "tests_test_reputation_testhandleoutletregistration_test_existing_outlet_returns_stored_status"
+    ],
+    "80": [
+      "tests_test_reputation_testhandleoutletregistration_test_same_domain_different_vertical_is_new"
+    ],
+    "81": [
+      "tests_test_reputation_testhandleoutletregistration_test_stores_outlet_name"
+    ],
+    "82": [
+      "tests_test_reputation_testreadoutletreputation_test_returns_none_for_unknown"
+    ],
+    "83": [
+      "tests_test_reputation_testreadoutletreputation_test_returns_full_row_for_known"
+    ],
+    "84": [
+      "tests_test_reputation_testwriteoutliersignal_test_inserts_signal"
+    ],
+    "85": [
+      "tests_test_reputation_testwriteoutliersignal_test_ignore_duplicate_signal"
+    ],
+    "86": [
+      "tests_test_reputation_testwriteingestionlog_make_doc"
+    ],
+    "87": [
+      "tests_test_reputation_testwriteingestionlog_test_inserts_multiple_docs"
+    ],
+    "88": [
+      "tests_test_reputation_testwriteingestionlog_test_same_url_different_query_id_both_persist"
+    ],
+    "89": [
+      "tests_test_reputation_testwriteingestionlog_test_same_url_same_query_id_replaces"
+    ],
+    "90": [
+      "tests_test_reputation_testwriteingestionlog_test_stores_body_length_correctly"
+    ],
+    "91": [
+      "tests_test_reputation_testwriteingestionlog_test_handles_missing_optional_fields"
+    ],
+    "92": [
+      "tests_test_reputation_testwritewithretry_test_raises_after_max_retries"
+    ],
+    "93": [
+      "tests_test_reputation_testwritewithretry_test_calls_rollback_on_failure"
+    ],
+    "94": [
+      "tests_test_reputation_testwritewithretry_test_succeeds_after_retry"
+    ],
+    "95": [
+      "tests_test_reputation_testwritewithretry_test_non_locked_error_does_not_retry"
+    ],
+    "96": [
       "readme_narrative_alpha"
     ],
-    "14": [
+    "97": [
       "docs_preview_01_html"
     ],
-    "15": [
+    "98": [
       "docs_superpowers_plans_2026_05_29_narrative_alpha_full_md"
+    ],
+    "99": [
+      "dashboard_vite_config_ts"
+    ],
+    "100": [
+      "dashboard_src_smoke_test_ts"
+    ],
+    "101": [
+      "dashboard_src_test_setup_ts"
+    ],
+    "102": [
+      "dashboard_src_vite_env_d_ts"
+    ],
+    "103": [
+      "agents_frontend"
     ]
   },
   "cohesion": {
-    "0": 0.06526806526806526,
-    "1": 0.05555555555555555,
-    "2": 0.07067307692307692,
-    "3": 0.08176100628930817,
-    "4": 0.12427409988385599,
-    "5": 0.11470985155195682,
-    "6": 0.2077922077922078,
-    "7": 0.1830065359477124,
-    "8": 0.175,
-    "9": 0.24242424242424243,
-    "10": 0.21818181818181817,
-    "11": 0.4444444444444444,
-    "12": 1.0,
-    "13": 1.0,
-    "14": 1.0,
-    "15": 1.0
+    "0": 0.0629746835443038,
+    "1": 0.056943056943056944,
+    "2": 0.11563367252543941,
+    "3": 0.08717948717948718,
+    "4": 0.10695187165775401,
+    "5": 0.10606060606060606,
+    "6": 0.15873015873015872,
+    "7": 0.07692307692307693,
+    "8": 0.08923076923076922,
+    "9": 0.12857142857142856,
+    "10": 0.21578947368421053,
+    "11": 0.10526315789473684,
+    "12": 0.13450292397660818,
+    "13": 0.19607843137254902,
+    "14": 0.1111111111111111,
+    "15": 0.1895424836601307,
+    "16": 0.1111111111111111,
+    "17": 0.1503267973856209,
+    "18": 0.1568627450980392,
+    "19": 0.14705882352941177,
+    "20": 0.125,
+    "21": 0.17582417582417584,
+    "22": 0.24242424242424243,
+    "23": 0.23636363636363636,
+    "24": 0.2,
+    "25": 0.3333333333333333,
+    "26": 0.5555555555555556,
+    "27": 0.2857142857142857,
+    "28": 0.2857142857142857,
+    "29": 0.3333333333333333,
+    "30": 0.3333333333333333,
+    "31": 0.6,
+    "32": 0.4,
+    "33": 0.5,
+    "34": 0.5,
+    "35": 0.5,
+    "36": 0.5,
+    "37": 0.6666666666666666,
+    "38": 1.0,
+    "39": 1.0,
+    "40": 1.0,
+    "41": 1.0,
+    "42": 1.0,
+    "43": 1.0,
+    "44": 1.0,
+    "45": 1.0,
+    "46": 1.0,
+    "47": 1.0,
+    "48": 1.0,
+    "49": 1.0,
+    "50": 1.0,
+    "51": 1.0,
+    "52": 1.0,
+    "53": 1.0,
+    "54": 1.0,
+    "55": 1.0,
+    "56": 1.0,
+    "57": 1.0,
+    "58": 1.0,
+    "59": 1.0,
+    "60": 1.0,
+    "61": 1.0,
+    "62": 1.0,
+    "63": 1.0,
+    "64": 1.0,
+    "65": 1.0,
+    "66": 1.0,
+    "67": 1.0,
+    "68": 1.0,
+    "69": 1.0,
+    "70": 1.0,
+    "71": 1.0,
+    "72": 1.0,
+    "73": 1.0,
+    "74": 1.0,
+    "75": 1.0,
+    "76": 1.0,
+    "77": 1.0,
+    "78": 1.0,
+    "79": 1.0,
+    "80": 1.0,
+    "81": 1.0,
+    "82": 1.0,
+    "83": 1.0,
+    "84": 1.0,
+    "85": 1.0,
+    "86": 1.0,
+    "87": 1.0,
+    "88": 1.0,
+    "89": 1.0,
+    "90": 1.0,
+    "91": 1.0,
+    "92": 1.0,
+    "93": 1.0,
+    "94": 1.0,
+    "95": 1.0,
+    "96": 1.0,
+    "97": 1.0,
+    "98": 1.0,
+    "99": 1.0,
+    "100": 1.0,
+    "101": 1.0,
+    "102": 1.0,
+    "103": 1.0
   },
   "gods": [
     {
+      "id": "narrative_analysis_compute_consensus_baseline",
+      "label": "compute_consensus_baseline()",
+      "degree": 29
+    },
+    {
       "id": "narrative_llm_client_call_llm",
       "label": "call_llm()",
-      "degree": 26
+      "degree": 28
     },
     {
       "id": "tests_test_llm_client_messages_payload",
@@ -506,9 +1164,14 @@
       "degree": 25
     },
     {
-      "id": "narrative_contracts_strict",
-      "label": "_Strict",
-      "degree": 23
+      "id": "narrative_ingestion_build_ingestion_manifest",
+      "label": "build_ingestion_manifest()",
+      "degree": 24
+    },
+    {
+      "id": "narrative_backtest_execute_historical_backtest",
+      "label": "execute_historical_backtest()",
+      "degree": 24
     },
     {
       "id": "tests_test_llm_client_slot_config_payload",
@@ -516,37 +1179,60 @@
       "degree": 23
     },
     {
-      "id": "narrative_analysis_compute_consensus_baseline",
-      "label": "compute_consensus_baseline()",
-      "degree": 22
-    },
-    {
       "id": "tests_test_analysis_testcomputeconsensusbaseline",
       "label": "TestComputeConsensusBaseline",
+      "degree": 23
+    },
+    {
+      "id": "narrative_llm_client_load_llm_config",
+      "label": "load_llm_config()",
+      "degree": 21
+    },
+    {
+      "id": "narrative_processing_run_entity_normalization",
+      "label": "run_entity_normalization()",
       "degree": 20
     },
     {
-      "id": "narrative_reputation_init_db",
-      "label": "init_db()",
-      "degree": 18
-    },
-    {
-      "id": "narrative_ingestion_build_ingestion_manifest",
-      "label": "build_ingestion_manifest()",
-      "degree": 17
-    },
-    {
-      "id": "narrative_ingestion_validate_ingestion_payload",
-      "label": "validate_ingestion_payload()",
-      "degree": 16
-    },
-    {
-      "id": "tests_test_llm_client_setup_mock_client_for_call_llm",
-      "label": "_setup_mock_client_for_call_llm()",
-      "degree": 16
+      "id": "narrative_pipeline_run_pipeline",
+      "label": "_run_pipeline()",
+      "degree": 20
     }
   ],
   "surprises": [
+    {
+      "source": "build_ingestion_manifest()",
+      "target": "Bright Data Scraping",
+      "source_files": [
+        "narrative/ingestion.py",
+        "AGENTS.md"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "crosses file types (code \u2194 doc); connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "Backend FastAPI Server",
+      "target": "DeepSeek LLM",
+      "source_files": [
+        "narrative/server.py",
+        "AGENTS.md"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "references",
+      "why": "crosses file types (code \u2194 doc); connects across different repos/directories; bridges separate communities"
+    },
+    {
+      "source": "discover_articles()",
+      "target": "Bright Data Scraping",
+      "source_files": [
+        "narrative/ingestion.py",
+        "AGENTS.md"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "crosses file types (code \u2194 doc); connects across different repos/directories"
+    },
     {
       "source": "TestExtractText",
       "target": "IngestionManifest",
@@ -568,43 +1254,10 @@
       "confidence": "INFERRED",
       "relation": "uses",
       "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities"
-    },
-    {
-      "source": "TestValidateIngestionPayload",
-      "target": "IngestionManifest",
-      "source_files": [
-        "tests/test_ingestion.py",
-        "narrative/contracts.py"
-      ],
-      "confidence": "INFERRED",
-      "relation": "uses",
-      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities"
-    },
-    {
-      "source": "TestDiscoverArticles",
-      "target": "IngestionManifest",
-      "source_files": [
-        "tests/test_ingestion.py",
-        "narrative/contracts.py"
-      ],
-      "confidence": "INFERRED",
-      "relation": "uses",
-      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities"
-    },
-    {
-      "source": "TestFetchArticleBody",
-      "target": "IngestionManifest",
-      "source_files": [
-        "tests/test_ingestion.py",
-        "narrative/contracts.py"
-      ],
-      "confidence": "INFERRED",
-      "relation": "uses",
-      "why": "inferred connection - not explicitly stated in source; connects across different repos/directories; bridges separate communities"
     }
   ],
   "tokens": {
-    "input": 48474,
-    "output": 1770
+    "input": 37212,
+    "output": 1765
   }
 }

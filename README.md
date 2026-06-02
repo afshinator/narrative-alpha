@@ -69,36 +69,24 @@ Finance & Market Intelligence — Web Data UNLOCKED Hackathon, 2026.
 
 ## Quick Start
 
+**Requires:** Python 3.11+, Node.js 18+, npm
+
 ```bash
-# Clone
 git clone git@github.com:afshinator/narrative-alpha.git
 cd narrative-alpha
 
-# Python environment
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-
-# Dashboard dependencies
-cd dashboard && npm install && cd ..
-
-# Configure
 cp .env.example .env
-# Edit .env — fill in BRIGHTDATA_API_KEY, DEEPSEEK_API_KEY, OPENAI_API_KEY
+# Fill in BRIGHTDATA_API_KEY, DEEPSEEK_API_KEY, OPENAI_API_KEY
 
-# Start both backend (port 3001) and dashboard (port 3019)
 ./start-demo.sh
 ```
 
-> **Note:** If port 3019 is already in use, Vite auto-increments to the next available port. Check the terminal output for the actual URL.
+The script installs Python and dashboard dependencies on first run. Open the URL it prints when ready — backend on port 8000, dashboard on port 5173 by default.
 
-Open [http://localhost:3019](http://localhost:3019) in your browser.
-
-The backend API is at [http://localhost:3001](http://localhost:3001). To run the backend alone:
+**Port overrides** (set in `.env` or inline):
 
 ```bash
-source .venv/bin/activate
-source .env
-uvicorn narrative.server:app --host 0.0.0.0 --port 3001
+BACKEND_PORT=9000 PORT=3005 ./start-demo.sh
 ```
 
 ## License

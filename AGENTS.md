@@ -11,22 +11,32 @@
 ## Startup
 
 ```bash
-source .venv/bin/activate
-source .env
-uvicorn narrative.server:app --host 0.0.0.0 &
-cd dashboard && npm run dev
+source .env   # load API keys into shell
+.venv/bin/uvicorn narrative.server:app --host 0.0.0.0 --port 8000 &
+cd dashboard && VITE_BACKEND_PORT=8000 npm run dev
 ```
 
-Backend port is printed on startup; Vite picks dashboard port dynamically.
+Or use `./start-demo.sh`, which handles venv setup, dependency checks, and both processes.
+
+Port env vars:
+
+| Var | Effect |
+|---|---|
+| `BACKEND_PORT` | uvicorn listen port (default `8000`) |
+| `PORT` | Vite listen port (default `5173`) |
+| `VITE_BACKEND_PORT` | Port the frontend proxies `/api` to (defaults to `BACKEND_PORT`) |
+
+If the venv is missing or broken (e.g. after moving the repo), rebuild it:
+
+```bash
+uv venv --python 3.11 --clear && uv pip install -r requirements.txt
+```
 
 ## NARRATIVE_ALPHA_ROOT
 
-Controls where reports, DB, and config are stored. Code default: `~/.narrative_alpha`. Set in `.env` to override. `.env.example` leaves it commented out — only set to override.
-
-If starting without `.env` sourced, data lives under `~/.narrative_alpha`.
+Controls where reports, DB, and config are stored. Code default: project root directory (the repo root). Reports land under `data/reports/`. Set in `.env` to override.
 
 ## Known traps
 
-- **Data directory mismatch:** Starting server without `.env` sourced writes to a different directory than previous runs — old reports won't appear. Always `source .env` first.
 - **Kill server:** `kill %<job-id>` or `pkill -f uvicorn`
 - **NARRATIVE_ALPHA_ROOT inconsistent:** All components must agree on the path. Check `backtest.py`, `pipeline.py`, and `server.py` if one reads a different directory.

@@ -14,24 +14,50 @@ if [ -f .env ]; then
 	set +a
 fi
 
-export NARRATIVE_ALPHA_ROOT="${NARRATIVE_ALPHA_ROOT:-$HOME/.narrative_alpha}"
+export BACKEND_PORT="${BACKEND_PORT:-8000}"
+export VITE_BACKEND_PORT="${VITE_BACKEND_PORT:-$BACKEND_PORT}"
+# PORT controls the Vite listen port — set it to a port reachable by your client.
+# Unset = Vite default (5173).
 
-echo "Starting backend on port 3001 ..."
-if [ -d .venv ]; then
-	source .venv/bin/activate
+# ── Setup checks ────────────────────────────────────────────────────────────
+# Verify the Python venv exists and can import the app's dependencies.
+# Rebuilds automatically when missing or broken (e.g. after moving the repo).
+if ! .venv/bin/python -c "import uvicorn, fastapi, trafilatura" 2>/dev/null; then
+	echo "Python venv missing or broken — setting up..."
+	if command -v uv &>/dev/null; then
+		uv venv --python 3.11 --clear
+		uv pip install -r requirements.txt
+	else
+		python3 -m venv .venv --clear
+		.venv/bin/pip install -r requirements.txt
+	fi
+	echo ""
 fi
-uvicorn narrative.server:app --host 0.0.0.0 --port 3001 &
+
+if [ ! -d "dashboard/node_modules" ]; then
+	echo "Installing dashboard dependencies..."
+	cd dashboard && npm install && cd ..
+	echo ""
+fi
+# ────────────────────────────────────────────────────────────────────────────
+
+echo "Starting backend on port $BACKEND_PORT ..."
+.venv/bin/uvicorn narrative.server:app --host 0.0.0.0 --port "$BACKEND_PORT" &
 BACKEND_PID=$!
 
 sleep 2
 
-echo "Starting dashboard on port 3019 ..."
-cd dashboard && npm run dev &
+echo "Starting dashboard ..."
+cd dashboard && env PORT="${PORT:-}" VITE_BACKEND_PORT="$VITE_BACKEND_PORT" npm run dev &
 DASHBOARD_PID=$!
 
 echo ""
-echo "Backend:   http://localhost:3001  (PID $BACKEND_PID)"
-echo "Dashboard: starting (check output above for port — Vite uses 3019 by default, auto-bumps if busy)"
+echo "Backend:   http://localhost:$BACKEND_PORT  (PID $BACKEND_PID)"
+if [ -n "${PORT:-}" ]; then
+	echo "Dashboard: http://localhost:$PORT  (PID $DASHBOARD_PID)"
+else
+	echo "Dashboard: starting (check output above for port — Vite defaults to 5173)"
+fi
 echo ""
 echo "Press Ctrl+C to stop both."
 

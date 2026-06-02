@@ -17,3 +17,5 @@ __pycache__/
 outlet_reputation.db
 *.db-shm
 *.db-wal
+
+graphify-out/

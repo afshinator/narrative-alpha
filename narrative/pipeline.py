@@ -45,7 +45,7 @@ SYNTHESIS_TEXT_CHAR_LIMIT = 5000
 
 def _run_startup_init():
     db_path = os.path.join(
-        os.environ.get("NARRATIVE_ALPHA_ROOT", os.path.expanduser("~/.narrative_alpha")),
+        os.environ.get("NARRATIVE_ALPHA_ROOT", os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
         "outlet_reputation.db",
     )
     conn = get_hardened_db_connection(db_path)

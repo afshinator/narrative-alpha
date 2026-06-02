@@ -9,7 +9,7 @@ import os
 import sqlite3
 import time
 
-_DEFAULT_DB_PATH = "/root/.narrative_alpha/outlet_reputation.db"
+_DEFAULT_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "outlet_reputation.db")
 
 
 def _db_path() -> str:

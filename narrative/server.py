@@ -34,7 +34,7 @@ app = FastAPI(title="Narrative Alpha API", lifespan=lifespan)
 
 
 def _narrative_root() -> str:
-    return os.environ.get("NARRATIVE_ALPHA_ROOT", os.path.expanduser("~/.narrative_alpha"))
+    return os.environ.get("NARRATIVE_ALPHA_ROOT", os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 def _config_path() -> str:
@@ -193,7 +193,7 @@ async def stream_pipeline(keyword: str, vertical: str = "TECHNOLOGY"):
         exc = pipeline_future.exception()
         if exc:
             logger.exception("Pipeline stream failed", exc_info=exc)
-            yield f"data: {json.dumps({'step': 'error', 'message': 'Pipeline failed during processing.', 'detail': f'Something went wrong while analyzing articles. The server logs have more details. Error: {exc}'})}\n\n"
+            yield f"data: {json.dumps({'step': 'error', 'message': f'Pipeline failed: {exc}', 'detail': f'Pipeline failed: {exc}'})}\n\n"
             return
 
         report = pipeline_future.result()

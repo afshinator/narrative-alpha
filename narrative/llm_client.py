@@ -48,7 +48,7 @@ DEFAULT_LLM_CONFIG = LLMConfig(
 # ── Config lifecycle ──
 
 def _config_path() -> str:
-    root = os.environ.get("NARRATIVE_ALPHA_ROOT", "/root/.narrative_alpha")
+    root = os.environ.get("NARRATIVE_ALPHA_ROOT", os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     return os.path.join(root, "llm_config.json")
 
 
