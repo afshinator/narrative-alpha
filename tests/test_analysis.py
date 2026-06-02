@@ -652,6 +652,38 @@ class TestSynthesizeForensicReport:
                 {}, {"call_4_forensic_synthesis": {}}
             )
 
+    def test_prepared_fractures_replaces_raw_in_bundle(self, monkeypatch):
+        """After enrichment, prepared_fractures appears but fracture_candidates is removed."""
+        captured = {}
+
+        def _capture(slot_cfg, messages, json_mode):
+            captured["content"] = messages[1]["content"]
+            return ('{"event_meta": {}, "consensus_reality_graph": {"consensus_summary":"",'
+                    '"verified_anchor_nodes":[],"primary_verifications":[]}, '
+                    '"distortion_matrix": [], "outlier_signals": [], '
+                    '"reputation_warnings": [], "reality_divergence_zones": [], '
+                    '"reality_fractures": [], "narrative_regime_shifts": []}')
+
+        monkeypatch.setattr("narrative.llm_client.call_llm", _capture)
+
+        bundle_with_fractures = {
+            "fracture_candidates": [
+                ("topic1", "claim A", ["outlet1.com"], "claim B", ["outlet2.com"]),
+            ],
+        }
+        synthesize_forensic_report(
+            bundle_with_fractures, {"call_4_forensic_synthesis": {}}
+        )
+
+        content = captured["content"]
+        payload = json.loads(content)
+
+        assert "prepared_fractures" in payload, \
+            "prepared_fractures should be present in serialized output"
+
+        assert "fracture_candidates" not in payload, \
+            "fracture_candidates should be removed after enrichment"
+
 
 class TestInjectLabels:
     def test_adds_omission_and_framing_labels(self):
