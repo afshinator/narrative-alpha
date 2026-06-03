@@ -1,0 +1,644 @@
+{
+  "event_meta": {
+    "cluster_id": "EVT-20260603-US-FIRES-ON-IRAN-BOU",
+    "search_query": "US fires on Iran-bound tanker",
+    "industry_vertical": "UNKNOWN",
+    "timestamp_utc": "2026-06-03T00:01:48.560982+00:00",
+    "corpus_count": 9,
+    "corpus_capped": false
+  },
+  "consensus_reality_graph": {
+    "consensus_summary": "All outlets report that U.S. forces, under U.S. Central Command, have been intercepting and disabling commercial vessels attempting to breach a naval blockade of Iranian ports, primarily in the Strait of Hormuz and surrounding waters. The blockade is described as a response to heightened tensions with Iran.",
+    "verified_anchor_nodes": [
+      "Strait of Hormuz",
+      "U.S. Central Command",
+      "Iran",
+      "blockade",
+      "U.S. forces"
+    ],
+    "primary_verifications": [
+      {
+        "authority": "U.S. Central Command",
+        "reference_id": "CENTCOM",
+        "status": "confirmed"
+      },
+      {
+        "authority": "Marco Rubio",
+        "reference_id": "White House press briefing",
+        "status": "confirmed"
+      }
+    ]
+  },
+  "distortion_matrix": [
+    {
+      "outlet_name": "JNS.org",
+      "source_domain": "jns.org",
+      "omission_index": 0.2,
+      "framing_volatility_score": 0.1136,
+      "identifiable_omissions": [
+        "U.S. Central Command"
+      ],
+      "linguistic_camouflage": [
+        {
+          "raw_expression": "fired cannon-gun rounds at the rudder",
+          "clinical_translation": "used 20mm cannon on rudder"
+        },
+        {
+          "raw_expression": "disabling the vessel",
+          "clinical_translation": "rendered vessel inoperable"
+        }
+      ],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "T\u00fcrkiye Today",
+      "source_domain": "turkiyetoday.com",
+      "omission_index": 0.0,
+      "framing_volatility_score": 0.0602,
+      "identifiable_omissions": [],
+      "linguistic_camouflage": [
+        {
+          "raw_expression": "fired a Hellfire missile into the engine room",
+          "clinical_translation": "used precision munitions on engine room"
+        },
+        {
+          "raw_expression": "marks the sixth commercial vessel disabled",
+          "clinical_translation": "is the sixth incident of vessel immobilization"
+        }
+      ],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "gCaptain",
+      "source_domain": "gcaptain.com",
+      "omission_index": 0.0,
+      "framing_volatility_score": 0.1701,
+      "identifiable_omissions": [],
+      "linguistic_camouflage": [
+        {
+          "raw_expression": "disabled an Iranian-flagged oil tanker",
+          "clinical_translation": "rendered tanker inoperative"
+        },
+        {
+          "raw_expression": "fired several 20mm cannon rounds to disable the tanker\u2019s rudder",
+          "clinical_translation": "used 20mm cannon to impair rudder control"
+        }
+      ],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "Scripps News",
+      "source_domain": "scrippsnews.com",
+      "omission_index": 0.2,
+      "framing_volatility_score": 0.0988,
+      "identifiable_omissions": [
+        "U.S. Central Command"
+      ],
+      "linguistic_camouflage": [
+        {
+          "raw_expression": "disabled two Iranian-flagged oil tankers",
+          "clinical_translation": "rendered two tankers inoperative"
+        },
+        {
+          "raw_expression": "used precision-guided munitions to disable the vessels",
+          "clinical_translation": "employed precision weapons to stop the vessels"
+        }
+      ],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "Yahoo",
+      "source_domain": "yahoo.com",
+      "omission_index": 0.2,
+      "framing_volatility_score": 0.1548,
+      "identifiable_omissions": [
+        "Strait of Hormuz"
+      ],
+      "linguistic_camouflage": [
+        {
+          "raw_expression": "fired a Hellfire missile into the engine room",
+          "clinical_translation": "launched missile at engine room"
+        },
+        {
+          "raw_expression": "enforced blockade measures against",
+          "clinical_translation": "applied blockade rules to"
+        }
+      ],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "investingLive",
+      "source_domain": "investinglive.com",
+      "omission_index": 0.0,
+      "framing_volatility_score": 0.0504,
+      "identifiable_omissions": [],
+      "linguistic_camouflage": [
+        {
+          "raw_expression": "fired a Hellfire missile into the engine room",
+          "clinical_translation": "deployed missile to engine room"
+        },
+        {
+          "raw_expression": "disabled the vessel",
+          "clinical_translation": "immobilized the vessel"
+        }
+      ],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "WJAR",
+      "source_domain": "turnto10.com",
+      "omission_index": 0.2,
+      "framing_volatility_score": 0.1059,
+      "identifiable_omissions": [
+        "Strait of Hormuz"
+      ],
+      "linguistic_camouflage": [
+        {
+          "raw_expression": "disabled an oil tanker bound for an Iranian port",
+          "clinical_translation": "incapacitated tanker heading to Iran"
+        },
+        {
+          "raw_expression": "fired a Hellfire missile into the engine room",
+          "clinical_translation": "shot a missile into engine room"
+        }
+      ],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "Shipping Telegraph",
+      "source_domain": "shippingtelegraph.com",
+      "omission_index": 0.2,
+      "framing_volatility_score": 0.0953,
+      "identifiable_omissions": [
+        "U.S. Central Command"
+      ],
+      "linguistic_camouflage": [
+        {
+          "raw_expression": "launched a Hellfire missile into a ship\u2019s engine room",
+          "clinical_translation": "fired missile at engine room"
+        },
+        {
+          "raw_expression": "disabled the vessel",
+          "clinical_translation": "stopped the vessel"
+        }
+      ],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "The Maritime Executive",
+      "source_domain": "maritime-executive.com",
+      "omission_index": 0.0,
+      "framing_volatility_score": 0.0833,
+      "identifiable_omissions": [],
+      "linguistic_camouflage": [
+        {
+          "raw_expression": "dispatched an F/A-18 Super Hornet ... to interdict",
+          "clinical_translation": "sent fighter to stop"
+        },
+        {
+          "raw_expression": "used 'precision munitions' to hit each tanker's stack",
+          "clinical_translation": "employed precision weapons on stacks"
+        }
+      ],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    }
+  ],
+  "outlier_signals": [
+    {
+      "signal_id": "sig-001",
+      "origin_outlet": "JNS.org",
+      "origin_domain": "jns.org",
+      "extracted_claim": "The blockade is costing Iran as much as $500 million per day in lost revenue.",
+      "timestamp_first_seen": "",
+      "outlier_origin_provenance": {
+        "classification": "single-source",
+        "historical_origin_validation_rate": 0.0,
+        "scatter_shot_anomaly_factor": 0.0,
+        "reputation_warning_triggered": false,
+        "echo_chamber_mimics": [],
+        "scatter_shot_label": "LOW"
+      },
+      "validation_tracking": {
+        "current_state": "unverified",
+        "last_checked_timestamp": "2026-06-03T00:00:00Z",
+        "consensus_absorption_status": "not_absorbed",
+        "evaluation_window_days": 7
+      }
+    },
+    {
+      "signal_id": "sig-002",
+      "origin_outlet": "gCaptain",
+      "origin_domain": "gcaptain.com",
+      "extracted_claim": "President Donald Trump announced a pause to 'Project Freedom,' the U.S.-led effort to evacuate stranded commercial ships from the Persian Gulf.",
+      "timestamp_first_seen": "",
+      "outlier_origin_provenance": {
+        "classification": "single-source",
+        "historical_origin_validation_rate": 0.0,
+        "scatter_shot_anomaly_factor": 0.0,
+        "reputation_warning_triggered": false,
+        "echo_chamber_mimics": [],
+        "scatter_shot_label": "LOW"
+      },
+      "validation_tracking": {
+        "current_state": "unverified",
+        "last_checked_timestamp": "2026-06-03T00:00:00Z",
+        "consensus_absorption_status": "not_absorbed",
+        "evaluation_window_days": 7
+      }
+    },
+    {
+      "signal_id": "sig-003",
+      "origin_outlet": "The Maritime Executive",
+      "origin_domain": "maritime-executive.com",
+      "extracted_claim": "CENTCOM conducted retaliatory strikes on Iranian positions in Qeshm, Bandar Abbas and nearby locations.",
+      "timestamp_first_seen": "",
+      "outlier_origin_provenance": {
+        "classification": "single-source",
+        "historical_origin_validation_rate": 0.0,
+        "scatter_shot_anomaly_factor": 0.0,
+        "reputation_warning_triggered": false,
+        "echo_chamber_mimics": [],
+        "scatter_shot_label": "LOW"
+      },
+      "validation_tracking": {
+        "current_state": "unverified",
+        "last_checked_timestamp": "2026-06-03T00:00:00Z",
+        "consensus_absorption_status": "not_absorbed",
+        "evaluation_window_days": 7
+      }
+    },
+    {
+      "signal_id": "sig-004",
+      "origin_outlet": "investingLive",
+      "origin_domain": "investinglive.com",
+      "extracted_claim": "The Botswana-flagged tanker M/T Lexie was disabled on June 2.",
+      "timestamp_first_seen": "",
+      "outlier_origin_provenance": {
+        "classification": "single-source",
+        "historical_origin_validation_rate": 0.0,
+        "scatter_shot_anomaly_factor": 0.0,
+        "reputation_warning_triggered": false,
+        "echo_chamber_mimics": [],
+        "scatter_shot_label": "LOW"
+      },
+      "validation_tracking": {
+        "current_state": "unverified",
+        "last_checked_timestamp": "2026-06-03T00:00:00Z",
+        "consensus_absorption_status": "not_absorbed",
+        "evaluation_window_days": 7
+      }
+    }
+  ],
+  "reputation_warnings": [
+    {
+      "outlet_name": "JNS.org",
+      "source_domain": "jns.org",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": "Insufficient historical data to assess reliability."
+    },
+    {
+      "outlet_name": "T\u00fcrkiye Today",
+      "source_domain": "turkiyetoday.com",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": "Insufficient historical data to assess reliability."
+    },
+    {
+      "outlet_name": "gCaptain",
+      "source_domain": "gcaptain.com",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": "Insufficient historical data to assess reliability."
+    },
+    {
+      "outlet_name": "Scripps News",
+      "source_domain": "scrippsnews.com",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": "Insufficient historical data to assess reliability."
+    },
+    {
+      "outlet_name": "Yahoo",
+      "source_domain": "yahoo.com",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": "Insufficient historical data to assess reliability."
+    },
+    {
+      "outlet_name": "investingLive",
+      "source_domain": "investinglive.com",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": "Insufficient historical data to assess reliability."
+    },
+    {
+      "outlet_name": "WJAR",
+      "source_domain": "turnto10.com",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": "Insufficient historical data to assess reliability."
+    },
+    {
+      "outlet_name": "Shipping Telegraph",
+      "source_domain": "shippingtelegraph.com",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": "Insufficient historical data to assess reliability."
+    },
+    {
+      "outlet_name": "The Maritime Executive",
+      "source_domain": "maritime-executive.com",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": "Insufficient historical data to assess reliability."
+    }
+  ],
+  "reality_divergence_zones": [
+    {
+      "topic": "Cost of blockade",
+      "consensus_stability_score": 0.2,
+      "institutional_convergence": "weak",
+      "observed_narrative_structures": [
+        "U.S. blockade costing Iran $500 million per day"
+      ],
+      "supporting_outlets": {
+        "U.S. blockade costing Iran $500 million per day": [
+          "jns.org"
+        ]
+      },
+      "consensus_stability": "LOW"
+    },
+    {
+      "topic": "Date of vessel interdiction",
+      "consensus_stability_score": 0.3,
+      "institutional_convergence": "moderate",
+      "observed_narrative_structures": [
+        "Tuesday (unspecified date)",
+        "Wednesday",
+        "Friday",
+        "May 6",
+        "June 2"
+      ],
+      "supporting_outlets": {
+        "Tuesday": [
+          "turkiyetoday.com",
+          "yahoo.com"
+        ],
+        "Wednesday": [
+          "jns.org",
+          "gcaptain.com",
+          "maritime-executive.com"
+        ],
+        "Friday": [
+          "scrippsnews.com",
+          "shippingtelegraph.com"
+        ],
+        "May 6": [
+          "gcaptain.com"
+        ],
+        "June 2": [
+          "investinglive.com"
+        ]
+      },
+      "consensus_stability": "LOW"
+    },
+    {
+      "topic": "Weapon type used",
+      "consensus_stability_score": 0.4,
+      "institutional_convergence": "low",
+      "observed_narrative_structures": [
+        "20mm cannon",
+        "Hellfire missile",
+        "precision-guided munitions"
+      ],
+      "supporting_outlets": {
+        "20mm cannon": [
+          "jns.org",
+          "gcaptain.com",
+          "maritime-executive.com"
+        ],
+        "Hellfire missile": [
+          "turkiyetoday.com",
+          "yahoo.com",
+          "investinglive.com",
+          "turnto10.com",
+          "shippingtelegraph.com"
+        ],
+        "precision-guided munitions": [
+          "scrippsnews.com",
+          "maritime-executive.com"
+        ]
+      },
+      "consensus_stability": "MED"
+    }
+  ],
+  "reality_fractures": [
+    {
+      "fracture_id": "frac-weapon",
+      "topic": "Weapon used to disable vessels",
+      "claim_a": {
+        "statement": "U.S. forces used a 20mm cannon",
+        "supporting_outlets": [
+          "jns.org",
+          "gcaptain.com",
+          "maritime-executive.com"
+        ]
+      },
+      "claim_b": {
+        "statement": "U.S. forces used a Hellfire missile",
+        "supporting_outlets": [
+          "turkiyetoday.com",
+          "yahoo.com",
+          "investinglive.com",
+          "turnto10.com",
+          "shippingtelegraph.com"
+        ]
+      },
+      "relationship": "contradiction",
+      "resolution_status": "unresolved",
+      "classification_method": "LLM_ASSISTED"
+    },
+    {
+      "fracture_id": "frac-vessel",
+      "topic": "Primary vessel targeted in recent incident",
+      "claim_a": {
+        "statement": "The disabled vessel was M/T Hasna",
+        "supporting_outlets": [
+          "jns.org",
+          "gcaptain.com",
+          "maritime-executive.com"
+        ]
+      },
+      "claim_b": {
+        "statement": "The disabled vessel was M/T Lexie",
+        "supporting_outlets": [
+          "turkiyetoday.com",
+          "yahoo.com",
+          "investinglive.com",
+          "turnto10.com",
+          "shippingtelegraph.com"
+        ]
+      },
+      "relationship": "contradiction",
+      "resolution_status": "unresolved",
+      "classification_method": "LLM_ASSISTED"
+    },
+    {
+      "fracture_id": "frac-date",
+      "topic": "Date of most recent interdiction",
+      "claim_a": {
+        "statement": "The incident occurred on Wednesday",
+        "supporting_outlets": [
+          "jns.org",
+          "gcaptain.com",
+          "maritime-executive.com"
+        ]
+      },
+      "claim_b": {
+        "statement": "The incident occurred on Tuesday",
+        "supporting_outlets": [
+          "turkiyetoday.com",
+          "yahoo.com",
+          "turnto10.com"
+        ]
+      },
+      "relationship": "contradiction",
+      "resolution_status": "unresolved",
+      "classification_method": "LLM_ASSISTED"
+    }
+  ],
+  "narrative_regime_shifts": [
+    {
+      "shift_id": "shift-001",
+      "topic": "Actor naming",
+      "detected_shift": {
+        "previous_term": "u.s. military aircraft",
+        "replacement_term": "u.s. forces"
+      },
+      "observed_across": 7,
+      "total_sources": 9,
+      "synchronization_score": 0.78,
+      "interpretive_note": "Shift from specific military asset to a broader, less precise force label.",
+      "synchronization_label": "HIGH"
+    },
+    {
+      "shift_id": "shift-002",
+      "topic": "Blockade framing",
+      "detected_shift": {
+        "previous_term": "washington\u2019s blockade",
+        "replacement_term": "blockade"
+      },
+      "observed_across": 9,
+      "total_sources": 9,
+      "synchronization_score": 1.0,
+      "interpretive_note": "Attribution to Washington dropped, blockade presented as a standalone fact.",
+      "synchronization_label": "HIGH"
+    },
+    {
+      "shift_id": "shift-003",
+      "topic": "Vessel identification",
+      "detected_shift": {
+        "previous_term": "botswana-flagged m/t vessel",
+        "replacement_term": "m/t lexie"
+      },
+      "observed_across": 4,
+      "total_sources": 9,
+      "synchronization_score": 0.44,
+      "interpretive_note": "Specific vessel name adopted by multiple outlets, increasing precision.",
+      "synchronization_label": "MED"
+    },
+    {
+      "shift_id": "shift-004",
+      "topic": "Diplomatic framing",
+      "detected_shift": {
+        "previous_term": "ceasefire negotiations",
+        "replacement_term": "ceasefire"
+      },
+      "observed_across": 5,
+      "total_sources": 9,
+      "synchronization_score": 0.56,
+      "interpretive_note": "Shift from negotiation process to a static state of ceasefire.",
+      "synchronization_label": "MED"
+    },
+    {
+      "shift_id": "shift-005",
+      "topic": "Authority abbreviation",
+      "detected_shift": {
+        "previous_term": "us central command (centcom)",
+        "replacement_term": "centcom"
+      },
+      "observed_across": 9,
+      "total_sources": 9,
+      "synchronization_score": 1.0,
+      "interpretive_note": "Full name shortened to acronym for brevity across all sources.",
+      "synchronization_label": "HIGH"
+    },
+    {
+      "shift_id": "shift-006",
+      "topic": "President naming",
+      "detected_shift": {
+        "previous_term": "president donald trump",
+        "replacement_term": "donald trump"
+      },
+      "observed_across": 5,
+      "total_sources": 9,
+      "synchronization_score": 0.56,
+      "interpretive_note": "Title dropped, moving to informal reference.",
+      "synchronization_label": "MED"
+    },
+    {
+      "shift_id": "shift-007",
+      "topic": "Target location",
+      "detected_shift": {
+        "previous_term": "iranian port",
+        "replacement_term": "iran"
+      },
+      "observed_across": 9,
+      "total_sources": 9,
+      "synchronization_score": 1.0,
+      "interpretive_note": "Generalization from specific port to the country as destination.",
+      "synchronization_label": "HIGH"
+    },
+    {
+      "shift_id": "shift-008",
+      "topic": "Naval asset framing",
+      "detected_shift": {
+        "previous_term": "u.s. navy jet",
+        "replacement_term": "u.s. navy"
+      },
+      "observed_across": 4,
+      "total_sources": 9,
+      "synchronization_score": 0.44,
+      "interpretive_note": "Shift from specific aircraft type to the broader naval service branch.",
+      "synchronization_label": "MED"
+    }
+  ]
+}

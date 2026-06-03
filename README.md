@@ -1,12 +1,14 @@
-<div align="center">
-  <img src="./narrative-01.png" alt="Narrative Alpha" width="600" />
-</div>
-
 # Narrative Alpha
 
 **Forensic narrative analysis for news intelligence.**
 
 Built for [Web Data UNLOCKED](https://luma.com/k9vgqtfp) — [Bright Data](https://brightdata.com/)'s two-day enterprise AI hackathon in San Francisco, May 30–31, 2026.
+
+
+<div align="center">
+  <img src="./narrative-03.png" alt="Narrative Alpha"  />
+</div>
+
 
 ---
 

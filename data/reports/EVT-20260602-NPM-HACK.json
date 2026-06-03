@@ -1,0 +1,322 @@
+{
+  "event_meta": {
+    "cluster_id": "EVT-20260602-NPM-HACK",
+    "search_query": "npm hack",
+    "industry_vertical": "UNKNOWN",
+    "timestamp_utc": "2026-06-02T23:46:23.890438+00:00",
+    "corpus_count": 8,
+    "corpus_capped": false
+  },
+  "consensus_reality_graph": {
+    "consensus_summary": "A supply chain attack targeting npm packages, involving GitHub and attributed to TeamPCP, compromised multiple ecosystems and leveraged sophisticated techniques including valid provenance attestations.",
+    "verified_anchor_nodes": [
+      "GitHub",
+      "npm",
+      "TeamPCP"
+    ],
+    "primary_verifications": []
+  },
+  "distortion_matrix": [
+    {
+      "outlet_name": "Snyk",
+      "source_domain": "snyk.io",
+      "omission_index": 0.0,
+      "framing_volatility_score": 0.0898,
+      "identifiable_omissions": [],
+      "linguistic_camouflage": [],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "The Hacker News",
+      "source_domain": "thehackernews.com",
+      "omission_index": 0.0,
+      "framing_volatility_score": 0.0697,
+      "identifiable_omissions": [],
+      "linguistic_camouflage": [],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "Cybernews",
+      "source_domain": "cybernews.com",
+      "omission_index": 0.0,
+      "framing_volatility_score": 0.059,
+      "identifiable_omissions": [],
+      "linguistic_camouflage": [],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "Ars Technica",
+      "source_domain": "arstechnica.com",
+      "omission_index": 1.0,
+      "framing_volatility_score": 0.0857,
+      "identifiable_omissions": [
+        "GitHub",
+        "npm",
+        "TeamPCP"
+      ],
+      "linguistic_camouflage": [],
+      "omission_label": "HIGH",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "SecurityWeek",
+      "source_domain": "securityweek.com",
+      "omission_index": 0.3333,
+      "framing_volatility_score": 0.0609,
+      "identifiable_omissions": [
+        "GitHub"
+      ],
+      "linguistic_camouflage": [],
+      "omission_label": "MED",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "wiz.io",
+      "source_domain": "wiz.io",
+      "omission_index": 0.0,
+      "framing_volatility_score": 0.0561,
+      "identifiable_omissions": [],
+      "linguistic_camouflage": [],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "StepSecurity",
+      "source_domain": "stepsecurity.io",
+      "omission_index": 0.0,
+      "framing_volatility_score": 0.1444,
+      "identifiable_omissions": [],
+      "linguistic_camouflage": [],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    },
+    {
+      "outlet_name": "TechRadar",
+      "source_domain": "techradar.com",
+      "omission_index": 0.0,
+      "framing_volatility_score": 0.1915,
+      "identifiable_omissions": [],
+      "linguistic_camouflage": [],
+      "omission_label": "LOW",
+      "framing_volatility_label": "LOW"
+    }
+  ],
+  "outlier_signals": [],
+  "reputation_warnings": [
+    {
+      "outlet_name": "Snyk",
+      "source_domain": "snyk.io",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": ""
+    },
+    {
+      "outlet_name": "The Hacker News",
+      "source_domain": "thehackernews.com",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": ""
+    },
+    {
+      "outlet_name": "Cybernews",
+      "source_domain": "cybernews.com",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": ""
+    },
+    {
+      "outlet_name": "Ars Technica",
+      "source_domain": "arstechnica.com",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": ""
+    },
+    {
+      "outlet_name": "SecurityWeek",
+      "source_domain": "securityweek.com",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": ""
+    },
+    {
+      "outlet_name": "wiz.io",
+      "source_domain": "wiz.io",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": ""
+    },
+    {
+      "outlet_name": "StepSecurity",
+      "source_domain": "stepsecurity.io",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": ""
+    },
+    {
+      "outlet_name": "TechRadar",
+      "source_domain": "techradar.com",
+      "warning_triggered": false,
+      "historical_origin_validation_rate": 0.0,
+      "scatter_shot_anomaly_factor": 0.0,
+      "scatter_shot_label": "LOW",
+      "warning_message": ""
+    }
+  ],
+  "reality_divergence_zones": [],
+  "reality_fractures": [
+    {
+      "fracture_id": "6bb0cdc8-6c2b-43e8-82ef-077d2c272366",
+      "topic": "npm",
+      "claim_a": {
+        "statement": "84 valid signed provenance-attested package publishes (received)",
+        "supporting_outlets": [
+          "snyk.io"
+        ]
+      },
+      "claim_b": {
+        "statement": "2.3 MB payload (executed)",
+        "supporting_outlets": [
+          "cybernews.com"
+        ]
+      },
+      "relationship": "STRUCTURALLY_CONTRADICTORY",
+      "resolution_status": "UNRESOLVED",
+      "classification_method": "LLM_ASSISTED"
+    },
+    {
+      "fracture_id": "e5ab7586-2d5c-4eed-b71b-e3b8ac9e3298",
+      "topic": "npm",
+      "claim_a": {
+        "statement": "84 valid signed provenance-attested package publishes (received)",
+        "supporting_outlets": [
+          "snyk.io"
+        ]
+      },
+      "claim_b": {
+        "statement": "1,048 versions across 498 packages (contained)",
+        "supporting_outlets": [
+          "securityweek.com"
+        ]
+      },
+      "relationship": "STRUCTURALLY_CONTRADICTORY",
+      "resolution_status": "UNRESOLVED",
+      "classification_method": "LLM_ASSISTED"
+    },
+    {
+      "fracture_id": "5f49469d-ad95-4c45-b938-8b34f146eac1",
+      "topic": "npm",
+      "claim_a": {
+        "statement": "2.3 MB payload (executed)",
+        "supporting_outlets": [
+          "cybernews.com"
+        ]
+      },
+      "claim_b": {
+        "statement": "1,048 versions across 498 packages (contained)",
+        "supporting_outlets": [
+          "securityweek.com"
+        ]
+      },
+      "relationship": "STRUCTURALLY_CONTRADICTORY",
+      "resolution_status": "UNRESOLVED",
+      "classification_method": "LLM_ASSISTED"
+    }
+  ],
+  "narrative_regime_shifts": [
+    {
+      "shift_id": "shift_1",
+      "topic": "npm hack",
+      "detected_shift": {
+        "previous_term": "tanstack npm packages",
+        "replacement_term": "tanstack"
+      },
+      "observed_across": 3,
+      "total_sources": 8,
+      "synchronization_score": 0.375,
+      "interpretive_note": "Shift from specific package name to shortened form",
+      "synchronization_label": "MED"
+    },
+    {
+      "shift_id": "shift_2",
+      "topic": "npm hack",
+      "detected_shift": {
+        "previous_term": "mini shai-hulud supply chain attack",
+        "replacement_term": "mini shai-hulud"
+      },
+      "observed_across": 3,
+      "total_sources": 8,
+      "synchronization_score": 0.375,
+      "interpretive_note": "Truncation of campaign name",
+      "synchronization_label": "MED"
+    },
+    {
+      "shift_id": "shift_3",
+      "topic": "npm hack",
+      "detected_shift": {
+        "previous_term": "vect ransomware group",
+        "replacement_term": "vect"
+      },
+      "observed_across": 3,
+      "total_sources": 8,
+      "synchronization_score": 0.375,
+      "interpretive_note": "Shortening of group name",
+      "synchronization_label": "MED"
+    },
+    {
+      "shift_id": "shift_4",
+      "topic": "npm hack",
+      "detected_shift": {
+        "previous_term": "shai-hulud worm",
+        "replacement_term": "shai-hulud"
+      },
+      "observed_across": 5,
+      "total_sources": 8,
+      "synchronization_score": 0.625,
+      "interpretive_note": "Drop of 'worm' descriptor",
+      "synchronization_label": "MED"
+    },
+    {
+      "shift_id": "shift_5",
+      "topic": "npm hack",
+      "detected_shift": {
+        "previous_term": "socket security",
+        "replacement_term": "socket"
+      },
+      "observed_across": 4,
+      "total_sources": 8,
+      "synchronization_score": 0.5,
+      "interpretive_note": "Shortening of company name",
+      "synchronization_label": "MED"
+    },
+    {
+      "shift_id": "shift_6",
+      "topic": "npm hack",
+      "detected_shift": {
+        "previous_term": "visual studio code",
+        "replacement_term": "vs code"
+      },
+      "observed_across": 5,
+      "total_sources": 8,
+      "synchronization_score": 0.625,
+      "interpretive_note": "Abbreviation of IDE name",
+      "synchronization_label": "MED"
+    }
+  ]
+}
